@@ -1,0 +1,7 @@
+*.elf
+*.hex
+*.list
+*.map
+*.o
+*.su
+/Debug/
