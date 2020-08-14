@@ -192,8 +192,8 @@
 #define SEQ_GPODREN_GPIO_DELAY_ENABLE		0x00	//	channel selection 	  delayed
 #define SEQ_GPODREN_GPIO_DELAY_DISABLE		0x04	//	channel selection not delayed
 #define SEQ_MDREN_MUX_DELAY_DISABLE     	0x00
-#define SEQ_MDREN_MUX_DELAY_ENABLE      	0x02    // 	Tüm Kanallarin Conversiyon islemi tamamlandiginda RDYB Low'a düser
-#define SEQ_RDYBEN_READY_BAR_DISABLE    	0x00    //	Her Kanalin    Conversiyon islemi tamamlandiginda RDYB Low'a düser
+#define SEQ_MDREN_MUX_DELAY_ENABLE      	0x02    // 	Tï¿½m Kanallarin Conversiyon islemi tamamlandiginda RDYB Low'a dï¿½ser
+#define SEQ_RDYBEN_READY_BAR_DISABLE    	0x00    //	Her Kanalin    Conversiyon islemi tamamlandiginda RDYB Low'a dï¿½ser
 #define SEQ_RDYBEN_READY_BAR_ENABLE     	0x01
 /**
   * @brief GPIO_CTRL: GPIO Control Register 
@@ -363,4 +363,7 @@ void 		Max11254_SequencerMode2_EntryUart( MaxDevice ChooseMax , ChmapConvChannel
 //	uint32_t 	Filter_ADC2_Bessel_Result			( uint32_t input );
 //	uint32_t 	Filter_ADC3_Bessel_Result			( uint32_t input );
 //	uint32_t 	Filter_ADC4_Bessel_Result			( uint32_t input );
+
+uint8_t channel_polarity[4];
+
 #endif /*__MAX11254_H */

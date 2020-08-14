@@ -46,12 +46,13 @@ void HAL_UART_RxCpltCallback		( UART_HandleTypeDef *huart ) {		//	Usart Interrup
  * @retval [ void ]
  */
 void HAL_TIM_PeriodElapsedCallback	( TIM_HandleTypeDef *htim ) {		//	Timer Interrupt Fonksiyonu
+	static uint32_t usn10;
+
 	if (htim->Instance == TIM1) {
 		((TIM1->CR1 & TIM_CR1_DIR) == TIM_CR1_DR_CW ) ?
 				enc_signal_msb++ : enc_signal_msb--;
 	}
 	if (htim->Instance == TIM4) {
-		static uint32_t usn10;
 		usn10++;
 		if (buffer_clear_timer > 0)
 			buffer_clear_timer--;
@@ -59,10 +60,11 @@ void HAL_TIM_PeriodElapsedCallback	( TIM_HandleTypeDef *htim ) {		//	Timer Inter
 			ControlTIM4_10msec = ControlState_CHECKIT;
 		}
 		if (usn10 == 10000) {  //100 mili second
+		}
+		if (usn10 == 100000) {  //1 second
 			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
 			usn10 = 0;
 		}
-
 	}
 }
 /**
@@ -142,7 +144,7 @@ int main(void) {
 		if (ControlTIM4_10msec == ControlState_CHECKIT) {
 			if (calculate_slopes == 1) {
 				calculate_slopes = 0;
-				slope_calculation(active_cal_channel);
+				//slope_calculation(active_cal_channel);
 			}
 			ControlTIM4_10msec = ControlState_CHECKED;
 //			for (uint8_t i = 0; i < 4; i++) {
@@ -171,8 +173,7 @@ int main(void) {
 					channel[0].raw = (0xFFFFFF + 1) - channel[0].raw;
 				}
 			}
-			evaluate_calibrated_values( 0 );
-//			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
+			//evaluate_calibrated_values( 0 );
 			ControlExti_Max_1_RdbyPin = ControlState_CHECKED;
 		}
 		if (ControlExti_Max_2_RdbyPin == ControlState_CHECKIT) {
@@ -185,8 +186,7 @@ int main(void) {
 					channel[1].raw = (0xFFFFFF + 1) - channel[1].raw;
 				}
 			}
-			evaluate_calibrated_values( 1 );
-//			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
+			//evaluate_calibrated_values( 1 );
 			ControlExti_Max_2_RdbyPin = ControlState_CHECKED;
 		}
 		if (ControlExti_Max_3_RdbyPin == ControlState_CHECKIT) {
@@ -199,8 +199,7 @@ int main(void) {
 					channel[2].raw = (0xFFFFFF + 1) - channel[2].raw;
 				}
 			}
-			evaluate_calibrated_values( 2 );
-//			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
+			//evaluate_calibrated_values( 2 );
 			ControlExti_Max_3_RdbyPin = ControlState_CHECKED;
 		}
 		if (ControlExti_Max_4_RdbyPin == ControlState_CHECKIT) {
@@ -213,8 +212,7 @@ int main(void) {
 					channel[3].raw = (0xFFFFFF + 1) - channel[3].raw;
 				}
 			}
-			evaluate_calibrated_values( 3 );
-//			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
+			//evaluate_calibrated_values( 3 );
 			ControlExti_Max_4_RdbyPin = ControlState_CHECKED;
 		}
 

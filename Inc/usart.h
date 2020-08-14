@@ -7,10 +7,15 @@
 #include "stm32f4xx_hal.h"
 #include "main.h" 
 
-#define PRESS_RELAY_ON_AutoManual	  	HAL_GPIO_WritePin( RELAY_DRV_2_GPIO_Port , RELAY_DRV_2_Pin , GPIO_PIN_SET 	)
-#define PRESS_RELAY_OFF_AutoManual		HAL_GPIO_WritePin( RELAY_DRV_2_GPIO_Port , RELAY_DRV_2_Pin , GPIO_PIN_RESET )
-#define PRESS_RELAY_ON_StartStop 		HAL_GPIO_WritePin( RELAY_DRV_1_GPIO_Port , RELAY_DRV_1_Pin , GPIO_PIN_SET 	)
-#define PRESS_RELAY_OFF_StartStop		HAL_GPIO_WritePin( RELAY_DRV_1_GPIO_Port , RELAY_DRV_1_Pin , GPIO_PIN_RESET )
+#define Electromechanic_RELAY_ON_AutoManual	  	HAL_GPIO_WritePin( RELAY_DRV_2_GPIO_Port , RELAY_DRV_2_Pin , GPIO_PIN_SET 	)
+#define Electromechanic_RELAY_OFF_AutoManual	HAL_GPIO_WritePin( RELAY_DRV_2_GPIO_Port , RELAY_DRV_2_Pin , GPIO_PIN_RESET )
+#define Electromechanic_RELAY_ON_StartStop 		HAL_GPIO_WritePin( RELAY_DRV_1_GPIO_Port , RELAY_DRV_1_Pin , GPIO_PIN_SET 	)
+#define Electromechanic_RELAY_OFF_StartStop		HAL_GPIO_WritePin( RELAY_DRV_1_GPIO_Port , RELAY_DRV_1_Pin , GPIO_PIN_RESET )
+
+#define Electromechanic_ServoStop           	HAL_GPIO_WritePin( PulseOutEn_GPIO_Port	 , PulseOutEn_Pin  , GPIO_PIN_RESET )
+#define Electromechanic_ServoStart          	HAL_GPIO_WritePin( PulseOutEn_GPIO_Port  , PulseOutEn_Pin  , GPIO_PIN_SET	  )
+#define Electromechanic_ServoReverse        	HAL_GPIO_WritePin( MotorDir_GPIO_Port	 , MotorDir_Pin 	 , GPIO_PIN_RESET )
+#define Electromechanic_ServoForward        	HAL_GPIO_WritePin( MotorDir_GPIO_Port 	 , MotorDir_Pin    , GPIO_PIN_SET   )
 
 #define USART1_TX_ARRAY_SIZE 			(uint8_t)40
 #define USART1_RX_ARRAY_SIZE 			(uint8_t)90

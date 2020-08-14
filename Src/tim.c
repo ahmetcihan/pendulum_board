@@ -265,7 +265,7 @@ void HAL_TIM_Base_MspDeInit 	( TIM_HandleTypeDef* tim_baseHandle ) {
   }
 } 
 /**
-  * @brief  Timer_3 , Channel_1'e bagli PULSE_OUT_Pin pininden 0.1Hz~1MHz arasi frekans üretir.  
+  * @brief  Timer_3 , Channel_1'e bagli PULSE_OUT_Pin pininden 0.1Hz~1MHz arasi frekans ï¿½retir.  
   * @param  TenTimesFreq : Girilen TenTimesFreq degerinin onda biri Timer3 Ch3 kanalindan sinyal olusturur.
 	*		@example TenTimesFreq = 1 				  ise PULSE_OUT_Pin 0.1Hz output frequency	
 	*		@example TenTimesFreq = 10 000  		ise PULSE_OUT_Pin 1 KHz output frequency	
@@ -288,4 +288,53 @@ void Timer3_OutputFrequency_Update( uint32_t TenTimesFreq ) {
 		TIM3->PSC = register_psc-1;
 		TIM3->ARR = register_arr-1;
 		TIM3->CCR1= register_arr/2;
+}
+void Timer3_AutoConsolidation_SpecialFunc( uint32_t value ) {
+	uint16_t register_psc, register_arr;
+	uint32_t val;
+	if	( value < 6710886  ) {
+		val		= value / 2;
+		value = val*50;
+		value = value / 10;
+	}
+	else if ( value < 11000000 ) {
+		value = 11000000;
+	}
+	else if ( value < 0xFFFFFF ) {
+		value = 16777000;
+	}
+	else		{
+		value = 0xFFFFFF;
+	}
+
+	if			( value <= 65535 ) {
+		register_psc = 0;
+		register_arr = value;
+	}
+	else{
+		if 			( value == 16777000 ) {
+		register_arr = (value/256);
+		register_psc = 1024;
+		}
+		else if ( value == 11000000 ) {
+			register_arr = (value/256);
+			register_psc = 768;
+		}
+		else if ( value == 0xFFFFFF ) {
+			register_arr = 0;
+			register_psc = 0;
+		}
+		else{
+			register_arr = (value/256);
+			register_psc = 256;
+		}
+	}
+	TIM3->PSC = register_psc;
+	TIM3->ARR = register_arr;
+	TIM3->CCR1= (TIM3->ARR)/2; 	//	Output Frequency %50duty olmasi icin
+}
+
+int32_t Timer1_CalculateEncoderValue ( void ) {
+	int32_t encoderval = enc_signal_msb * ( 65536 ) + TIM1->CNT;;
+	return (int32_t)(encoderval);					//	encoderval );
 }

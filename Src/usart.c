@@ -1,7 +1,7 @@
 #include "usart.h"
 #include "gpio.h"
 #include "dma.h"
-
+#include "tim.h"
 #include "max11254.h"
 
 uint8_t u1_ctrl1;
@@ -234,8 +234,22 @@ void 	 UsartReceiveData_SearchCommand ( void ) {
 	else if ( usartrx[0]=='C' && usartrx[1]=='A' && usartrx[2]=='L' && usartrx[3]=='S' && usartrx[4]=='E' && usartrx[5]=='N' && usartrx[6]=='D' )  {
 		PRESS_CALSEND_CommandOperating();
 	}
+	else if	( usartrx[0]=='P' && usartrx[1]=='L' && usartrx[2]=='R' && usartrx[3]=='T' ) {
+		uint8_t chn  = usartrx[4] - 0x30;
+		uint8_t plrt = usartrx[5] - 0x30;
 
+		channel_polarity[chn] = plrt;
 
+		if (channel_polarity[chn] == 0){
+			MAX[chn].polarity = POLARITY_UNIPOLAR;
+		}
+		else{
+			MAX[chn].polarity = POLARITY_BIPOLAR;
+		}
+		Max11254_PolaritySelect( (chn+1) , MAX[chn].polarity );
+		Max11254_ConversionCommand( (chn+1) , MAX[chn].RateNumber|COMMAND_MODE_SEQUENCER );
+
+	}
 	else if ( usartrx[0]=='M' && usartrx[1]=='A' && usartrx[2]=='X' && usartrx[3]=='A' && usartrx[4]=='D' && usartrx[5]=='C' ) {
 		if ( (usartrx[6]<=3) && (usartrx[7]<=1) && (usartrx[8]<=15) ) {
 			Max11254_SoftwareReset 			( usartrx[6] + 1 );
@@ -304,15 +318,28 @@ void 	 UsartReceiveData_SearchCommand ( void ) {
 	}
 }
 void 	 PRESS_CONV_CommandOperating	( void ) {
-	if ( usartrx[4] == 0x30 )	PRESS_RELAY_OFF_AutoManual;
-	if ( usartrx[4] == 0x31 ) 	PRESS_RELAY_ON_AutoManual;
-	
-	if ( usartrx[5] == 0x30 )	PRESS_RELAY_OFF_StartStop;
-	if ( usartrx[5] == 0x31 )	PRESS_RELAY_ON_StartStop;
+	if 			( usartrx[4] == 0x01 ) {
+		uint32_t ServoSpeed = (uint32_t)( ( uint32_t )( usartrx[5]*65536 )
+										+ ( uint32_t )( usartrx[6]*256 )
+										+ ( uint32_t )( usartrx[7]) );
+		Timer3_AutoConsolidation_SpecialFunc( ServoSpeed );
+	}
+	//	0x30[Hex] = 48[Dec]	,	0x31[Hex] = 49[Dec]
+	if (usartrx[8] == 0x30 )	Electromechanic_RELAY_OFF_AutoManual;
+	else if(usartrx[8] == 0x31 ) 	Electromechanic_RELAY_ON_AutoManual;
 
-	uint16_t DacValue = (uint16_t)(((uint16_t)(usartrx[6]<<8)) |((uint16_t)(usartrx[7]))) / 4;
-	TIM8->CCR4 = 	(uint16_t) DacValue;
-	
+	//	0x30[Hex] = 48[Dec]	,	0x31[Hex] = 49[Dec]
+	if (usartrx[9] == 0x30 ) 	Electromechanic_RELAY_OFF_StartStop;
+	else if (usartrx[9] == 0x31 ) 	Electromechanic_RELAY_ON_StartStop;
+
+	if (usartrx[10] == 0x01 ) {
+		Electromechanic_ServoStop;
+		TIM3->CCR1= 0;
+	}
+	if (usartrx[11] == 0x01 ) Electromechanic_ServoStart;
+	if (usartrx[12] == 0x01 ) Electromechanic_ServoForward;
+	if (usartrx[13] == 0x01 ) Electromechanic_ServoReverse;
+
 	PRESS_ANS_Command();
 }
 void	 PRESS_GAIN_CommandOperating	( void ) {
@@ -376,33 +403,48 @@ void	 PRESS_CALSEND_CommandOperating ( void ) {
 	}
 }
 void 	 PRESS_ANS_Command 				( void ) {
-	unsigned char *calibrated;
-	
-	usarttx[0] = 'A';
-	usarttx[1] = 'N';
-	usarttx[2] = 'S';
-	HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
+	//	unsigned char *calibrated;
+		usarttx[0] = 'A';
+		usarttx[1] = 'N';
+		usarttx[2] = 'S';
+		for ( uint8_t i = 0 ; i < 4 ; i++ ) {
+	//		calibrated = (uint8_t *)&channel[i].calibrated;
+			//uint8_t gain_force = (uint8_t)( MAX[i].Gain +  2 );
+			uint8_t gain_force =  MAX[resultBinding[i]/6].chGain[resultBinding[i]%6] + 2;	//(uint8_t)( MAX[i].Gain +  2 );
 
-	for ( uint8_t i = 0 ; i<4 ; i++ ) {
-		calibrated = (uint8_t *)&channel[i].calibrated;
-		uint8_t gain_force =  MAX[resultBinding[i]/6].chGain[resultBinding[i]%6] + 2;	//(uint8_t)( MAX[i].Gain +  2 );
-		if	(channel[i].raw_sign == '+' )	/*	ADC'nin datasi (+) ise */
-			gain_force = gain_force|0x10;
-		usarttx[8*i+3] = (uint8_t)( (channel[i].raw&0x00FF0000)>>16); 
-		usarttx[8*i+4] = (uint8_t)( (channel[i].raw&0x0000FF00)>>8 );
-		usarttx[8*i+5] = (uint8_t)(  channel[i].raw&0x000000FF     );
-		usarttx[8*i+6] = calibrated[0];
-		usarttx[8*i+7] = calibrated[1];
-		usarttx[8*i+8] = calibrated[2];
-		usarttx[8*i+9] = calibrated[3];
-		usarttx[8*i+10]= gain_force;
-	}
-	uint16_t fcrc;
-	fcrc = CyclicRedundancyCheck( &usarttx[0] , 35 ); 
-	usarttx[35] = fcrc%256;
-	usarttx[36] = fcrc/256;
-	TxAmound = 37;
-	ControlUsart1_TransmitData = ControlState_CHECKIT; 
+			if	(channel[i].raw_sign == '+' )	/*	ADC'nin datasi (+) ise */
+				gain_force = gain_force|0x10;
+			usarttx[4*i+3] = (uint8_t)( (channel[i].raw&0x00FF0000)>>16);
+			usarttx[4*i+4] = (uint8_t)( (channel[i].raw&0x0000FF00)>>8 );
+			usarttx[4*i+5] = (uint8_t)(  channel[i].raw&0x000000FF     );
+			usarttx[4*i+6]= gain_force;
+		}
+		int32_t encoder_value = Timer1_CalculateEncoderValue();
+		if ( encoder_value < 0 ) {
+			usarttx[ 22 ] = 0x00;
+			encoder_value = encoder_value* -1;
+		}
+		else
+			usarttx[ 22 ] = 0x10;
+
+		usarttx[ 19 ] = (encoder_value/65536)%256;	//
+		usarttx[ 20 ] = (encoder_value/256)%256;	//
+		usarttx[ 21 ] =  encoder_value%256;			//
+
+		usarttx[23] = channel_polarity[0] + 0x30;
+		usarttx[24] = channel_polarity[1] + 0x30;
+		usarttx[25] = channel_polarity[2] + 0x30;
+		usarttx[26] = channel_polarity[3] + 0x30;
+
+		uint16_t fcrc;
+		fcrc = CyclicRedundancyCheck( &usarttx[0] , 27 );
+		usarttx[27] = fcrc%256;
+		usarttx[28] = fcrc/256;
+		TxAmound = 29;
+		ControlUsart1_TransmitData = ControlState_CHECKIT;
+
+		HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
+
 }
 
 /*	A.C.AKINCA eklemeleri	*/

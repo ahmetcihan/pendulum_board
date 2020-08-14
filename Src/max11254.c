@@ -1,18 +1,18 @@
 /*	*****	*****	*****	*****	*****	*****	*****	*****	*****	*****	*/
 /*																					*/
 /*	Bu kutuphane 2019 yilinda TMS700(bb02502V22) PCB'si, 							*/
-/*							  Press Cihazý icin										*/
+/*							  Press Cihazï¿½ icin										*/
 /*							  Mehmet KARATAS Tarafindan yazilmistir.				*/
 /*																					*/
-/*	[ !! ] Press Cihaznýn TMS700 diger cihazlarýndan farklý							*/
+/*	[ !! ] Press Cihaznï¿½n TMS700 diger cihazlarï¿½ndan farklï¿½							*/
 /*		   ( - ) 4 kanal ADC vardir.												*/
 /*		   ( - ) Birinci ve ikinci kanalda ki  ADClerden Transducer okunacaktir.	*/
 /* 					Transducer okuyabilmek icin ADC Unipolar ve REFSEL_x pini High  */
-/* 					olarak yapýlandýrmalý											*/
+/* 					olarak yapï¿½landï¿½rmalï¿½											*/
 /*																					*/
-/*		   ( - ) Üçüncü ve dördüncü kanalda ki  ADClerden LVDT okunacaktir.			*/
+/*		   ( - ) ï¿½ï¿½ï¿½ncï¿½ ve dï¿½rdï¿½ncï¿½ kanalda ki  ADClerden LVDT okunacaktir.			*/
 /* 					LVDT okuyabilmek icin ADC Unipolar ve REFSEL_x pini Low  		*/
-/* 					olarak yapýlandýrmalý											*/
+/* 					olarak yapï¿½landï¿½rmalï¿½											*/
 /*																					*/
 /*	*****	*****	*****	*****	*****	*****	*****	*****	*****	*****	*/
 #include "stm32f4xx_hal.h"
@@ -32,7 +32,7 @@ void		Max11254_NextChannelOperations	( MaxDevice ChooseMax );
 
 /**
   * @brief	Max11254'e komut girer.
-  * @param  command   : max11254.h COMMAND_ ile baslayan Rate ve Mode seçimleri & islemi ile girilebi   
+  * @param  command   : max11254.h COMMAND_ ile baslayan Rate ve Mode seï¿½imleri & islemi ile girilebi   
   */
 void 		Max11254_ConversionCommand 		( MaxDevice ChooseMax , uint8_t command ) {
 	switch ( ChooseMax ) {
@@ -65,7 +65,7 @@ void 		Max11254_ConversionCommand 		( MaxDevice ChooseMax , uint8_t command ) {
 	}
 } 
 /**
-  * @brief  MAX11254'ün 'Adr' registir adresine 8 bitlik 'Data' degerini yazar.
+  * @brief  MAX11254'ï¿½n 'Adr' registir adresine 8 bitlik 'Data' degerini yazar.
   * @param  Adr      	: Max11254 register adres 
   * @param  Data			: 8 bit register value 
   * @retval [ void ]
@@ -104,7 +104,7 @@ void 		Max11254_Write1byte 			( MaxDevice ChooseMax , uint8_t Adr , uint8_t  Dat
 	}
 }
 /**
-  * @brief  MAX11254'ün 'Adr' registir adresine 16 bitlik 'Data' degerini yazar
+  * @brief  MAX11254'ï¿½n 'Adr' registir adresine 16 bitlik 'Data' degerini yazar
   * @param  Adr      	: Max11254 register adres  
   * @param  Data			: 16 bit register value
   * @retval [ void ]
@@ -144,7 +144,7 @@ void		Max11254_Write2byte 			( MaxDevice ChooseMax , uint8_t Adr , uint16_t Data
 	}
 }
 /**
-  * @brief  MAX11254'ün 'Adr' registir adresine 24 bitlik 'Data' degerini yazar
+  * @brief  MAX11254'ï¿½n 'Adr' registir adresine 24 bitlik 'Data' degerini yazar
   * @param  Adr      	: Max11254 register adres
   * @param  Data			: 24 bit register value
   * @retval [ void ]
@@ -185,7 +185,7 @@ void 		Max11254_Write3byte 			( MaxDevice ChooseMax , uint8_t Adr , uint32_t Dat
 	}
 }
 /**
-  * @brief  MAX11254'ün 'Adr' registir adresinden 8 bitlik data okur 
+  * @brief  MAX11254'ï¿½n 'Adr' registir adresinden 8 bitlik data okur 
   * @retval 8 bit register value 
   */
 uint8_t 	Max11254_Read1byte 				( MaxDevice ChooseMax , uint8_t Adr ){
@@ -226,7 +226,7 @@ uint8_t 	Max11254_Read1byte 				( MaxDevice ChooseMax , uint8_t Adr ){
 	return spi_rx;
 }
 /**
-  * @brief  MAX11254'ün 'Adr' registir adresinden 16 bitlik data okur   
+  * @brief  MAX11254'ï¿½n 'Adr' registir adresinden 16 bitlik data okur   
   * @retval 16 bit register value 
   */
 uint16_t 	Max11254_Read2byte 			   	( MaxDevice ChooseMax , uint8_t Adr ) {
@@ -267,7 +267,7 @@ uint16_t 	Max11254_Read2byte 			   	( MaxDevice ChooseMax , uint8_t Adr ) {
 	return ( (spi_rx[0]<<8) | (spi_rx[1]) );
 }
 /**
-  * @brief MAX11254'ün 'Adr' registir adresinden 24 bitlik data okur  
+  * @brief MAX11254'ï¿½n 'Adr' registir adresinden 24 bitlik data okur  
   * @retval 24 bit register value
   */
 uint32_t 	Max11254_Read3byte				( MaxDevice ChooseMax , uint8_t Adr ) {
@@ -308,7 +308,7 @@ uint32_t 	Max11254_Read3byte				( MaxDevice ChooseMax , uint8_t Adr ) {
 	return ( (spi_rx[0]<<16) | (spi_rx[1]<<8) | (spi_rx[2]) );
 }
 /**
-  * @brief  MAX11254'ün RSTB pinini Low dan High'a çekerek donanimsal resetler 
+  * @brief  MAX11254'ï¿½n RSTB pinini Low dan High'a ï¿½ekerek donanimsal resetler 
   * @param  [ void ] 
   * @retval [ void ]
   */
@@ -318,7 +318,7 @@ void 		Max11254_HardwareReset 			( void ) {
 		MAX11254s_RSTB_HIGH;
 }
 /**
-  * @brief  MAX11254'ü CTRL1 registeri üzerinden yazilimsal resetler
+  * @brief  MAX11254'ï¿½ CTRL1 registeri ï¿½zerinden yazilimsal resetler
   * @param  [ void ] 
   * @retval [ void ]
   */
@@ -335,7 +335,7 @@ void 		Max11254_SoftwareReset 			( MaxDevice ChooseMax ) {
 //	}
 }
 /**
-  * @brief 	Max11254'ü Self Kalibre yapar.  
+  * @brief 	Max11254'ï¿½ Self Kalibre yapar.  
   * @param  [ void ] 
   * @retval [ void ]
   */
@@ -351,7 +351,7 @@ void 		Max11254_SelfCalibration 		( MaxDevice ChooseMax ) {
 	HAL_Delay( 250 );    	
 }
 /**
-  * @brief 	Max11254'ü System Offset Kalibresi yapar.  
+  * @brief 	Max11254'ï¿½ System Offset Kalibresi yapar.  
   * @param  [ void ] 
   * @retval [ void ]
   */
@@ -372,7 +372,7 @@ void 		MAX11254_SystemZeroCalibration  ( MaxDevice ChooseMax , SeqConvChannel Ch
 	HAL_Delay(150);
 }
 /**
-  * @brief 	Max11254'ü System Full Scacale Kalibresi yapar.  
+  * @brief 	Max11254'ï¿½ System Full Scacale Kalibresi yapar.  
   * @param  [ void ] 
   * @retval [ void ]
   */
@@ -393,7 +393,7 @@ void 		MAX11254_SystemFullCalibration	( MaxDevice ChooseMax , SeqConvChannel Ch 
 	HAL_Delay(150);
 }
 /**
-  * @brief 	Max11254'ü System Kalibresi yapar.  
+  * @brief 	Max11254'ï¿½ System Kalibresi yapar.  
   * @param  [ void ] 
   * @retval [ void ]
   */
@@ -406,7 +406,7 @@ void 		Max11254_SystemCalibration 		( MaxDevice ChooseMax , SeqConvChannel Ch ) 
 	Max11254_Write1byte( ChooseMax , MAX11254_REG_SEQ		, reg_seq );
 }
 /**
- * @brief  Max11254'ün anolog input sinyalini girilen deger kadar güclendirir.
+ * @brief  Max11254'ï¿½n anolog input sinyalini girilen deger kadar gï¿½clendirir.
  * @param  gain      : Programmable Gain Amplifier (PGA) kat sayisi.
  *          This parameter can be one of the following values:
  *			  @arg  GAIN_Disb	: PGA Devre Disi
@@ -436,7 +436,7 @@ void Max11254_PGAGain_Set			( MaxDevice ChooseMax , GAIN Gain ) {
 	}
 }
 /**
-  * @brief  Max11254'ün dahili 6 kanalindan conversiyon islemine tabi tutulacak kanali seçer
+  * @brief  Max11254'ï¿½n dahili 6 kanalindan conversiyon islemine tabi tutulacak kanali seï¿½er
   * @param  ActivatedCh : ADC'nin aktif edilcek kanali. 0 ile 5 arasi bi deger alir
 	*   @arg   0 : Channel 0 Aktif 
 	*   @arg   1 : Channel 1 Aktif   
@@ -511,7 +511,7 @@ void 		Max11254_ChannelMap_Set			( MaxDevice ChooseMax , ChmapConvChannels Chs )
 	} 
 }
 /**
-  * @brief  Max11254'ü Sequencer Mode 1 de yapilandirir.  
+  * @brief  Max11254'ï¿½ Sequencer Mode 1 de yapilandirir.  
   * @param  [ void ] 
   * @retval [ void ]
   */
@@ -579,7 +579,7 @@ void 		Max11254_SequencerMode1_Entry 	( MaxDevice ChooseMax , SeqConvChannel  Ch
 		Max11254_SystemCalibration( ChooseMax , Ch );
 }
 /**
-  * @brief  Max11254'ü Sequencer Mode 2 de yapilandirir.  
+  * @brief  Max11254'ï¿½ Sequencer Mode 2 de yapilandirir.  
   * @param  [ void ] 
   * @retval [ void ]
   */
@@ -621,8 +621,8 @@ void 		Max11254_SequencerMode2_Entry 	( MaxDevice ChooseMax , ChmapConvChannels 
 	/*	*****	*****			CHMAP1/CHMAP0		*****	*****	*/
 	Max11254_ChannelMap_Set					( ChooseMax , Chs ); 
 	/*	*****	*****	*****		SEQ		*****	*****	*****	*/
-	// SEQ_RDYBEN_READY_BAR_DISABLE : Her Kanalin    Conversiyon islemi tamamlandiginda RDYB Low'a düser 
-	// SEQ_RDYBEN_READY_BAR_ENABLE  : Tüm Kanallarin Conversiyon islemi tamamlandiginda RDYB Low'a düser
+	// SEQ_RDYBEN_READY_BAR_DISABLE : Her Kanalin    Conversiyon islemi tamamlandiginda RDYB Low'a dï¿½ser 
+	// SEQ_RDYBEN_READY_BAR_ENABLE  : Tï¿½m Kanallarin Conversiyon islemi tamamlandiginda RDYB Low'a dï¿½ser
 	Max11254_Write1byte( ChooseMax , MAX11254_REG_SEQ	, SEQ_MUX_DISABLE
 														 |SEQ_MODE_SEQUENCER_MODE_2
 														 |SEQ_GPODREN_GPIO_DELAY_DISABLE
@@ -682,8 +682,8 @@ void 		Max11254_SequencerMode2_EntryUart( MaxDevice ChooseMax , ChmapConvChannel
 	/*	*****	*****			CHMAP1/CHMAP0		*****	*****	*/
 	Max11254_ChannelMap_Set					( ChooseMax , Chs );
 	/*	*****	*****	*****		SEQ		*****	*****	*****	*/
-	// SEQ_RDYBEN_READY_BAR_DISABLE : Her Kanalin    Conversiyon islemi tamamlandiginda RDYB Low'a düser
-	// SEQ_RDYBEN_READY_BAR_ENABLE  : Tüm Kanallarin Conversiyon islemi tamamlandiginda RDYB Low'a düser
+	// SEQ_RDYBEN_READY_BAR_DISABLE : Her Kanalin    Conversiyon islemi tamamlandiginda RDYB Low'a dï¿½ser
+	// SEQ_RDYBEN_READY_BAR_ENABLE  : Tï¿½m Kanallarin Conversiyon islemi tamamlandiginda RDYB Low'a dï¿½ser
 	Max11254_Write1byte( ChooseMax , MAX11254_REG_SEQ	, SEQ_MUX_DISABLE
 														 |SEQ_MODE_SEQUENCER_MODE_2
 														 |SEQ_GPODREN_GPIO_DELAY_DISABLE
@@ -698,13 +698,13 @@ void 		Max11254_SequencerMode2_EntryUart( MaxDevice ChooseMax , ChmapConvChannel
 }
 
 /**
-  * @brief  Max11254'ü Sequencer Mode 3 de yapilandirir.
+  * @brief  Max11254'ï¿½ Sequencer Mode 3 de yapilandirir.
   * @param  [ void ] 
   * @retval [ void ]
   */
 void 		Max11254_SequencerMode3_Entry 	( MaxDevice ChooseMax ) {
-//	 MAX11254_REG_SEQ = SEQ_MODE2_SQUENCER3|SEQ_MDREN 					 = 0x12	--->	Her Kanalin    Conversiyon islemi tamamlandiginda RDYB Low'a düser	
-//	 MAX11254_REG_SEQ = SEQ_MODE2_SQUENCER3|SEQ_MDREN|SEQ_RDYBEN = 0x13 --->  Tüm Kanallarin Conversiyon islemi tamamlandiginda RDYB Low'a düser 
+//	 MAX11254_REG_SEQ = SEQ_MODE2_SQUENCER3|SEQ_MDREN 					 = 0x12	--->	Her Kanalin    Conversiyon islemi tamamlandiginda RDYB Low'a dï¿½ser	
+//	 MAX11254_REG_SEQ = SEQ_MODE2_SQUENCER3|SEQ_MDREN|SEQ_RDYBEN = 0x13 --->  Tï¿½m Kanallarin Conversiyon islemi tamamlandiginda RDYB Low'a dï¿½ser 
  		Max11254_Write1byte( ChooseMax , MAX11254_REG_SEQ    ,  SEQ_MODE_SEQUENCER_MODE_3|SEQ_RDYBEN_READY_BAR_ENABLE );														//	0x12
  		Max11254_Write2byte( ChooseMax , MAX11254_REG_DELAY  ,  0x0100 );	//	0xF000 -> 292.8Hz															//	0xF000
 		Max11254_Write1byte( ChooseMax , MAX11254_REG_CTRL3  ,  CTRL3_GPO_MODE_ENABLE|CTRL3_CALREGSEL_ENABLE|CTRL3_NOSCG_ENABLE|CTRL3_NOSYSO_ENABLE);	//	0x5C
@@ -714,7 +714,7 @@ void 		Max11254_SequencerMode3_Entry 	( MaxDevice ChooseMax ) {
 		Max11254_ConversionCommand( ChooseMax , COMMAND_MODE_SEQUENCER|COMMAND_RATE_6 );                                   	//	0xBE
 }
 /**
-  * @brief  Max11254'ü Sequencer Mode 1 de yapilandirmasi iptal edilir.
+  * @brief  Max11254'ï¿½ Sequencer Mode 1 de yapilandirmasi iptal edilir.
   * @param  [ void ] 
   * @retval [ void ]
   */
@@ -726,7 +726,7 @@ void 		Max11254_SequencerMode1_Exit 	( MaxDevice ChooseMax ) {
 //		MAX[ChooseMax-1].ReadCh[i] = ChannelNotRead;
 }
 /**
-  * @brief  Max11254'ü Sequencer Mode 2 de yapilandirmasi iptal edilir.
+  * @brief  Max11254'ï¿½ Sequencer Mode 2 de yapilandirmasi iptal edilir.
   * @param  [ void ] 
   * @retval [ void ]
   */ 
@@ -746,7 +746,7 @@ void 		Max11254_SequencerMode2_Exit	( MaxDevice ChooseMax ) {
 //		MAX[ChooseMax-1].ReadCh[i] = ChannelNotRead;
 }
 /**
-  * @brief  Max11254'ün baslangic yapilandirilmasi yapar.
+  * @brief  Max11254'ï¿½n baslangic yapilandirilmasi yapar.
   * @param  [ void ] 
   * @retval [ void ]
   */
@@ -754,6 +754,11 @@ void 		Max11254_Init					( void ) {
 //	Max11254_SoftwareReset( );	
 	Max11254_HardwareReset( );
 	HAL_Delay( 200 );	
+
+	channel_polarity[0] = 0;
+	channel_polarity[1] = 0;
+	channel_polarity[2] = 0;
+	channel_polarity[3] = 0;
 
 	for( uint8_t max=0 ; max<4 ; max++ ) {
 		for( uint8_t ch=0 ; ch<6 ; ch++ ) {
@@ -923,9 +928,9 @@ void		Max11254_NextChannelOperations	( MaxDevice ChooseMax ) {
 /*	*****		*****			FILTERS FUNCTIONS			*****		*****	*/
 /**	Klasik Moving Average Filtresi Fonksiyonlari 
   * @brief  Klasik Moving Average Filtresi Fonksiyonu    
-  * @param  raw_signal	  			: MovingAverage Filtresine gönderilecek raw data 
+  * @param  raw_signal	  			: MovingAverage Filtresine gï¿½nderilecek raw data 
 	* @param  filter_coefficient	: Filtre katsayisi
-	* @note   static double running_averange dizisi eleman sayisi filter_coefficient degerinden küçük olmamali 
+	* @note   static double running_averange dizisi eleman sayisi filter_coefficient degerinden kï¿½ï¿½ï¿½k olmamali 
   *          This parameter can be one of the following values:
   * @retval 
   */
@@ -981,7 +986,7 @@ uint32_t 	Filter_ADC4_ClassicMovingAverage 		 ( uint32_t raw_signal ) {
 */
 /** Agirlastirilmis Moving Average Filtresi Fonksiyonlari
   * @brief  Agirlastirilmis Moving Average Filtresi Fonksiyonu  
-  * @param  raw_signal	  			: MovingAverage Filtresine gönderilecek raw data 
+  * @param  raw_signal	  			: MovingAverage Filtresine gï¿½nderilecek raw data 
 	* @param  filter_coefficient	: Filtre katsayisi
   * @retval 
   */
@@ -1013,7 +1018,7 @@ uint32_t 	Filter_ADC4_WeightedMovingAverage 	 ( uint32_t raw_signal ) {
 */
 /** Eksponential Moving Average Filtresi Fonksiyonlari
   * @brief  Eksponential Moving Average Filtresi Fonksiyonu  
-  * @param  raw_signal	  			: MovingAverage Filtresine gönderilecek raw data 
+  * @param  raw_signal	  			: MovingAverage Filtresine gï¿½nderilecek raw data 
 	* @param  filter_coefficient	: Filtre katsayisi
   * @retval 
   */

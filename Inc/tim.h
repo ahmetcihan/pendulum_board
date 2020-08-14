@@ -29,6 +29,8 @@ void MX_TIM8_Init(void);
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 void Timer3_OutputFrequency_Update( uint32_t TenTimesFreq );
+void 	Timer3_AutoConsolidation_SpecialFunc	( uint32_t value );
+int32_t Timer1_CalculateEncoderValue 			( void );
 
 #ifdef __cplusplus
 }
