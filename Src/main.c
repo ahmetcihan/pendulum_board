@@ -118,9 +118,9 @@ int main(void) {
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
 
-//	MX_TIM1_Init();		//	Encoder sinyalinin bagli oldugu timer modulu
+	//MX_TIM1_Init();		//	Encoder sinyalinin bagli oldugu timer modulu
 	MX_TIM8_Init(); 	// 	Duty Modilation 		-> 0 to 14Bit Duty output   ( Usart Control ) [DacPWM]	 [PC8]
-//  MX_TIM3_Init();     //  Frequency Modilation 	-> 0.1Hz to 1MHz PWM output.( Usart Control ) [PulseOut][PB4]
+	MX_TIM3_Init();     //  Frequency Modilation 	-> 0.1Hz to 1MHz PWM output.( Usart Control ) [PulseOut][PB4]
 
 	MX_DMA_Init();
 
