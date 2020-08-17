@@ -133,6 +133,8 @@ int main(void) {
 
 	MX_TIM4_Init();
 	ControlTIM4_10msec = ControlState_CHECKIT;
+	Timer3_AutoConsolidation_SpecialFunc(0);
+
 
 	while (1) {
 		if (buffer_cleared == 0) {
