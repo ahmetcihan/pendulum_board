@@ -37,7 +37,25 @@ void HAL_UART_RxCpltCallback		( UART_HandleTypeDef *huart ) {		//	Usart Interrup
 				usartrx[i] = usartrx[i + 1];
 		}
 	}
+	if (huart->Instance == USART2) {
+		usart2.buffer_clear_timer = 200;
+		usart2.clear_buffer = 1;
+		usart2.rx[usart2.rx_indeks] = usart2.instant_data;
+
+		if (usart2.rx[usart2.rx_indeks] == 0x0A && usart2.rx[usart2.rx_indeks - 1] == 0x0D) {
+			usart2.data_received = 1;
+		}
+		if (usart2.rx_indeks < USART4_RX_ARRAY_SIZE) usart2.rx_indeks++;
+	    HAL_UART_Receive_IT(&huart2, &usart2.instant_data,1);
+	}
+
 }
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
+	if (huart->Instance == USART2) {
+		HAL_GPIO_WritePin( GPIOA , Tx2En , GPIO_PIN_RESET );
+	}
+}
+
 /**
  * @brief  Timer Interrupt Fonksiyonu
  * @param  htim	: Kesmenin meydana geldigi timer modul�
@@ -56,10 +74,16 @@ void HAL_TIM_PeriodElapsedCallback	( TIM_HandleTypeDef *htim ) {		//	Timer Inter
 		usn10++;
 		if (buffer_clear_timer > 0)
 			buffer_clear_timer--;
+
+		if ((usn10 % 100) == 0) {  // 1 mili second
+			timer_1_msec = 1;
+		}
+
 		if ((usn10 % 1000) == 0) {  // 10 mili second
 			ControlTIM4_10msec = ControlState_CHECKIT;
 		}
-		if (usn10 == 10000) {  //100 mili second
+		if ((usn10 % 10000) == 0) {  //100 mili second
+			timer_100_msec = 1;
 		}
 		if (usn10 == 100000) {  //1 second
 			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
@@ -129,19 +153,45 @@ int main(void) {
 	Max11254_Init();
 
 	MX_USART1_UART_Init();
+	MX_USART2_Init();
 	MX_UART4_Init();
 
 	MX_TIM4_Init();
 	ControlTIM4_10msec = ControlState_CHECKIT;
 	Timer3_AutoConsolidation_SpecialFunc(0);
 
+	step_motor_command = 0;
+	step_motor_requested_pos = 0;
+	abs_pos = 0;
+	timer_1_msec = 0;
+	timer_100_msec = 0;
 
 	while (1) {
+		if (usart2.data_received == 1) {
+			usart2.data_received = 0;
+			usart2_handle();
+		}
+		if (usart2.clear_buffer == 1) {
+			if (usart2.buffer_clear_timer == 0) {
+				usart2.clear_buffer = 0;
+				usart2.rx_indeks = 0;
+				for (uint8_t i = 0; i < USART4_RX_ARRAY_SIZE ; i++) {
+					usart2.rx[i] = 0;
+				}
+			}
+		}
+
 		if (buffer_cleared == 0) {
 			if (buffer_clear_timer == 0) {
 				buffer_cleared = 1;
 				clear_usart_buffer();
 			}
+		}
+
+		if(timer_100_msec == 1){
+			timer_100_msec = 0;
+			MASTER_send_RS485_data_to_motor();
+
 		}
 		if (ControlTIM4_10msec == ControlState_CHECKIT) {
 			if (calculate_slopes == 1) {

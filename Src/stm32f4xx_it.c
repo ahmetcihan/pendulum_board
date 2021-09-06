@@ -8,6 +8,8 @@ extern TIM_HandleTypeDef 	htim4;
 extern SPI_HandleTypeDef 	hspi2;
 
 extern UART_HandleTypeDef 	huart1;
+extern UART_HandleTypeDef 	huart2;
+
 extern DMA_HandleTypeDef 	hdma_usart1_rx;
 extern DMA_HandleTypeDef 	hdma_usart1_tx;
 
@@ -146,6 +148,10 @@ void SPI2_IRQHandler		(	void ) {
 void USART1_IRQHandler  ( void ) {
   HAL_UART_IRQHandler(&huart1);
 }
+void USART2_IRQHandler  ( void ) {
+  HAL_UART_IRQHandler(&huart2);
+}
+
 /**
 * @brief This function handles UART4 global interrupt.
 */

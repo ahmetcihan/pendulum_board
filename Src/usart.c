@@ -13,6 +13,8 @@ UART_HandleTypeDef huart1;
 DMA_HandleTypeDef  hdma_usart1_rx;
 DMA_HandleTypeDef  hdma_usart1_tx;
 
+UART_HandleTypeDef huart2;
+
 UART_HandleTypeDef huart4;
 DMA_HandleTypeDef  hdma_uart4_tx;
 
@@ -32,6 +34,8 @@ union 	_char_to_f {
 };
 union 	_char_to_f char_to_f;
 struct  chan channel[8];
+struct _usart usart2;
+
 uint8_t active_cal_channel,calculate_slopes;	//	unsigned char->uint8_t
 uint8_t in_calibration; 
 
@@ -52,7 +56,21 @@ void MX_UART4_Init			( void ) {
   usartrx[ 0 ] = 10;
   HAL_UART_Transmit( &huart4 , &usartrx[0] , 1 , 10 );
 }
-/* USART1 init function */ 
+void MX_USART2_Init			( void ) {
+	huart2.Instance 			= USART2;
+	huart2.Init.BaudRate 		= 115200;
+	huart2.Init.WordLength 		= UART_WORDLENGTH_8B;
+	huart2.Init.StopBits 		= UART_STOPBITS_1;
+	huart2.Init.Parity 			= UART_PARITY_NONE;
+	huart2.Init.Mode 			= UART_MODE_TX_RX;
+	huart2.Init.HwFlowCtl		= UART_HWCONTROL_NONE;
+	huart2.Init.OverSampling 	= UART_OVERSAMPLING_16;
+	if (HAL_UART_Init(&huart2) != HAL_OK)
+		_Error_Handler(__FILE__, __LINE__);
+	usart2.clear_buffer = 1;
+	usart2.rx_indeks = 0;
+    HAL_UART_Receive_IT(&huart2, &usart2.instant_data,1);
+}
 void MX_USART1_UART_Init 	( void ) {
 
   huart1.Instance 			= USART1;
@@ -159,6 +177,24 @@ void HAL_UART_MspInit		( UART_HandleTypeDef* uartHandle ) {
     HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(USART1_IRQn);
   }
+  else if ( uartHandle->Instance == USART2 ) {
+    __HAL_RCC_USART2_CLK_ENABLE();
+
+    /**USART1 GPIO Configuration
+    PA2     ------> USART1_TX
+    PA3     ------> USART1_RX
+    */
+    GPIO_InitStruct.Pin  = GPIO_PIN_2|GPIO_PIN_3;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USART2_IRQn);
+  }
+
 }
 void HAL_UART_MspDeInit  	( UART_HandleTypeDef* uartHandle ) {
 
@@ -194,7 +230,48 @@ void HAL_UART_MspDeInit  	( UART_HandleTypeDef* uartHandle ) {
     /* USART1 interrupt Deinit */
     HAL_NVIC_DisableIRQ(USART1_IRQn);
   }
+  else if ( uartHandle -> Instance == USART2 ) {
+		/* Peripheral clock disable */
+		__HAL_RCC_USART2_CLK_DISABLE();
+
+		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_2|GPIO_PIN_3);
+
+		HAL_NVIC_DisableIRQ(USART2_IRQn);
+	}
+
 }
+void MASTER_send_RS485_data_to_motor(void){
+	HAL_GPIO_WritePin( GPIOA , Tx2En , GPIO_PIN_SET );
+	usart2.tx[0] = 'S';
+	usart2.tx[1] = 'T';
+	usart2.tx[2] = 'P';
+	usart2.tx[3] = 0x00;	//device address
+
+	usart2.tx[4] = step_motor_command;
+	usart2.tx[5] = (step_motor_requested_pos/256)%256;
+	usart2.tx[6] = (step_motor_requested_pos)%256;
+
+	usart2.tx[7] = step_motor_speed[0];
+	usart2.tx[8] = step_motor_speed[1];
+	usart2.tx[9] = step_motor_speed[2];
+
+	usart2.tx[10] = 0x0D;
+	usart2.tx[11] = 0x0A;
+
+	usart2.tx_amount = 12;
+	HAL_UART_Transmit_IT(&huart2, &usart2.tx[0], usart2.tx_amount);
+}
+void usart2_handle(void){
+	if((usart2.rx[0] == 'A') && (usart2.rx[1] == 'H') && (usart2.rx[2] == 'A')){
+
+		abs_pos = 65536 * usart2.rx[3] + 256 * usart2.rx[4] + usart2.rx[5];
+		usart2.rx_indeks = 0;
+		for (uint8_t i = 0; i < USART4_RX_ARRAY_SIZE ; i++) {
+			usart2.rx[i] = 0;
+		}
+	}
+}
+
 /**
   * @brief  CRC ==> Cyclic Redundancy Check(D�ng�sel Artiklik Denetimi) fonksiyonu
   * @param  data      : CRC ye g�nderilecek dizi 

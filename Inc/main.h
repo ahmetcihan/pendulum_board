@@ -1,6 +1,8 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
+#define Tx2En 					GPIO_PIN_12
+
 #define Led_Pin 				GPIO_PIN_11
 #define Led_GPIO_Port 			GPIOA
 
@@ -73,6 +75,12 @@ typedef enum {
 extern ControlState ControlUsart1_TransmitData;
 
 void _Error_Handler(char *, int);
+
+unsigned char step_motor_command;
+unsigned char step_motor_speed[3];
+unsigned int step_motor_requested_pos;
+unsigned char timer_1_msec;
+unsigned char timer_100_msec;
 
 #define Error_Handler() _Error_Handler(__FILE__, __LINE__)
 
