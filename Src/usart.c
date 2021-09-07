@@ -264,7 +264,7 @@ void MASTER_send_RS485_data_to_motor(void){
 void usart2_handle(void){
 	if((usart2.rx[0] == 'A') && (usart2.rx[1] == 'H') && (usart2.rx[2] == 'A')){
 
-		abs_pos = 65536 * usart2.rx[3] + 256 * usart2.rx[4] + usart2.rx[5];
+		stepper_abs_pos = 65536 * usart2.rx[3] + 256 * usart2.rx[4] + usart2.rx[5];
 		usart2.rx_indeks = 0;
 		for (uint8_t i = 0; i < USART4_RX_ARRAY_SIZE ; i++) {
 			usart2.rx[i] = 0;
@@ -417,6 +417,12 @@ void 	 PRESS_CONV_CommandOperating	( void ) {
 	if (usartrx[12] == 0x01 ) Electromechanic_ServoForward;
 	if (usartrx[13] == 0x01 ) Electromechanic_ServoReverse;
 
+	step_motor_command = usartrx[14];
+	step_motor_requested_pos = (uint32_t)((uint32_t)usartrx[15] * 256 + (uint32_t)usartrx[16]);
+	step_motor_speed[0] = usartrx[17];
+	step_motor_speed[1] = usartrx[18];
+	step_motor_speed[2] = usartrx[19];
+
 	PRESS_ANS_Command();
 }
 void	 PRESS_GAIN_CommandOperating	( void ) {
@@ -498,26 +504,30 @@ void 	 PRESS_ANS_Command 				( void ) {
 		}
 		int32_t encoder_value = Timer1_CalculateEncoderValue();
 		if ( encoder_value < 0 ) {
-			usarttx[ 22 ] = 0x00;
+			usarttx[22] = 0x00;
 			encoder_value = encoder_value* -1;
 		}
 		else
-			usarttx[ 22 ] = 0x10;
+			usarttx[22] = 0x10;
 
-		usarttx[ 19 ] = (encoder_value/65536)%256;	//
-		usarttx[ 20 ] = (encoder_value/256)%256;	//
-		usarttx[ 21 ] =  encoder_value%256;			//
+		usarttx[19] = (encoder_value/65536)%256;	//
+		usarttx[20] = (encoder_value/256)%256;	//
+		usarttx[21] =  encoder_value%256;			//
 
 		usarttx[23] = channel_polarity[0] + 0x30;
 		usarttx[24] = channel_polarity[1] + 0x30;
 		usarttx[25] = channel_polarity[2] + 0x30;
 		usarttx[26] = channel_polarity[3] + 0x30;
 
+		usarttx[27] = (uint8_t)(stepper_abs_pos >> 16);
+		usarttx[28] = (uint8_t)(stepper_abs_pos >> 8);
+		usarttx[29] = (uint8_t)(stepper_abs_pos);
+
 		uint16_t fcrc;
-		fcrc = CyclicRedundancyCheck( &usarttx[0] , 27 );
-		usarttx[27] = fcrc%256;
-		usarttx[28] = fcrc/256;
-		TxAmound = 29;
+		fcrc = CyclicRedundancyCheck( &usarttx[0] , 30 );
+		usarttx[30] = fcrc%256;
+		usarttx[31] = fcrc/256;
+		TxAmound = 32;
 		ControlUsart1_TransmitData = ControlState_CHECKIT;
 
 		HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );

@@ -162,7 +162,7 @@ int main(void) {
 
 	step_motor_command = 0;
 	step_motor_requested_pos = 0;
-	abs_pos = 0;
+	stepper_abs_pos = 0;
 	timer_1_msec = 0;
 	timer_100_msec = 0;
 

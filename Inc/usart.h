@@ -92,7 +92,7 @@ extern uint8_t active_cal_channel,calculate_slopes;	//	unsigned char->uint8_t
 void evaluate_calibrated_values 		( uint8_t no );
 void slope_calculation					( uint8_t i  );
 
-unsigned int abs_pos;
+unsigned int stepper_abs_pos;
 
 #ifdef __cplusplus
 }
