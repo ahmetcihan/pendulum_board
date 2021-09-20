@@ -230,7 +230,7 @@ int main(void) {
 					channel[0].raw = (0xFFFFFF + 1) - channel[0].raw;
 				}
 			}
-			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
+			//HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
 			//evaluate_calibrated_values( 0 );
 			ControlExti_Max_1_RdbyPin = ControlState_CHECKED;
 		}

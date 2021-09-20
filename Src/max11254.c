@@ -780,48 +780,48 @@ void 		Max11254_Init					( void ) {
 	MAX[0].RateNumber = 0;
 	MAX[0].chRead[4] = CH_READ;
 	MAX[0].chGain[4] = (GAIN)GAIN_x128;
-	MAX[0].chRead[5] = CH_READ;
+	MAX[0].chRead[5] = CH_NotREAD;
 	MAX[0].chGain[5] = (GAIN)GAIN_x2;
 	MAX[0].rank	= 4;
 	Max11254_SelfCalibration( MAX_1 );
 //	Max11254_SequencerMode1_Entry( MAX_1 , SEQ_CH2_ENABLE  , MAX[0].Gain  );
-	Max11254_SequencerMode2_Entry( MAX_1 , (ChmapConvChannels)(CHMAP_CH4_ENABLE|CHMAP_CH5_ENABLE) , MAX[0].chGain[4] );
+	Max11254_SequencerMode2_Entry( MAX_1 , (ChmapConvChannels)(CHMAP_CH4_ENABLE) , MAX[0].chGain[4] );
 
 	/* MAX11254 - 2 Values Init */
 	MAX[1].Gain = GAIN_x128;
 	MAX[1].RateNumber = 0;
 	MAX[1].chRead[4] = CH_READ;
 	MAX[1].chGain[4] = (GAIN)GAIN_x128;
-	MAX[1].chRead[5] = CH_READ;
+	MAX[1].chRead[5] = CH_NotREAD;
 	MAX[1].chGain[5] = (GAIN)GAIN_x2;
 	MAX[1].rank	= 4;
 	Max11254_SelfCalibration( MAX_2 );
 //	Max11254_SequencerMode1_Entry( MAX_2 , SEQ_CH1_ENABLE  , MAX[1].Gain  );
-	Max11254_SequencerMode2_Entry( MAX_2 , (ChmapConvChannels)(CHMAP_CH4_ENABLE|CHMAP_CH5_ENABLE) , MAX[1].chGain[4] );
+	Max11254_SequencerMode2_Entry( MAX_2 , (ChmapConvChannels)(CHMAP_CH4_ENABLE) , MAX[1].chGain[4] );
 	
 	/* MAX11254 - 3 Values Init */
 	MAX[2].Gain = GAIN_x128;
 	MAX[2].RateNumber = 0;
 	MAX[2].chRead[4] = CH_READ;
 	MAX[2].chGain[4] = (GAIN)GAIN_x128;
-	MAX[2].chRead[5] = CH_READ;
+	MAX[2].chRead[5] = CH_NotREAD;
 	MAX[2].chGain[5] = (GAIN)GAIN_x2;
 	MAX[2].rank = 4;
 	Max11254_SelfCalibration( MAX_3 );
 //	Max11254_SequencerMode1_Entry( MAX_3 , SEQ_CH1_ENABLE  , MAX[2].Gain  );
-	Max11254_SequencerMode2_Entry( MAX_3 , (ChmapConvChannels)(CHMAP_CH4_ENABLE|CHMAP_CH5_ENABLE) , MAX[2].chGain[4] );
+	Max11254_SequencerMode2_Entry( MAX_3 , (ChmapConvChannels)(CHMAP_CH4_ENABLE) , MAX[2].chGain[4] );
 
 	/* MAX11254 - 4 Values Init */
 	MAX[3].Gain = GAIN_x128;
 	MAX[3].RateNumber = 0;
 	MAX[3].chRead[4] = CH_READ;
 	MAX[3].chGain[4] = (GAIN)GAIN_x128;
-	MAX[3].chRead[5] = CH_READ;
+	MAX[3].chRead[5] = CH_NotREAD;
 	MAX[3].chGain[5] = (GAIN)GAIN_x2;
 	MAX[3].rank = 4;
 	Max11254_SelfCalibration( MAX_4 );
 //	Max11254_SequencerMode1_Entry( MAX_4 , SEQ_CH1_ENABLE  , MAX[3].Gain  );
-	Max11254_SequencerMode2_Entry( MAX_4 , (ChmapConvChannels)(CHMAP_CH4_ENABLE|CHMAP_CH5_ENABLE) , MAX[3].chGain[4] );
+	Max11254_SequencerMode2_Entry( MAX_4 , (ChmapConvChannels)(CHMAP_CH4_ENABLE) , MAX[3].chGain[4] );
 
 	Max11254_ConversionCommand( MAX_1 , MAX[0].RateNumber|COMMAND_MODE_SEQUENCER );
 	Max11254_ConversionCommand( MAX_2 , MAX[1].RateNumber|COMMAND_MODE_SEQUENCER );
