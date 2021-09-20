@@ -51,6 +51,12 @@
 #define RELAY_DRV_2_Pin       	GPIO_PIN_2    	//	Press Cihazinda Islevi Yok
 #define RELAY_DRV_2_GPIO_Port	GPIOC        	//	Press Cihazinda Islevi Yok
 
+#define INPUT_1_Pin 			GPIO_PIN_0
+#define INPUT_2_Pin 			GPIO_PIN_15
+#define INPUT_3_Pin 			GPIO_PIN_14
+#define INPUT_4_Pin 			GPIO_PIN_13
+#define INPUT_Port		 		GPIOC
+
 #define ExtInp_1_Pin 			GPIO_PIN_0    	//	Press Cihazinda Islevi Yok
 #define ExtInp_1_GPIO_Port 		GPIOC         	//	Press Cihazinda Islevi Yok
 #define ExtInp_2_Pin 			GPIO_PIN_15  	//	Press Cihazinda Islevi Yok
@@ -81,6 +87,7 @@ unsigned char step_motor_speed[3];
 unsigned int step_motor_requested_pos;
 unsigned char timer_1_msec;
 unsigned char timer_100_msec;
+unsigned char input_status[4];
 
 #define Error_Handler() _Error_Handler(__FILE__, __LINE__)
 

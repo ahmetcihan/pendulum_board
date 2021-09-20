@@ -54,6 +54,12 @@ void MX_GPIO_Init ( void ) {
 //  GPIO_InitStruct.Pull = GPIO_NOPULL;
 //  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 	
+	GPIO_InitStruct.Pin  = INPUT_4_Pin | INPUT_3_Pin | INPUT_2_Pin | INPUT_1_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+
   /*Configure GPIO pin : RELAY_DRV_1|RELAY_DRV_2|RELAY_DRV_3|RELAY_DRV_4 */
   GPIO_InitStruct.Pin   = RELAY_DRV_1_Pin|RELAY_DRV_2_Pin|RELAY_DRV_3_Pin|RELAY_DRV_4_Pin;
   GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;

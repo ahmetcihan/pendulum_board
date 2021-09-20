@@ -395,33 +395,19 @@ void 	 UsartReceiveData_SearchCommand ( void ) {
 	}
 }
 void 	 PRESS_CONV_CommandOperating	( void ) {
-	if 			( usartrx[4] == 0x01 ) {
-		uint32_t ServoSpeed = (uint32_t)( ( uint32_t )( usartrx[5]*65536 )
-										+ ( uint32_t )( usartrx[6]*256 )
-										+ ( uint32_t )( usartrx[7]) );
-		Timer3_AutoConsolidation_SpecialFunc( ServoSpeed );
-	}
 	//	0x30[Hex] = 48[Dec]	,	0x31[Hex] = 49[Dec]
-	if (usartrx[8] == 0x30 )	Electromechanic_RELAY_OFF_AutoManual;
-	else if(usartrx[8] == 0x31 ) 	Electromechanic_RELAY_ON_AutoManual;
+	if (usartrx[4] == 0x30 )	Electromechanic_RELAY_OFF_AutoManual;
+	else if(usartrx[4] == 0x31 ) 	Electromechanic_RELAY_ON_AutoManual;
 
 	//	0x30[Hex] = 48[Dec]	,	0x31[Hex] = 49[Dec]
-	if (usartrx[9] == 0x30 ) 	Electromechanic_RELAY_OFF_StartStop;
-	else if (usartrx[9] == 0x31 ) 	Electromechanic_RELAY_ON_StartStop;
+	if (usartrx[5] == 0x30 ) 	Electromechanic_RELAY_OFF_StartStop;
+	else if (usartrx[5] == 0x31 ) 	Electromechanic_RELAY_ON_StartStop;
 
-	if (usartrx[10] == 0x01 ) {
-		Electromechanic_ServoStop;
-		TIM3->CCR1= 0;
-	}
-	if (usartrx[11] == 0x01 ) Electromechanic_ServoStart;
-	if (usartrx[12] == 0x01 ) Electromechanic_ServoForward;
-	if (usartrx[13] == 0x01 ) Electromechanic_ServoReverse;
-
-	step_motor_command = usartrx[14];
-	step_motor_requested_pos = (uint32_t)((uint32_t)usartrx[15] * 256 + (uint32_t)usartrx[16]);
-	step_motor_speed[0] = usartrx[17];
-	step_motor_speed[1] = usartrx[18];
-	step_motor_speed[2] = usartrx[19];
+	step_motor_command = usartrx[6];
+	step_motor_requested_pos = (uint32_t)((uint32_t)usartrx[7] * 256 + (uint32_t)usartrx[8]);
+	step_motor_speed[0] = usartrx[9];
+	step_motor_speed[1] = usartrx[10];
+	step_motor_speed[2] = usartrx[11];
 
 	PRESS_ANS_Command();
 }
@@ -502,17 +488,11 @@ void 	 PRESS_ANS_Command 				( void ) {
 			usarttx[4*i+5] = (uint8_t)(  channel[i].raw&0x000000FF     );
 			usarttx[4*i+6]= gain_force;
 		}
-		int32_t encoder_value = Timer1_CalculateEncoderValue();
-		if ( encoder_value < 0 ) {
-			usarttx[22] = 0x00;
-			encoder_value = encoder_value* -1;
-		}
-		else
-			usarttx[22] = 0x10;
 
-		usarttx[19] = (encoder_value/65536)%256;	//
-		usarttx[20] = (encoder_value/256)%256;	//
-		usarttx[21] =  encoder_value%256;			//
+		usarttx[19] = input_status[0] + 0x30;
+		usarttx[20] = input_status[1] + 0x30;
+		usarttx[21] = input_status[2] + 0x30;
+		usarttx[22] = input_status[3] + 0x30;
 
 		usarttx[23] = channel_polarity[0] + 0x30;
 		usarttx[24] = channel_polarity[1] + 0x30;

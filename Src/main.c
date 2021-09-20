@@ -133,7 +133,12 @@ void clear_usart_buffer(void) {
 		usartrx[i] = 0;
 	}
 }
-/**	*****	*****	*****	**/
+void read_inputs(void){
+	input_status[0] = HAL_GPIO_ReadPin(INPUT_Port,INPUT_1_Pin);
+	input_status[1] = HAL_GPIO_ReadPin(INPUT_Port,INPUT_2_Pin);
+	input_status[2] = HAL_GPIO_ReadPin(INPUT_Port,INPUT_3_Pin);
+	input_status[3] = HAL_GPIO_ReadPin(INPUT_Port,INPUT_4_Pin);
+}
 int main(void) {
 	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 	HAL_Init();
@@ -191,7 +196,7 @@ int main(void) {
 		if(timer_100_msec == 1){
 			timer_100_msec = 0;
 			MASTER_send_RS485_data_to_motor();
-
+			read_inputs();
 		}
 		if (ControlTIM4_10msec == ControlState_CHECKIT) {
 			if (calculate_slopes == 1) {
@@ -225,6 +230,7 @@ int main(void) {
 					channel[0].raw = (0xFFFFFF + 1) - channel[0].raw;
 				}
 			}
+			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
 			//evaluate_calibrated_values( 0 );
 			ControlExti_Max_1_RdbyPin = ControlState_CHECKED;
 		}
