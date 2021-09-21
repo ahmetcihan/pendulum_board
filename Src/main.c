@@ -170,6 +170,7 @@ int main(void) {
 	stepper_abs_pos = 0;
 	timer_1_msec = 0;
 	timer_100_msec = 0;
+	send_RS485 = 0;
 
 	while (1) {
 		if (usart2.data_received == 1) {
@@ -193,8 +194,8 @@ int main(void) {
 			}
 		}
 
-		if(timer_100_msec == 1){
-			timer_100_msec = 0;
+		if(send_RS485 == 1){
+			send_RS485 = 0;
 			MASTER_send_RS485_data_to_motor();
 			read_inputs();
 		}

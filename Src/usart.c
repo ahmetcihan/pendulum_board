@@ -409,6 +409,8 @@ void 	 PRESS_CONV_CommandOperating	( void ) {
 	step_motor_speed[1] = usartrx[10];
 	step_motor_speed[2] = usartrx[11];
 
+	send_RS485 = 1;
+
 	PRESS_ANS_Command();
 }
 void	 PRESS_GAIN_CommandOperating	( void ) {
