@@ -1,41 +1,27 @@
-/*	*****	*****	*****	*****	*****	*****	*****	*****	*****	*****	*/
-/*																															*/
-/*	Bu kutuphane 2019 yilinda TMS700(bb02502V22) PCB'si icin		*/
-/*										Mehmet KARATAS Tarafindan yazilmistir.		*/
-/*																															*/
-/*	*****	*****	*****	*****	*****	*****	*****	*****	*****	*****	*/
 #ifndef __MAX11254_H
 #define __MAX11254_H 
-/**
-  * @brief  Max11254 - 1 baglantilari .
-  */
+
 #if !defined  (   MAX11254_1_CS_PIN 	) 
  #define MAX11254_1_CS_PIN  ADC_1_CS_Pin   							
 #endif /* MAX11254_1_CS_PIN */
 #if !defined  (   MAX11254_1_CS_PORT 	) 
  #define MAX11254_1_CS_PORT  ADC_1_CS_GPIO_Port
 #endif /* MAX11254_1_CS_PORT */
-/**
-  * @brief  Max11254 - 2 baglantilari .
-  */
+
 #if !defined  (   MAX11254_2_CS_PIN 	) 
  #define MAX11254_2_CS_PIN  ADC_2_CS_Pin   							
 #endif /* MAX11254_2_CS_PIN */
 #if !defined  (   MAX11254_2_CS_PORT 	) 
  #define MAX11254_2_CS_PORT  ADC_2_CS_GPIO_Port
 #endif /* MAX11254_2_CS_PORT */
-/**
-  * @brief  Max11254 - 3 baglantilari .
-  */
+
 #if !defined  (   MAX11254_3_CS_PIN 	) 
  #define MAX11254_3_CS_PIN  ADC_3_CS_Pin   							
 #endif /* MAX11254_3_CS_PIN */
 #if !defined  (   MAX11254_3_CS_PORT 	) 
  #define MAX11254_3_CS_PORT  ADC_3_CS_GPIO_Port
 #endif /* MAX11254_3_CS_PORT */
-/**
-  * @brief  Max11254 - 4 baglantilari .
-  */
+
 #if !defined  (   MAX11254_4_CS_PIN 	) 
  #define MAX11254_4_CS_PIN  ADC_4_CS_Pin   							
 #endif /* MAX11254_4_CS_PIN */
@@ -43,16 +29,9 @@
  #define MAX11254_4_CS_PORT  ADC_4_CS_GPIO_Port
 #endif /* MAX11254_4_CS_PORT */
 
-
-/**
-  * @brief  Max11254-1 | Max11254-2  | Max11254-3  Max11254-4 
-	*					cihazlarinin ortak hardware reset pini 
-  */
 #define MAX11254s_RSTB_LOW	    HAL_GPIO_WritePin( ADC_RST_GPIO_Port , ADC_RST_Pin , GPIO_PIN_RESET );
 #define MAX11254s_RSTB_HIGH 	HAL_GPIO_WritePin( ADC_RST_GPIO_Port , ADC_RST_Pin , GPIO_PIN_SET   );
-/*	*/
 
-/*	*/
 #define CH0	0x00
 #define CH1 0x01
 #define CH2 0x02
@@ -66,9 +45,6 @@
 #define POLARITY_BIPOLAR	0x00	//	( -Vref to +Vref )
 #define POLARITY_UNIPOLAR	0x01	//	(   0V  to +Vref )
 
-/**
-  * @brief Max11254 Register Adress 
-  */
 #define MAX11254_REG_STAT					0			//		W:0xC0			R:0xC1
 #define MAX11254_REG_CTRL1					1   		//		W:0xC2			R:0xC3
 #define MAX11254_REG_CTRL2					2   		//		W:0xC4			R:0xC5
@@ -89,9 +65,7 @@
 #define MAX11254_REG_DATA3      			17  		//		W:0xE2			R:0xE3	
 #define MAX11254_REG_DATA4      			18  		//		W:0xE4			R:0xE5	
 #define MAX11254_REG_DATA5      			19  		//		W:0xE6			R:0xE7	
-/**
-  * @brief Max11254 Command Byte Definition 
-  */
+
 #define COMMAND_MODE_UNUSED					0x80
 #define COMMAND_MODE_POWER_DOWN   			0x90
 #define COMMAND_MODE_CALIBRATION  			0xA0
@@ -112,16 +86,12 @@
 #define COMMAND_RATE_13    					0x8D
 #define COMMAND_RATE_14   					0x8E
 #define COMMAND_RATE_15						0x8F
-/**
-  * @brief Max11254 STAT: Status Register  
-  */
+
 #define STAT_PDSTAT_CONVERSION	((uint32_t)0x00000000U)					 					
 #define STAT_PDSTAT_SLEEP		((uint32_t)0x00000004U)
 #define STAT_PDSTAT_STANDBY     ((uint32_t)0x00000008U)
 #define STAT_PDSTAT_RESET       ((uint32_t)0x0000000CU)
-/**
-  * @brief CTRL1: Control Register 1  
-  */
+
 #define CTRL1_CALx_SELF_CAL           		0x00
 #define CTRL1_CALx_SYSTEMOFFSET_CAL   		0x40
 #define CTRL1_CALx_SYSTEMFULL_CAL			0x80
@@ -138,9 +108,7 @@
 #define CTRL1_SCYCLE_ENABLE           		0x02
 #define CTRL1_CONTSC_DISABLE          		0x00
 #define CTRL1_CONTSC_ENABLE           		0x01
-/**
-  * @brief CTRL2: Control Register 2  
-  */
+
 #define CTRL2_PGA_DISABLE    				0x00
 #define CTRL2_PGA_ENABLE    	 			0x08
 #define CTRL2_PGAGx_1     					0x00
@@ -158,9 +126,7 @@
 #define CTRL2_CSSEN_CURRENTSOURCES_EN 		0x40
 #define CTRL2_EXTCLK_INTERNAL_CLOCK  		0x00
 #define CTRL2_EXTCLK_EXTERNAL_CLOCK  		0x80
-/**
-  * @brief Control Register 3 
-  */
+
 #define CTRL3_GPO_MODE_ENABLE				0x80
 #define CTRL3_GPO_MODE_DISABLE          	0x00
 #define CTRL3_SYNC_MODE_ENABLE          	0x40
@@ -175,9 +141,7 @@
 #define CTRL3_NOSCG_DISABLE             	0x02
 #define CTRL3_NOSCO_ENABLE              	0x00
 #define CTRL3_NOSCO_DISABLE             	0x01
-/**
-  * @brief SEQ: Sequencer Register  
-  */
+
 #define SEQ_MUX_DISABLE						0x00
 #define SEQ_MUX_SEQUENCER1_CH0				0x00
 #define SEQ_MUX_SEQUENCER1_CH1        		0x20
@@ -189,15 +153,13 @@
 #define SEQ_MODE_SEQUENCER_MODE_2     		0x08
 #define SEQ_MODE_SEQUENCER_MODE_3     		0x10
 #define SEQ_MODE_DO_NOT_USE           		0x18
-#define SEQ_GPODREN_GPIO_DELAY_ENABLE		0x00	//	channel selection 	  delayed
-#define SEQ_GPODREN_GPIO_DELAY_DISABLE		0x04	//	channel selection not delayed
+#define SEQ_GPODREN_GPIO_DELAY_ENABLE		0x00
+#define SEQ_GPODREN_GPIO_DELAY_DISABLE		0x04
 #define SEQ_MDREN_MUX_DELAY_DISABLE     	0x00
-#define SEQ_MDREN_MUX_DELAY_ENABLE      	0x02    // 	T�m Kanallarin Conversiyon islemi tamamlandiginda RDYB Low'a d�ser
-#define SEQ_RDYBEN_READY_BAR_DISABLE    	0x00    //	Her Kanalin    Conversiyon islemi tamamlandiginda RDYB Low'a d�ser
+#define SEQ_MDREN_MUX_DELAY_ENABLE      	0x02
+#define SEQ_RDYBEN_READY_BAR_DISABLE    	0x00
 #define SEQ_RDYBEN_READY_BAR_ENABLE     	0x01
-/**
-  * @brief GPIO_CTRL: GPIO Control Register 
-  */
+
 #define GPIO_CTRL_GPIO1_EN_GPIO				0x80
 #define GPIO_CTRL_GPIO1_EN_SYNCINPUT		0x00
 #define GPIO_CTRL_GPIO0_EN_GPIO       		0x40
@@ -210,21 +172,12 @@
 #define GPIO_CTRL_DIO1_OUTPUT_LOW      		0x00
 #define GPIO_CTRL_DIO0_OUTPUT_HIGH      	0x01
 #define GPIO_CTRL_DIO0_OUTPUT_LOW       	0x00
-/**
-  * @brief GPO_DIR: GPO Direct Access Register 2
-  */
+
 #define GPO_DIR_GPO0_OUTPUT_LOW				0x01
 #define GPO_DIR_GPO0_OUTPUT_HIGH      		0x00
 #define GPO_DIR_GPO1_OUTPUT_LOW				0x02
 #define GPO_DIR_GP01_OUTPUT_HIGH      		0x00
-/*	*****	*****	*****	*****	*/
-//	#define CMA_FILTER_COEF_MAX_VALUE  (uint8_t)32
-//	#define WMA_FILTER_COEF_MAX_VALUE  (uint8_t)32
-//	#define EMA_FILTER_COEF_MAX_VALUE  (uint8_t)32
-//	#define CMA_Value		RawDataCh[6]	/*  CMA 	Filtresi  Sonucu */	
-//	#define WMA_Value 	RawDataCh[7]  /*  WMA 	Filtresi  Sonucu */
-//	#define EMA_Value 	RawDataCh[8]  /*  EMA 	Filtresi  Sonucu */
-//	#define BES_Value 	RawDataCh[9]  /* Bessel Filtresi  Sonucu */ 
+
 typedef enum 	 { /*		  SeqConvChannel		*/
 	SEQ_CH0_ENABLE = 0x00,   /*	MAX11254 SingleChannel mod yanlizca CH0 conversion	*/
 	SEQ_CH1_ENABLE = 0x20,   /*	MAX11254 SingleChannel mod yanlizca CH1 conversion	*/
@@ -303,11 +256,10 @@ typedef struct { /*		  ConnectedADC      */
 //	uint8_t 		BES_Channel;     	/* Bessel Filtresi uygulanacagi MAX kanali 		*/
 }ConnectedADC;
 
-
 extern ConnectedADC	MAX[4];
-extern uint32_t 	DeviceChannel[4];
+extern uint32_t DeviceChannel[4];
 
-extern uint8_t		resultBinding[4];
+extern uint8_t	resultBinding[4];
 									
 void 		Max11254_ConversionCommand 		( MaxDevice ChooseMax , uint8_t command );
 void 		Max11254_Write1byte 			( MaxDevice ChooseMax , uint8_t Adr , uint8_t  Data );
@@ -335,34 +287,6 @@ void 		OperatingMaxExtiRdbyControl 	( MaxDevice ChooseMax );
 void		Max11254_GPIOSetting			( MaxDevice ChooseMax , uint8_t fourGpio );
 void 		Max11254_PolaritySelect			( MaxDevice ChooseMax , uint8_t polarity );
 void 		Max11254_SequencerMode2_EntryUart( MaxDevice ChooseMax , ChmapConvChannels Chs , GAIN Gain );
-/*	*****		*****			FILTERS FUNCTIONS			*****		*****	*/
-//	uint32_t 	Filter_ADC1_ClassicMovingAverage 	( uint32_t raw_signal );
-//	uint32_t 	Filter_ADC2_ClassicMovingAverage 	( uint32_t raw_signal );
-//	uint32_t 	Filter_ADC3_ClassicMovingAverage 	( uint32_t raw_signal );
-//	uint32_t 	Filter_ADC4_ClassicMovingAverage 	( uint32_t raw_signal );
-
-//	uint32_t 	Filter_ADC1_WeightedMovingAverage 	( uint32_t raw_signal );
-//	uint32_t 	Filter_ADC2_WeightedMovingAverage 	( uint32_t raw_signal );
-//	uint32_t 	Filter_ADC3_WeightedMovingAverage 	( uint32_t raw_signal );
-//	uint32_t 	Filter_ADC4_WeightedMovingAverage 	( uint32_t raw_signal );
-
-//	uint32_t 	Filter_ADC1_ExponentialMovingAverage( uint32_t raw_signal );  
-//	uint32_t 	Filter_ADC2_ExponentialMovingAverage( uint32_t raw_signal );
-//	uint32_t 	Filter_ADC3_ExponentialMovingAverage( uint32_t raw_signal );  
-//	uint32_t 	Filter_ADC4_ExponentialMovingAverage( uint32_t raw_signal ); 
-
-//	/*	Filter_Bessel_Init icin */
-//	#define M_PI 	  	3.14159265358979323846
-//	#define M_SQRT2   	1.41421356237309504880
-//	void   		Filter_ADC1_Bessel_Init   			( uint16_t samplerate , uint8_t cutoff );
-//	void   		Filter_ADC2_Bessel_Init   			( uint16_t samplerate , uint8_t cutoff );
-//	void   		Filter_ADC3_Bessel_Init   			( uint16_t samplerate , uint8_t cutoff );
-//	void   		Filter_ADC4_Bessel_Init   			( uint16_t samplerate , uint8_t cutoff );
-
-//	uint32_t 	Filter_ADC1_Bessel_Result			( uint32_t input );
-//	uint32_t 	Filter_ADC2_Bessel_Result			( uint32_t input );
-//	uint32_t 	Filter_ADC3_Bessel_Result			( uint32_t input );
-//	uint32_t 	Filter_ADC4_Bessel_Result			( uint32_t input );
 
 uint8_t channel_polarity[4];
 

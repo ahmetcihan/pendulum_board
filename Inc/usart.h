@@ -1,8 +1,5 @@
 #ifndef __usart_H
 #define __usart_H
-#ifdef __cplusplus
- extern "C" {
-#endif
 
 #include "stm32f4xx_hal.h"
 #include "main.h" 
@@ -49,21 +46,19 @@ extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart4;
 
-extern 	void _Error_Handler			( char *, int );
-void MX_USART1_UART_Init	( void );
-void MX_USART2_Init			( void );
-void MX_UART4_Init			( void );
+extern 	void _Error_Handler(char *, int );
+void MX_USART1_UART_Init(void);
+void MX_USART2_Init(void);
+void MX_UART4_Init(void);
 
-uint32_t CyclicRedundancyCheck 			( uint8_t* data, uint8_t length );
-void 	 UsartReceiveData_SearchCommand ( void );
-void 	 PRESS_CONV_CommandOperating	( void );
-void	 PRESS_GAIN_CommandOperating	( void );
-void 	 PRESS_TARE_CommandOperating	( void );
-void 	 PRESS_PRINT_CommandOperating	( void );
-void	 PRESS_CALSEND_CommandOperating ( void );
-
-void 		 PRESS_ANS_Command 			( void );
-
+uint32_t CyclicRedundancyCheck(uint8_t* data, uint8_t length );
+void UsartReceiveData_SearchCommand(void);
+void PRESS_CONV_CommandOperating(void);
+void PRESS_GAIN_CommandOperating(void);
+void PRESS_TARE_CommandOperating(void);
+void PRESS_PRINT_CommandOperating(void);
+void PRESS_CALSEND_CommandOperating(void);
+void PRESS_ANS_Command(void);
 void MASTER_send_RS485_data_to_motor(void);
 void usart2_handle(void);
 
@@ -87,14 +82,11 @@ struct chan {
     double slope[7];
 };
 extern struct chan channel[8];
-extern uint8_t active_cal_channel,calculate_slopes;	//	unsigned char->uint8_t
+extern uint8_t active_cal_channel,calculate_slopes;
 
-void evaluate_calibrated_values 		( uint8_t no );
-void slope_calculation					( uint8_t i  );
+void evaluate_calibrated_values(uint8_t no);
+void slope_calculation(uint8_t i);
 
 unsigned int stepper_abs_pos;
 
-#ifdef __cplusplus
-}
-#endif
 #endif /*__ usart_H */

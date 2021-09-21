@@ -39,22 +39,20 @@ struct _usart usart2;
 uint8_t active_cal_channel,calculate_slopes;	//	unsigned char->uint8_t
 uint8_t in_calibration; 
 
-/* UART4 init function */
 void MX_UART4_Init			( void ) {
+	huart4.Instance 			= UART4;
+	huart4.Init.BaudRate 		= 115200;
+	huart4.Init.WordLength 	= UART_WORDLENGTH_8B;
+	huart4.Init.StopBits 		= UART_STOPBITS_1;
+	huart4.Init.Parity 		= UART_PARITY_NONE;
+	huart4.Init.Mode 			= UART_MODE_TX;
+	huart4.Init.HwFlowCtl		= UART_HWCONTROL_NONE;
+	huart4.Init.OverSampling 	= UART_OVERSAMPLING_16;
+	if (HAL_HalfDuplex_Init(&huart4) != HAL_OK)
+		_Error_Handler(__FILE__, __LINE__);
 
-  huart4.Instance 			= UART4;
-  huart4.Init.BaudRate 		= 115200;
-  huart4.Init.WordLength 	= UART_WORDLENGTH_8B;
-  huart4.Init.StopBits 		= UART_STOPBITS_1;
-  huart4.Init.Parity 		= UART_PARITY_NONE;
-  huart4.Init.Mode 			= UART_MODE_TX;
-  huart4.Init.HwFlowCtl		= UART_HWCONTROL_NONE;
-  huart4.Init.OverSampling 	= UART_OVERSAMPLING_16;
-  if (HAL_HalfDuplex_Init(&huart4) != HAL_OK)
-    _Error_Handler(__FILE__, __LINE__);
-
-  usartrx[ 0 ] = 10;
-  HAL_UART_Transmit( &huart4 , &usartrx[0] , 1 , 10 );
+	usartrx[ 0 ] = 10;
+	HAL_UART_Transmit( &huart4 , &usartrx[0] , 1 , 10 );
 }
 void MX_USART2_Init			( void ) {
 	huart2.Instance 			= USART2;
@@ -72,92 +70,59 @@ void MX_USART2_Init			( void ) {
     HAL_UART_Receive_IT(&huart2, &usart2.instant_data,1);
 }
 void MX_USART1_UART_Init 	( void ) {
-
-  huart1.Instance 			= USART1;
-  huart1.Init.BaudRate 		= 115200;
-  huart1.Init.WordLength 	= UART_WORDLENGTH_8B;
-  huart1.Init.StopBits 		= UART_STOPBITS_1;
-  huart1.Init.Parity 		= UART_PARITY_NONE;
-  huart1.Init.Mode 			= UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl 	= UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling 	= UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart1) != HAL_OK)
-    _Error_Handler(__FILE__, __LINE__);
+	huart1.Instance 			= USART1;
+	huart1.Init.BaudRate 		= 115200;
+	huart1.Init.WordLength 	= UART_WORDLENGTH_8B;
+	huart1.Init.StopBits 		= UART_STOPBITS_1;
+	huart1.Init.Parity 		= UART_PARITY_NONE;
+	huart1.Init.Mode 			= UART_MODE_TX_RX;
+	huart1.Init.HwFlowCtl 	= UART_HWCONTROL_NONE;
+	huart1.Init.OverSampling 	= UART_OVERSAMPLING_16;
+	if (HAL_UART_Init(&huart1) != HAL_OK)
+		_Error_Handler(__FILE__, __LINE__);
 
 	HAL_UART_Receive_DMA ( &huart1 , &casual_rx_data , 1 );
 	calculate_slopes = 0;
 	buffer_cleared = 0;	
 }
 void HAL_UART_MspInit		( UART_HandleTypeDef* uartHandle ) {
-  GPIO_InitTypeDef GPIO_InitStruct;
-  if			( uartHandle->Instance == UART4  ) {
-    /* UART4 clock enable */
-    __HAL_RCC_UART4_CLK_ENABLE();
-  
-    /**UART4 GPIO Configuration    
-    PA0-WKUP     ------> UART4_TX 
-    */
-    GPIO_InitStruct.Pin 		= GPIO_PIN_0;
-    GPIO_InitStruct.Mode 		= GPIO_MODE_AF_OD;
-    GPIO_InitStruct.Pull 		= GPIO_PULLUP;
-    GPIO_InitStruct.Speed 		= GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate 	= GPIO_AF8_UART4;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+	GPIO_InitTypeDef GPIO_InitStruct;
 
-    /* UART4 DMA Init */
-    /* UART4_TX Init */
-//    hdma_uart4_tx.Instance 					= DMA1_Stream4;
-//    hdma_uart4_tx.Init.Channel 				= DMA_CHANNEL_4;
-//    hdma_uart4_tx.Init.Direction 				= DMA_MEMORY_TO_PERIPH;
-//    hdma_uart4_tx.Init.PeriphInc 				= DMA_PINC_DISABLE;
-//    hdma_uart4_tx.Init.MemInc 				= DMA_MINC_ENABLE;
-//    hdma_uart4_tx.Init.PeriphDataAlignment	= DMA_PDATAALIGN_BYTE;
-//    hdma_uart4_tx.Init.MemDataAlignment 		= DMA_MDATAALIGN_BYTE;
-//    hdma_uart4_tx.Init.Mode 					= DMA_NORMAL;
-//    hdma_uart4_tx.Init.Priority 				= DMA_PRIORITY_LOW;
-//    hdma_uart4_tx.Init.FIFOMode 				= DMA_FIFOMODE_DISABLE;
-//    if (HAL_DMA_Init(&hdma_uart4_tx) != HAL_OK)
-//      _Error_Handler(__FILE__, __LINE__);
+	if			( uartHandle->Instance == UART4  ) {
+		__HAL_RCC_UART4_CLK_ENABLE();
 
-//    __HAL_LINKDMA(uartHandle,hdmatx,hdma_uart4_tx);
+		GPIO_InitStruct.Pin 		= GPIO_PIN_0;
+		GPIO_InitStruct.Mode 		= GPIO_MODE_AF_OD;
+		GPIO_InitStruct.Pull 		= GPIO_PULLUP;
+		GPIO_InitStruct.Speed 		= GPIO_SPEED_FREQ_VERY_HIGH;
+		GPIO_InitStruct.Alternate 	= GPIO_AF8_UART4;
+		HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+	}
+	else if ( uartHandle->Instance == USART1 ) {
+	__HAL_RCC_USART1_CLK_ENABLE();
 
-    /* UART4 interrupt Init */
-//    HAL_NVIC_SetPriority(UART4_IRQn, 0, 0);
-//    HAL_NVIC_EnableIRQ(UART4_IRQn);
-  }
-  else if ( uartHandle->Instance == USART1 ) {
-    /* USART1 clock enable */
-    __HAL_RCC_USART1_CLK_ENABLE();
-  
-    /**USART1 GPIO Configuration    
-    PB6     ------> USART1_TX
-    PB7     ------> USART1_RX 
-    */
-    GPIO_InitStruct.Pin  = GPIO_PIN_6|GPIO_PIN_7;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	GPIO_InitStruct.Pin  = GPIO_PIN_6|GPIO_PIN_7;
+	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull = GPIO_PULLUP;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+	GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    /* USART1 DMA Init */
-    /* USART1_RX Init */
-    hdma_usart1_rx.Instance = DMA2_Stream2;
-    hdma_usart1_rx.Init.Channel = DMA_CHANNEL_4;
-    hdma_usart1_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    hdma_usart1_rx.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_usart1_rx.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_usart1_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    hdma_usart1_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_usart1_rx.Init.Mode = DMA_CIRCULAR;
-    hdma_usart1_rx.Init.Priority = DMA_PRIORITY_LOW;
-    hdma_usart1_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-    if (HAL_DMA_Init(&hdma_usart1_rx) != HAL_OK)
-      _Error_Handler(__FILE__, __LINE__);
+	hdma_usart1_rx.Instance = DMA2_Stream2;
+	hdma_usart1_rx.Init.Channel = DMA_CHANNEL_4;
+	hdma_usart1_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
+	hdma_usart1_rx.Init.PeriphInc = DMA_PINC_DISABLE;
+	hdma_usart1_rx.Init.MemInc = DMA_MINC_ENABLE;
+	hdma_usart1_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+	hdma_usart1_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+	hdma_usart1_rx.Init.Mode = DMA_CIRCULAR;
+	hdma_usart1_rx.Init.Priority = DMA_PRIORITY_LOW;
+	hdma_usart1_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+	if (HAL_DMA_Init(&hdma_usart1_rx) != HAL_OK)
+		_Error_Handler(__FILE__, __LINE__);
 
-    __HAL_LINKDMA(uartHandle,hdmarx,hdma_usart1_rx);
+	__HAL_LINKDMA(uartHandle,hdmarx,hdma_usart1_rx);
 
-    /* USART1_TX Init */
     hdma_usart1_tx.Instance = DMA2_Stream7;
     hdma_usart1_tx.Init.Channel = DMA_CHANNEL_4;
     hdma_usart1_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
@@ -168,77 +133,48 @@ void HAL_UART_MspInit		( UART_HandleTypeDef* uartHandle ) {
     hdma_usart1_tx.Init.Mode = DMA_NORMAL;
     hdma_usart1_tx.Init.Priority = DMA_PRIORITY_LOW;
     hdma_usart1_tx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-    if (HAL_DMA_Init(&hdma_usart1_tx) != HAL_OK)
-      _Error_Handler(__FILE__, __LINE__);
+	if (HAL_DMA_Init(&hdma_usart1_tx) != HAL_OK)
+		_Error_Handler(__FILE__, __LINE__);
 
     __HAL_LINKDMA(uartHandle,hdmatx,hdma_usart1_tx);
 
-    /* USART1 interrupt Init */
     HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(USART1_IRQn);
-  }
-  else if ( uartHandle->Instance == USART2 ) {
-    __HAL_RCC_USART2_CLK_ENABLE();
+	}
+	else if ( uartHandle->Instance == USART2 ) {
+		__HAL_RCC_USART2_CLK_ENABLE();
 
-    /**USART1 GPIO Configuration
-    PA2     ------> USART1_TX
-    PA3     ------> USART1_RX
-    */
-    GPIO_InitStruct.Pin  = GPIO_PIN_2|GPIO_PIN_3;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+		GPIO_InitStruct.Pin  = GPIO_PIN_2|GPIO_PIN_3;
+		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+		GPIO_InitStruct.Pull = GPIO_PULLUP;
+		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+		GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
+		HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(USART2_IRQn);
-  }
-
+		HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
+		HAL_NVIC_EnableIRQ(USART2_IRQn);
+	}
 }
 void HAL_UART_MspDeInit  	( UART_HandleTypeDef* uartHandle ) {
 
-  if			( uartHandle -> Instance == UART4  ) {
-    /* Peripheral clock disable */
-    __HAL_RCC_UART4_CLK_DISABLE();
-  
-    /**UART4 GPIO Configuration    
-    PA0-WKUP     ------> UART4_TX 
-    */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0);
-
-    /* UART4 DMA DeInit */
-    HAL_DMA_DeInit(uartHandle->hdmatx);
-
-    /* UART4 interrupt Deinit */
-    HAL_NVIC_DisableIRQ(UART4_IRQn);
-  }
-  else if ( uartHandle -> Instance == USART1 ) {
-    /* Peripheral clock disable */
-    __HAL_RCC_USART1_CLK_DISABLE();
-  
-    /**USART1 GPIO Configuration    
-    PB6     ------> USART1_TX
-    PB7     ------> USART1_RX 
-    */
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6|GPIO_PIN_7);
-
-    /* USART1 DMA DeInit */
-    HAL_DMA_DeInit(uartHandle->hdmarx);
-    HAL_DMA_DeInit(uartHandle->hdmatx);
-
-    /* USART1 interrupt Deinit */
-    HAL_NVIC_DisableIRQ(USART1_IRQn);
-  }
+	if(uartHandle -> Instance == UART4  ) {
+		__HAL_RCC_UART4_CLK_DISABLE();
+		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0);
+		HAL_DMA_DeInit(uartHandle->hdmatx);
+		HAL_NVIC_DisableIRQ(UART4_IRQn);
+	}
+	else if ( uartHandle -> Instance == USART1 ) {
+		__HAL_RCC_USART1_CLK_DISABLE();
+		HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6|GPIO_PIN_7);
+		HAL_DMA_DeInit(uartHandle->hdmarx);
+		HAL_DMA_DeInit(uartHandle->hdmatx);
+		HAL_NVIC_DisableIRQ(USART1_IRQn);
+	}
   else if ( uartHandle -> Instance == USART2 ) {
-		/* Peripheral clock disable */
 		__HAL_RCC_USART2_CLK_DISABLE();
-
 		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_2|GPIO_PIN_3);
-
 		HAL_NVIC_DisableIRQ(USART2_IRQn);
 	}
-
 }
 void MASTER_send_RS485_data_to_motor(void){
 	HAL_GPIO_WritePin( GPIOA , Tx2En , GPIO_PIN_SET );
@@ -263,7 +199,6 @@ void MASTER_send_RS485_data_to_motor(void){
 }
 void usart2_handle(void){
 	if((usart2.rx[0] == 'A') && (usart2.rx[1] == 'H') && (usart2.rx[2] == 'A')){
-
 		stepper_abs_pos = 65536 * usart2.rx[3] + 256 * usart2.rx[4] + usart2.rx[5];
 		usart2.rx_indeks = 0;
 		for (uint8_t i = 0; i < USART4_RX_ARRAY_SIZE ; i++) {
@@ -271,29 +206,18 @@ void usart2_handle(void){
 		}
 	}
 }
-
-/**
-  * @brief  CRC ==> Cyclic Redundancy Check(D�ng�sel Artiklik Denetimi) fonksiyonu
-  * @param  data      : CRC ye g�nderilecek dizi 
-  * @param  length		: CRC ye g�nderilen data elemanlarindan ka� tanesinin CRC ye taabii tutulacagi
-  * @retval 32 bitlik crc sonucu
-  */
 uint32_t CyclicRedundancyCheck 				( uint8_t* data, uint8_t length ) {
-    int j;
-    uint32_t reg_crc=0xFFFF;
-    while( length-- ) {
-      reg_crc^= *data++;
-      for (j=0; j<8; j++ ) {
-        reg_crc = (reg_crc & 0x01) ? ((reg_crc >> 1)^0xA001) : (reg_crc>>1);
-      }
-    }
-    return reg_crc;
+	int j;
+	uint32_t reg_crc=0xFFFF;
+
+	while( length-- ) {
+		reg_crc^= *data++;
+		for (j=0; j<8; j++ ) {
+			reg_crc = (reg_crc & 0x01) ? ((reg_crc >> 1)^0xA001) : (reg_crc>>1);
+		}
+	}
+	return reg_crc;
 }
-/**
-  * @brief  Gelen usartrx datalari arasinda CONV ile baslayan komutu arar
-  * @param  capture_index : gelen usartrx datalarinda komutu geldigini algiladigi indis numarasi   
-  * @retval [ void ]
-  */
 void 	 UsartReceiveData_SearchCommand ( void ) {
 	//float *channel_floats[8];
 	if 		( usartrx[0]=='C' && usartrx[1]=='O' && usartrx[2]=='N' && usartrx[3]=='V' ) {
@@ -427,8 +351,8 @@ void	 PRESS_GAIN_CommandOperating	( void ) {
 } 
 void 	 PRESS_TARE_CommandOperating	( void ) {
 	if(usartrx[4] < 4){
-			channel[usartrx[4]].tare = channel[usartrx[4]].raw;
-			channel[usartrx[4]].tare_sign = channel[usartrx[4]].raw_sign;
+		channel[usartrx[4]].tare = channel[usartrx[4]].raw;
+		channel[usartrx[4]].tare_sign = channel[usartrx[4]].raw_sign;
 	}
 }
 void 	 PRESS_PRINT_CommandOperating	( void ) {
@@ -445,8 +369,6 @@ void 	 PRESS_PRINT_CommandOperating	( void ) {
 			HAL_UART_Transmit( &huart4 , &usartrx[5] , 32 , 10 );
 }
 void	 PRESS_CALSEND_CommandOperating ( void ) {
-//		else if ( usartrx[capture_indeks-77]=='C'&usartrx[capture_indeks-76]=='A'&usartrx[capture_indeks-75]=='L'&usartrx[capture_indeks-74]=='S'
-//						&usartrx[capture_indeks-73]=='E'&usartrx[capture_indeks-72]=='N'&usartrx[capture_indeks-71]=='D' )
 	uint16_t fcrc;								//	unsigned int fcrc,i;
 	uint8_t  crc_high , crc_low;	//	unsigned char crc_high,crc_low;  
 	fcrc = CyclicRedundancyCheck((uint8_t*)usartrx,74);
@@ -513,10 +435,8 @@ void 	 PRESS_ANS_Command 				( void ) {
 		ControlUsart1_TransmitData = ControlState_CHECKIT;
 
 		HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
-
 }
 
-/*	A.C.AKINCA eklemeleri	*/
 void slope_calculation			( uint8_t i  ) {
     double aux_raw;
     double aux_cal;

@@ -39,17 +39,17 @@
 #define DacPWM_Pin 				GPIO_PIN_9
 #define DacPWM_GPIO_Port		GPIOC
 
-#define PulseOut_Pin 			GPIO_PIN_4   	//	Press Cihazinda Islevi Yok
-#define PulseOut_GPIO_Port		GPIOB        	//	Press Cihazinda Islevi Yok
-#define PulseOutEn_Pin 			GPIO_PIN_5    	//	Press Cihazinda Islevi Yok
-#define PulseOutEn_GPIO_Port  	GPIOB         	//	Press Cihazinda Islevi Yok
-#define MotorDir_Pin 			GPIO_PIN_8    	//	Press Cihazinda Islevi Yok
-#define MotorDir_GPIO_Port    	GPIOC         	//	Press Cihazinda Islevi Yok
+#define PulseOut_Pin 			GPIO_PIN_4
+#define PulseOut_GPIO_Port		GPIOB
+#define PulseOutEn_Pin 			GPIO_PIN_5
+#define PulseOutEn_GPIO_Port  	GPIOB
+#define MotorDir_Pin 			GPIO_PIN_8
+#define MotorDir_GPIO_Port    	GPIOC
 
-#define RELAY_DRV_1_Pin       	GPIO_PIN_1		//	Press Cihazinda Islevi Yok
-#define RELAY_DRV_1_GPIO_Port	GPIOC         	//	Press Cihazinda Islevi Yok
-#define RELAY_DRV_2_Pin       	GPIO_PIN_2    	//	Press Cihazinda Islevi Yok
-#define RELAY_DRV_2_GPIO_Port	GPIOC        	//	Press Cihazinda Islevi Yok
+#define RELAY_DRV_1_Pin       	GPIO_PIN_1
+#define RELAY_DRV_1_GPIO_Port	GPIOC
+#define RELAY_DRV_2_Pin       	GPIO_PIN_2
+#define RELAY_DRV_2_GPIO_Port	GPIOC
 
 #define INPUT_1_Pin 			GPIO_PIN_0
 #define INPUT_2_Pin 			GPIO_PIN_15
@@ -57,26 +57,26 @@
 #define INPUT_4_Pin 			GPIO_PIN_13
 #define INPUT_Port		 		GPIOC
 
-#define ExtInp_1_Pin 			GPIO_PIN_0    	//	Press Cihazinda Islevi Yok
-#define ExtInp_1_GPIO_Port 		GPIOC         	//	Press Cihazinda Islevi Yok
-#define ExtInp_2_Pin 			GPIO_PIN_15  	//	Press Cihazinda Islevi Yok
-#define ExtInp_2_GPIO_Port 		GPIOC        	//	Press Cihazinda Islevi Yok
-#define ExtInp_3_Pin 			GPIO_PIN_14   	//	Press Cihazinda Islevi Yok
-#define ExtInp_3_GPIO_Port 		GPIOC         	//	Press Cihazinda Islevi Yok
-#define ExtInp_4_Pin 			GPIO_PIN_13   	//	Press Cihazinda Islevi Yok
-#define ExtInp_4_GPIO_Port 		GPIOC         	//	Press Cihazinda Islevi Yok
+#define ExtInp_1_Pin 			GPIO_PIN_0
+#define ExtInp_1_GPIO_Port 		GPIOC
+#define ExtInp_2_Pin 			GPIO_PIN_15
+#define ExtInp_2_GPIO_Port 		GPIOC
+#define ExtInp_3_Pin 			GPIO_PIN_14
+#define ExtInp_3_GPIO_Port 		GPIOC
+#define ExtInp_4_Pin 			GPIO_PIN_13
+#define ExtInp_4_GPIO_Port 		GPIOC
 
-#define EncoderAIn_Pin        	GPIO_PIN_8    	//	Press Cihazinda Islevi Yok
-#define EncoderAIn_GPIO_Port  	GPIOA         	//	Press Cihazinda Islevi Yok
-#define EncoderBIn_Pin        	GPIO_PIN_9    	//	Press Cihazinda Islevi Yok
-#define EncoderBIn_GPIO_Port  	GPIOA         	//	Press Cihazinda Islevi Yok
-#define EncoderZF_Pin         	GPIO_PIN_3    	//	Press Cihazinda Islevi Yok
-#define EncoderZF_GPIO_Port		GPIOB         	//	Press Cihazinda Islevi Yok
-#define EncoderZF_EXTI_IRQn		EXTI3_IRQn    	//	Press Cihazinda Islevi Yok
+#define EncoderAIn_Pin        	GPIO_PIN_8
+#define EncoderAIn_GPIO_Port  	GPIOA
+#define EncoderBIn_Pin        	GPIO_PIN_9
+#define EncoderBIn_GPIO_Port  	GPIOA
+#define EncoderZF_Pin         	GPIO_PIN_3
+#define EncoderZF_GPIO_Port		GPIOB
+#define EncoderZF_EXTI_IRQn		EXTI3_IRQn
 
 typedef enum {
-  ControlState_CHECKED = 0,		//	 kontrol edildi
-  ControlState_CHECKIT			//	 kontrol et
+  ControlState_CHECKED = 0,
+  ControlState_CHECKIT
 }ControlState; 
 extern ControlState ControlUsart1_TransmitData;
 
