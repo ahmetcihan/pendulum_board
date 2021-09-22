@@ -74,6 +74,17 @@
 #define EncoderZF_GPIO_Port		GPIOB
 #define EncoderZF_EXTI_IRQn		EXTI3_IRQn
 
+#define Electromechanic_RELAY_ON_AutoManual	  	HAL_GPIO_WritePin( RELAY_DRV_2_GPIO_Port , RELAY_DRV_2_Pin , GPIO_PIN_SET 	)
+#define Electromechanic_RELAY_OFF_AutoManual	HAL_GPIO_WritePin( RELAY_DRV_2_GPIO_Port , RELAY_DRV_2_Pin , GPIO_PIN_RESET )
+#define Electromechanic_RELAY_ON_StartStop 		HAL_GPIO_WritePin( RELAY_DRV_1_GPIO_Port , RELAY_DRV_1_Pin , GPIO_PIN_SET 	)
+#define Electromechanic_RELAY_OFF_StartStop		HAL_GPIO_WritePin( RELAY_DRV_1_GPIO_Port , RELAY_DRV_1_Pin , GPIO_PIN_RESET )
+
+#define Electromechanic_ServoStop           	HAL_GPIO_WritePin( PulseOutEn_GPIO_Port	 , PulseOutEn_Pin  , GPIO_PIN_RESET )
+#define Electromechanic_ServoStart          	HAL_GPIO_WritePin( PulseOutEn_GPIO_Port  , PulseOutEn_Pin  , GPIO_PIN_SET	  )
+#define Electromechanic_ServoReverse        	HAL_GPIO_WritePin( MotorDir_GPIO_Port	 , MotorDir_Pin 	 , GPIO_PIN_RESET )
+#define Electromechanic_ServoForward        	HAL_GPIO_WritePin( MotorDir_GPIO_Port 	 , MotorDir_Pin    , GPIO_PIN_SET   )
+
+
 typedef enum {
   ControlState_CHECKED = 0,
   ControlState_CHECKIT

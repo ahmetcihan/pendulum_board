@@ -26,9 +26,9 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 			ControlUsart1_ReceiveData = ControlState_CHECKIT;
 		}
 		rx_indeks++;
-		if (rx_indeks > USART1_RX_ARRAY_SIZE) {
+		if (rx_indeks > USART_RX_ARRAY_SIZE) {
 			rx_indeks--;
-			for (uint8_t i = 0; i < USART1_RX_ARRAY_SIZE - 1; i++)
+			for (uint8_t i = 0; i < USART_RX_ARRAY_SIZE - 1; i++)
 				usartrx[i] = usartrx[i + 1];
 		}
 	}
@@ -40,7 +40,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 		if (usart2.rx[usart2.rx_indeks] == 0x0A && usart2.rx[usart2.rx_indeks - 1] == 0x0D) {
 			usart2.data_received = 1;
 		}
-		if (usart2.rx_indeks < USART4_RX_ARRAY_SIZE) usart2.rx_indeks++;
+		if (usart2.rx_indeks < USART_RX_ARRAY_SIZE) usart2.rx_indeks++;
 	    HAL_UART_Receive_IT(&huart2, &usart2.instant_data,1);
 	}
 }
@@ -99,7 +99,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) { 						//	EXTI Interrupt Fonksiy
 }
 void clear_usart_buffer(void) {
 	rx_indeks = 0;
-	for (uint8_t i = 0; i < USART1_RX_ARRAY_SIZE ; i++) {
+	for (uint8_t i = 0; i < USART_RX_ARRAY_SIZE ; i++) {
 		usartrx[i] = 0;
 	}
 }
@@ -143,7 +143,7 @@ int main(void) {
 			if (usart2.buffer_clear_timer == 0) {
 				usart2.clear_buffer = 0;
 				usart2.rx_indeks = 0;
-				for (uint8_t i = 0; i < USART4_RX_ARRAY_SIZE ; i++) {
+				for (uint8_t i = 0; i < USART_RX_ARRAY_SIZE ; i++) {
 					usart2.rx[i] = 0;
 				}
 			}

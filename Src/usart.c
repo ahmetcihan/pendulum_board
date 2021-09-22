@@ -18,16 +18,6 @@ UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart4;
 DMA_HandleTypeDef  hdma_uart4_tx;
 
-uint8_t usarttx[USART1_TX_ARRAY_SIZE];
-uint8_t usartrx[USART1_RX_ARRAY_SIZE];
-uint8_t rx_indeks;
-uint8_t casual_rx_data;
-uint8_t usart_tx_size;
-uint8_t TxAmound;
-
-uint32_t  	buffer_clear_timer;
-uint8_t 	buffer_cleared;	
-
 union 	_char_to_f {
 	float float_val;
 	unsigned char char_val[4];
@@ -201,7 +191,7 @@ void usart2_handle(void){
 	if((usart2.rx[0] == 'A') && (usart2.rx[1] == 'H') && (usart2.rx[2] == 'A')){
 		stepper_abs_pos = 65536 * usart2.rx[3] + 256 * usart2.rx[4] + usart2.rx[5];
 		usart2.rx_indeks = 0;
-		for (uint8_t i = 0; i < USART4_RX_ARRAY_SIZE ; i++) {
+		for (uint8_t i = 0; i < USART_RX_ARRAY_SIZE ; i++) {
 			usart2.rx[i] = 0;
 		}
 	}

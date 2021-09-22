@@ -4,21 +4,8 @@
 #include "stm32f4xx_hal.h"
 #include "main.h" 
 
-#define Electromechanic_RELAY_ON_AutoManual	  	HAL_GPIO_WritePin( RELAY_DRV_2_GPIO_Port , RELAY_DRV_2_Pin , GPIO_PIN_SET 	)
-#define Electromechanic_RELAY_OFF_AutoManual	HAL_GPIO_WritePin( RELAY_DRV_2_GPIO_Port , RELAY_DRV_2_Pin , GPIO_PIN_RESET )
-#define Electromechanic_RELAY_ON_StartStop 		HAL_GPIO_WritePin( RELAY_DRV_1_GPIO_Port , RELAY_DRV_1_Pin , GPIO_PIN_SET 	)
-#define Electromechanic_RELAY_OFF_StartStop		HAL_GPIO_WritePin( RELAY_DRV_1_GPIO_Port , RELAY_DRV_1_Pin , GPIO_PIN_RESET )
-
-#define Electromechanic_ServoStop           	HAL_GPIO_WritePin( PulseOutEn_GPIO_Port	 , PulseOutEn_Pin  , GPIO_PIN_RESET )
-#define Electromechanic_ServoStart          	HAL_GPIO_WritePin( PulseOutEn_GPIO_Port  , PulseOutEn_Pin  , GPIO_PIN_SET	  )
-#define Electromechanic_ServoReverse        	HAL_GPIO_WritePin( MotorDir_GPIO_Port	 , MotorDir_Pin 	 , GPIO_PIN_RESET )
-#define Electromechanic_ServoForward        	HAL_GPIO_WritePin( MotorDir_GPIO_Port 	 , MotorDir_Pin    , GPIO_PIN_SET   )
-
-#define USART1_TX_ARRAY_SIZE 			(uint8_t)40
-#define USART1_RX_ARRAY_SIZE 			(uint8_t)90
-
-#define USART4_TX_ARRAY_SIZE 			(uint8_t)90
-#define USART4_RX_ARRAY_SIZE 			(uint8_t)120
+#define USART_TX_ARRAY_SIZE 			(uint8_t)90
+#define USART_RX_ARRAY_SIZE 			(uint8_t)120
 
 struct _usart{
 	uint32_t buffer_clear_timer;
@@ -27,20 +14,10 @@ struct _usart{
 	uint8_t tx_amount;
 	uint8_t rx_indeks;
 	uint8_t data_received;
-	uint8_t tx[USART4_TX_ARRAY_SIZE];
-	uint8_t rx[USART4_RX_ARRAY_SIZE];
+	uint8_t tx[USART_TX_ARRAY_SIZE];
+	uint8_t rx[USART_RX_ARRAY_SIZE];
 };
 extern struct _usart usart1,usart2,usart4;
-
-extern uint8_t usarttx[USART1_TX_ARRAY_SIZE];
-extern uint8_t usartrx[USART1_RX_ARRAY_SIZE];
-extern uint8_t rx_indeks;
-extern uint8_t casual_rx_data;
-extern uint8_t usart_tx_size;
-extern uint8_t TxAmound;
-
-extern uint32_t  buffer_clear_timer;	
-extern uint8_t 	 buffer_cleared;			
 
 extern UART_HandleTypeDef huart1; 
 extern UART_HandleTypeDef huart2;
@@ -87,5 +64,13 @@ void evaluate_calibrated_values(uint8_t no);
 void slope_calculation(uint8_t i);
 
 unsigned int stepper_abs_pos;
+uint8_t usarttx[USART_TX_ARRAY_SIZE];
+uint8_t usartrx[USART_RX_ARRAY_SIZE];
+uint8_t rx_indeks;
+uint8_t casual_rx_data;
+uint8_t usart_tx_size;
+uint8_t TxAmound;
+uint32_t buffer_clear_timer;
+uint8_t buffer_cleared;
 
 #endif /*__ usart_H */
