@@ -58,19 +58,11 @@ struct chan {
     double slope[7];
 };
 extern struct chan channel[8];
-extern uint8_t active_cal_channel,calculate_slopes;
 
 void evaluate_calibrated_values(uint8_t no);
 void slope_calculation(uint8_t i);
 
 unsigned int stepper_abs_pos;
-uint8_t usarttx[USART_TX_ARRAY_SIZE];
-uint8_t usartrx[USART_RX_ARRAY_SIZE];
-uint8_t rx_indeks;
-uint8_t casual_rx_data;
-uint8_t usart_tx_size;
-uint8_t TxAmound;
-uint32_t buffer_clear_timer;
-uint8_t buffer_cleared;
+uint8_t active_cal_channel,calculate_slopes;
 
 #endif /*__ usart_H */

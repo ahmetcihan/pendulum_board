@@ -5,7 +5,6 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-
 #include "max11254.h"
 
 ControlState ControlExti_Max_1_RdbyPin 	= ControlState_CHECKED,
@@ -19,17 +18,17 @@ void SystemClock_Config(void);
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	if (huart->Instance == USART1) {
-		buffer_clear_timer = 200;
-		buffer_cleared = 0;
-		usartrx[rx_indeks] = casual_rx_data;
-		if (usartrx[rx_indeks] == 0x0A && usartrx[rx_indeks - 1] == 0x0D) {
+		usart1.buffer_clear_timer = 200;
+		usart1.clear_buffer = 1;
+		usart1.rx[usart1.rx_indeks] = usart1.instant_data;
+		if (usart1.rx[usart1.rx_indeks] == 0x0A && usart1.rx[usart1.rx_indeks - 1] == 0x0D) {
 			ControlUsart1_ReceiveData = ControlState_CHECKIT;
 		}
-		rx_indeks++;
-		if (rx_indeks > USART_RX_ARRAY_SIZE) {
-			rx_indeks--;
+		usart1.rx_indeks++;
+		if (usart1.rx_indeks > USART_RX_ARRAY_SIZE) {
+			usart1.rx_indeks--;
 			for (uint8_t i = 0; i < USART_RX_ARRAY_SIZE - 1; i++)
-				usartrx[i] = usartrx[i + 1];
+				usart1.rx[i] = usart1.rx[i + 1];
 		}
 	}
 	if (huart->Instance == USART2) {
@@ -58,13 +57,13 @@ void HAL_TIM_PeriodElapsedCallback	( TIM_HandleTypeDef *htim ) {		//	Timer Inter
 	}
 	if (htim->Instance == TIM4) {
 		usn10++;
-		if (buffer_clear_timer > 0)
-			buffer_clear_timer--;
+
+		if(usart1.buffer_clear_timer > 0) usart1.buffer_clear_timer--;
+		if(usart2.buffer_clear_timer > 0) usart2.buffer_clear_timer--;
 
 		if ((usn10 % 100) == 0) {
 			timer_1_msec = 1;
 		}
-
 		if ((usn10 % 1000) == 0) {
 			ControlTIM4_10msec = ControlState_CHECKIT;
 		}
@@ -96,12 +95,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) { 						//	EXTI Interrupt Fonksiy
 	if (GPIO_Pin == EncoderZF_Pin)
 		((TIM1->CR1 & TIM_CR1_DIR) == TIM_CR1_DR_CW ) ?
 				signal_z_count++ : signal_z_count--;
-}
-void clear_usart_buffer(void) {
-	rx_indeks = 0;
-	for (uint8_t i = 0; i < USART_RX_ARRAY_SIZE ; i++) {
-		usartrx[i] = 0;
-	}
 }
 void read_inputs(void){
 	input_status[0] = HAL_GPIO_ReadPin(INPUT_Port,INPUT_1_Pin);
@@ -149,10 +142,13 @@ int main(void) {
 			}
 		}
 
-		if (buffer_cleared == 0) {
-			if (buffer_clear_timer == 0) {
-				buffer_cleared = 1;
-				clear_usart_buffer();
+		if (usart1.clear_buffer == 1) {
+			if (usart1.buffer_clear_timer == 0) {
+				usart1.clear_buffer = 0;
+				usart1.rx_indeks = 0;
+				for (uint8_t i = 0; i < USART_RX_ARRAY_SIZE ; i++) {
+					usart1.rx[i] = 0;
+				}
 			}
 		}
 
@@ -242,7 +238,7 @@ int main(void) {
 			ControlUsart1_ReceiveData = ControlState_CHECKED;
 		}
 		if (ControlUsart1_TransmitData == ControlState_CHECKIT) {
-			HAL_UART_Transmit_DMA(&huart1, &usarttx[0], TxAmound);
+			HAL_UART_Transmit_DMA(&huart1, &usart1.tx[0], usart1.tx_amount);
 			ControlUsart1_TransmitData = ControlState_CHECKED;
 		}
 	}
