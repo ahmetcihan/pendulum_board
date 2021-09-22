@@ -90,6 +90,4 @@ unsigned char timer_100_msec;
 unsigned char input_status[4];
 unsigned char send_RS485;
 
-#define Error_Handler() _Error_Handler(__FILE__, __LINE__)
-
 #endif /* __MAIN_H */

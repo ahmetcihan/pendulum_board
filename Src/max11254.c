@@ -3,9 +3,6 @@
 #include "spi.h"
  
 ConnectedADC 	MAX[4];
-uint32_t DeviceChannel[4];
-
-uint8_t resultBinding[4];
 
 void		Max11254_GPIOSetting			( MaxDevice ChooseMax , uint8_t fourGpio );
 void 		Max11254_PolaritySelect			( MaxDevice ChooseMax , uint8_t polarity );

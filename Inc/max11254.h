@@ -231,35 +231,9 @@ typedef struct { /*		  ConnectedADC      */
   GAIN			chGain[6];
   uint8_t 		polarity;
   uint8_t		rank;
-//	char 			AdcMode;          	/* MAX'in Single/Multi Channel mod secenekleri	*/
-//	uint8_t			Conv_StartStop;
-//	ReadChannel 	ReadCh[6];        	/* MAX'in okunacak kanallarinin bilgisi 		*/
-//	uint32_t 		RawDataCh[10];		/* MAX'in 6 kanal ham 24bit datasi 				*/
-//	SendCommand 	SendCommandADC;  	/* MAX'in MultiChannel okumada Conversion islemi
-//											sonrasinda komut atma bilgisi 				*/
-	
-//	FilterState		CMA_FilterState;	/* CMA Filtresi Aktiflik Durumu 				*/
-//  uint8_t 		CMA_Coefficient;  	/* CMA Filtresi Filtre Katsayisi 				*/
-//	uint8_t 		CMA_Channel;      	/* CMA Filtresinin uygulanacagi MAX kanali 		*/
-
-//	FilterState 	WMA_FilterState;	/* WMA Filtresi Aktiflik Durumu 				*/
-//  uint8_t 		WMA_Coefficient;  	/* WMA Filtresi Filtre Katsayisi 				*/
-//	uint8_t 		WMA_Channel;      	/* WMA Filtresinin uygulanacagi MAX kanali 		*/
-	
-//	FilterState 	EMA_FilterState;	/* EMA Filtresi Aktiflik Durumu 				*/
-//  uint8_t 		EMA_Coefficient;  	/* EMA Filtresi Filtre Katsayisi 				*/
-//	uint8_t 		EMA_Channel;      	/* EMA Filtresinin uygulanacagi MAX kanali 		*/
-
-//	FilterState 	BES_FilterState;	/* Bessel Filtresi Aktiflik Durumu 				*/
-//  uint8_t 		BES_Cutoff;       	/* Bessel Filtresi Cutoff Degeri 				*/
-//  uint16_t 		BES_Samplerate;   	/* Bessel Filtresi Ornek sayisi 				*/
-//	uint8_t 		BES_Channel;     	/* Bessel Filtresi uygulanacagi MAX kanali 		*/
 }ConnectedADC;
 
 extern ConnectedADC	MAX[4];
-extern uint32_t DeviceChannel[4];
-
-extern uint8_t	resultBinding[4];
 									
 void 		Max11254_ConversionCommand 		( MaxDevice ChooseMax , uint8_t command );
 void 		Max11254_Write1byte 			( MaxDevice ChooseMax , uint8_t Adr , uint8_t  Data );
@@ -282,12 +256,12 @@ void 		Max11254_SequencerMode1_Exit 	( MaxDevice ChooseMax );
 void 		Max11254_SequencerMode2_Exit	( MaxDevice ChooseMax );
 void 		Max11254_Init					( void );
 void 		OperatingMaxExtiRdbyControl 	( MaxDevice ChooseMax );
-
-
 void		Max11254_GPIOSetting			( MaxDevice ChooseMax , uint8_t fourGpio );
 void 		Max11254_PolaritySelect			( MaxDevice ChooseMax , uint8_t polarity );
 void 		Max11254_SequencerMode2_EntryUart( MaxDevice ChooseMax , ChmapConvChannels Chs , GAIN Gain );
 
 uint8_t channel_polarity[4];
+uint32_t DeviceChannel[4];
+uint8_t	resultBinding[4];
 
 #endif /*__MAX11254_H */

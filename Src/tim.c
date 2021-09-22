@@ -5,9 +5,6 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim8;
 
-int32_t  signal_z_count;
-int8_t   enc_signal_msb;
-
 void MX_TIM1_Init ( void ) {
 	TIM_Encoder_InitTypeDef sConfig;
 	TIM_MasterConfigTypeDef sMasterConfig;
