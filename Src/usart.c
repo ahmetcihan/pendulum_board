@@ -9,31 +9,29 @@ uint8_t u2_ctrl1;
 uint8_t u3_ctrl1;
 uint8_t u4_ctrl1;
 
-UART_HandleTypeDef huart1;
 DMA_HandleTypeDef  hdma_usart1_rx;
 DMA_HandleTypeDef  hdma_usart1_tx;
-
-UART_HandleTypeDef huart2;
-
-UART_HandleTypeDef huart4;
 DMA_HandleTypeDef  hdma_uart4_tx;
+
+UART_HandleTypeDef huart1;
+UART_HandleTypeDef huart2;
+UART_HandleTypeDef huart4;
 
 union 	_char_to_f {
 	float float_val;
 	unsigned char char_val[4];
 };
-union 	_char_to_f char_to_f;
-struct  chan channel[8];
+union _char_to_f char_to_f;
+struct chan channel[8];
 struct _usart usart1,usart2;
-
-uint8_t in_calibration; 
+struct _cal cal[4];
 
 void MX_UART4_Init			( void ) {
 	huart4.Instance 			= UART4;
 	huart4.Init.BaudRate 		= 115200;
-	huart4.Init.WordLength 	= UART_WORDLENGTH_8B;
+	huart4.Init.WordLength 		= UART_WORDLENGTH_8B;
 	huart4.Init.StopBits 		= UART_STOPBITS_1;
-	huart4.Init.Parity 		= UART_PARITY_NONE;
+	huart4.Init.Parity 			= UART_PARITY_NONE;
 	huart4.Init.Mode 			= UART_MODE_TX;
 	huart4.Init.HwFlowCtl		= UART_HWCONTROL_NONE;
 	huart4.Init.OverSampling 	= UART_OVERSAMPLING_16;
@@ -427,66 +425,50 @@ void 	 PRESS_ANS_Command 				( void ) {
 		HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
 }
 
-void slope_calculation			( uint8_t i  ) {
-    double aux_raw;
-    double aux_cal;
-    if(channel[i].cal_raw_value[0] != channel[i].cal_raw_value[1]){
-        if(channel[i].cal_zero_sign == '+'){
-            channel[i].slope[0] = ((1.0*(double)(channel[i].cal_point_value[1]-channel[i].cal_point_value[0]))/(1.0*(double)(channel[i].cal_raw_value[1]-channel[i].cal_raw_value[0])));
+void slope_calculation(uint8_t no){
+    u8 validation_1 = 0xFF;
+    u8 validation_2 = 0xFF;
+
+    if(cal[no].point_no > 8) cal[no].point_no = 2;
+    for(u8 i = 0; i < (cal[no].point_no - 1); i++){
+        if(cal[no].real_val[i] < cal[no].real_val[i+1]){
+            validation_1 = validation_1 & 0xFF;
         }
         else{
-            channel[i].slope[0] = ((1.0*(double)(channel[i].cal_point_value[1]-channel[i].cal_point_value[0]))/(1.0*(double)(channel[i].cal_raw_value[1]+channel[i].cal_raw_value[0])));
+            validation_1 = validation_1 & 0x00;
         }
     }
-    if(channel[i].cal_raw_value[1] != channel[i].cal_raw_value[2]){
-        channel[i].slope[1] = ((1.0*(double)(channel[i].cal_point_value[2]-channel[i].cal_point_value[1]))/(1.0*(double)(channel[i].cal_raw_value[2]-channel[i].cal_raw_value[1])));
-    }
-    if(channel[i].cal_raw_value[2] != channel[i].cal_raw_value[3]){
-        channel[i].slope[2] = ((1.0*(double)(channel[i].cal_point_value[3]-channel[i].cal_point_value[2]))/(1.0*(double)(channel[i].cal_raw_value[3]-channel[i].cal_raw_value[2])));
-    }
-    if(channel[i].cal_raw_value[3] != channel[i].cal_raw_value[4]){
-        channel[i].slope[3] = ((1.0*(double)(channel[i].cal_point_value[4]-channel[i].cal_point_value[3]))/(1.0*(double)(channel[i].cal_raw_value[4]-channel[i].cal_raw_value[3])));
-    }
-    if(channel[i].cal_raw_value[4] != channel[i].cal_raw_value[5]){
-        channel[i].slope[4] = ((1.0*(double)(channel[i].cal_point_value[5]-channel[i].cal_point_value[4]))/(1.0*(double)(channel[i].cal_raw_value[5]-channel[i].cal_raw_value[4])));
-    }
-    if(channel[i].cal_raw_value[5] != channel[i].cal_raw_value[6]){
-        channel[i].slope[5] = ((1.0*(double)(channel[i].cal_point_value[6]-channel[i].cal_point_value[5]))/(1.0*(double)(channel[i].cal_raw_value[6]-channel[i].cal_raw_value[5])));
-    }
-    if(channel[i].cal_raw_value[6] != channel[i].cal_raw_value[7]){
-        channel[i].slope[6] = ((1.0*(double)(channel[i].cal_point_value[7]-channel[i].cal_point_value[6]))/(1.0*(double)(channel[i].cal_raw_value[7]-channel[i].cal_raw_value[6])));
-    }
-
-    if(channel[i].cal_point_value[0] == 0){
-        channel[i].zero_raw = channel[i].cal_raw_value[0];
-        channel[i].zero_raw_sign = channel[i].cal_zero_sign;
+    if(validation_1 == 0xFF){
+        //"calibration is ascending";
     }
     else{
-        if((double)channel[i].cal_raw_value[0] >= (((double)channel[i].cal_point_value[0])/channel[i].slope[0])){
-            aux_raw = (double)channel[i].cal_raw_value[0] - (((double)channel[i].cal_point_value[0])/channel[i].slope[0]);
+        for(u8 i = 0; i < (cal[no].point_no - 1); i++){
+            if(cal[no].real_val[i] > cal[no].real_val[i+1]){
+                validation_2 = validation_2 & 0xFF;
+            }
+            else{
+                validation_2 = validation_2 & 0x00;
+            }
+        }
+        if(validation_2 == 0xFF){
+            //"calibration is descending";
         }
         else{
-            aux_raw = (((double)channel[i].cal_point_value[0])/channel[i].slope[0]) - (double)channel[i].cal_raw_value[0];
+            //"calibration is faulty";
         }
-
-        aux_cal = (double)channel[i]. cal_point_value[0] - (((double)channel[i].cal_raw_value[0]) * channel[i].slope[0]);
-        if(aux_cal >= 0){
-            channel[i].zero_raw_sign = '-';
-        }
-        else{
-            channel[i].zero_raw_sign = '+';
-        }
-        channel[i].zero_raw = aux_raw;
     }
 
-    channel[i].tare = channel[i].zero_raw;
-    channel[i].tare_sign = channel[i].zero_raw_sign;
+    for(u8 i= 0; i < (cal[no].point_no - 1); i++){
+        cal[no].slope[i] = ((1.0*(double)(cal[no].assigned_val[i+1]-cal[no].assigned_val[i]))/
+                (1.0*(double)(cal[no].real_val[i+1]-cal[no].real_val[i])));
+    }
+    cal[no].tare_val = 0;
+
 }
 void evaluate_calibrated_values	( uint8_t no ) {
     float aux;
     float tared;
-    int8_t tared_sign; 
-    in_calibration = 1;
+    int8_t tared_sign;
     //	*****	*****	*****	*****	*****		TARE	*****	*****	*****	*****	*****		//
     if  ( channel[no].zero_raw_sign == '+' ) {
         if(channel[no].tare_sign == '+'){
@@ -865,5 +847,4 @@ void evaluate_calibrated_values	( uint8_t no ) {
             channel[no].calibrated = channel[no].slope[0]*(aux);
         }
     }
-    in_calibration = 0;
 }

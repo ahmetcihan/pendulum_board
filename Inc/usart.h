@@ -4,6 +4,11 @@
 #include "stm32f4xx_hal.h"
 #include "main.h" 
 
+typedef char s8;
+typedef unsigned char u8;
+typedef unsigned int u32;
+typedef signed int s32;
+
 #define USART_TX_ARRAY_SIZE 			(uint8_t)90
 #define USART_RX_ARRAY_SIZE 			(uint8_t)120
 
@@ -18,6 +23,16 @@ struct _usart{
 	uint8_t rx[USART_RX_ARRAY_SIZE];
 };
 extern struct _usart usart1,usart2,usart4;
+
+struct _cal{
+    double slope[7];
+    double assigned_val[8];
+    float tare_val;
+    float absolute_calibrated;
+    int real_val[8];
+    u8 point_no;
+};
+extern struct _cal cal[4];
 
 extern UART_HandleTypeDef huart1; 
 extern UART_HandleTypeDef huart2;
@@ -60,7 +75,7 @@ struct chan {
 extern struct chan channel[8];
 
 void evaluate_calibrated_values(uint8_t no);
-void slope_calculation(uint8_t i);
+void slope_calculation(uint8_t no);
 
 unsigned int stepper_abs_pos;
 uint8_t active_cal_channel,calculate_slopes;
