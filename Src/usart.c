@@ -19,7 +19,9 @@ UART_HandleTypeDef huart4;
 
 union 	_char_to_f {
 	float float_val;
-	unsigned char char_val[4];
+	u8 u8_val[4];
+	char s8_val[4];
+	s32 int_val;
 };
 union _char_to_f char_to_f;
 struct chan channel[8];
@@ -368,10 +370,10 @@ void	 PRESS_CALSEND_CommandOperating ( void ) {
 			channel[active_cal_channel].cal_zero_sign = usart1.rx[9];
 			if(active_cal_channel > 7) active_cal_channel = 7;
 			for( uint8_t i = 0 ; i < 8 ; i++ ) {
-				char_to_f.char_val[0] = usart1.rx[42+4*i];
-				char_to_f.char_val[1] = usart1.rx[43+4*i];
-				char_to_f.char_val[2] = usart1.rx[44+4*i];
-				char_to_f.char_val[3] = usart1.rx[45+4*i];
+				char_to_f.u8_val[0] = usart1.rx[42+4*i];
+				char_to_f.u8_val[1] = usart1.rx[43+4*i];
+				char_to_f.u8_val[2] = usart1.rx[44+4*i];
+				char_to_f.u8_val[3] = usart1.rx[45+4*i];
 				channel[active_cal_channel].cal_point_value[i] = char_to_f.float_val;
 			}
 			for( uint8_t i = 0 ; i < 8 ; i++ ) {
@@ -393,33 +395,33 @@ void 	 PRESS_ANS_Command 				( void ) {
 			//uint8_t gain_force = (uint8_t)( MAX[i].Gain +  2 );
 			uint8_t gain_force =  MAX[resultBinding[i]/6].chGain[resultBinding[i]%6] + 2;	//(uint8_t)( MAX[i].Gain +  2 );
 
-			if	(channel[i].raw_sign == '+' )	/*	ADC'nin datasi (+) ise */
-				gain_force = gain_force|0x10;
-			usart1.tx[4*i+3] = (uint8_t)( (channel[i].raw&0x00FF0000)>>16);
-			usart1.tx[4*i+4] = (uint8_t)( (channel[i].raw&0x0000FF00)>>8 );
-			usart1.tx[4*i+5] = (uint8_t)(  channel[i].raw&0x000000FF     );
-			usart1.tx[4*i+6]= gain_force;
+			char_to_f.int_val = channel[i].signed_raw;
+			usart1.tx[5*i+3]= char_to_f.s8_val[0];
+			usart1.tx[5*i+4]= char_to_f.s8_val[1];
+			usart1.tx[5*i+5]= char_to_f.s8_val[2];
+			usart1.tx[5*i+6]= char_to_f.s8_val[3];
+			usart1.tx[5*i+7]= gain_force;
 		}
 
-		usart1.tx[19] = input_status[0] + 0x30;
-		usart1.tx[20] = input_status[1] + 0x30;
-		usart1.tx[21] = input_status[2] + 0x30;
-		usart1.tx[22] = input_status[3] + 0x30;
+		usart1.tx[23] = input_status[0] + 0x30;
+		usart1.tx[24] = input_status[1] + 0x30;
+		usart1.tx[25] = input_status[2] + 0x30;
+		usart1.tx[26] = input_status[3] + 0x30;
 
-		usart1.tx[23] = channel_polarity[0] + 0x30;
-		usart1.tx[24] = channel_polarity[1] + 0x30;
-		usart1.tx[25] = channel_polarity[2] + 0x30;
-		usart1.tx[26] = channel_polarity[3] + 0x30;
+		usart1.tx[27] = channel_polarity[0] + 0x30;
+		usart1.tx[28] = channel_polarity[1] + 0x30;
+		usart1.tx[29] = channel_polarity[2] + 0x30;
+		usart1.tx[30] = channel_polarity[3] + 0x30;
 
-		usart1.tx[27] = (uint8_t)(stepper_abs_pos >> 16);
-		usart1.tx[28] = (uint8_t)(stepper_abs_pos >> 8);
-		usart1.tx[29] = (uint8_t)(stepper_abs_pos);
+		usart1.tx[31] = (uint8_t)(stepper_abs_pos >> 16);
+		usart1.tx[32] = (uint8_t)(stepper_abs_pos >> 8);
+		usart1.tx[33] = (uint8_t)(stepper_abs_pos);
 
 		uint16_t fcrc;
-		fcrc = CyclicRedundancyCheck( &usart1.tx[0] , 30 );
-		usart1.tx[30] = fcrc%256;
-		usart1.tx[31] = fcrc/256;
-		usart1.tx_amount = 32;
+		fcrc = CyclicRedundancyCheck( &usart1.tx[0] , 34 );
+		usart1.tx[34] = fcrc%256;
+		usart1.tx[35] = fcrc/256;
+		usart1.tx_amount = 36;
 		ControlUsart1_TransmitData = ControlState_CHECKIT;
 
 		HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );

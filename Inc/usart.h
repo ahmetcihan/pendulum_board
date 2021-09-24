@@ -71,6 +71,8 @@ struct chan {
     uint32_t cal_raw_value[8];
     float cal_point_value[8];
     double slope[7];
+
+    s32 signed_raw;
 };
 extern struct chan channel[8];
 

@@ -183,10 +183,13 @@ int main(void) {
 			OperatingMaxExtiRdbyControl( MAX_1 );
 			channel[0].raw = MAX[resultBinding[0]/6].chResult[resultBinding[0]%6];
 			channel[0].raw_sign = '+';
+			channel[0].signed_raw = channel[0].raw;
 			if   ( MAX[0].polarity == POLARITY_BIPOLAR ) {
 				if (channel[0].raw > 0x7FFFFF) {
 					channel[0].raw_sign = '-';
 					channel[0].raw = (0xFFFFFF + 1) - channel[0].raw;
+					channel[0].signed_raw = channel[0].raw;
+					channel[0].signed_raw = -channel[0].signed_raw;
 				}
 			}
 			//HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
@@ -197,10 +200,12 @@ int main(void) {
 			OperatingMaxExtiRdbyControl( MAX_2 );
 			channel[1].raw = MAX[resultBinding[1]/6].chResult[resultBinding[1]%6];
 			channel[1].raw_sign = '+';
+			channel[1].signed_raw = channel[1].raw;
 			if   ( MAX[1].polarity == POLARITY_BIPOLAR ) {
 				if (channel[1].raw > 0x7FFFFF) {
 					channel[1].raw_sign = '-';
 					channel[1].raw = (0xFFFFFF + 1) - channel[1].raw;
+					channel[1].signed_raw = -channel[1].raw;
 				}
 			}
 			//evaluate_calibrated_values( 1 );
@@ -210,10 +215,12 @@ int main(void) {
 			OperatingMaxExtiRdbyControl( MAX_3 );
 			channel[2].raw = MAX[resultBinding[2]/6].chResult[resultBinding[2]%6];
 			channel[2].raw_sign = '+';
+			channel[2].signed_raw = channel[2].raw;
 			if   ( MAX[2].polarity == POLARITY_BIPOLAR ) {
 				if (channel[2].raw > 0x7FFFFF) {
 					channel[2].raw_sign = '-';
 					channel[2].raw = (0xFFFFFF + 1) - channel[2].raw;
+					channel[2].signed_raw = -channel[2].raw;
 				}
 			}
 			//evaluate_calibrated_values( 2 );
@@ -223,10 +230,12 @@ int main(void) {
 			OperatingMaxExtiRdbyControl( MAX_4 );
 			channel[3].raw = MAX[resultBinding[3]/6].chResult[resultBinding[3]%6];
 			channel[3].raw_sign = '+';
+			channel[3].signed_raw = channel[3].raw;
 			if   ( MAX[3].polarity == POLARITY_BIPOLAR ) {
 				if (channel[3].raw > 0x7FFFFF) {
 					channel[3].raw_sign = '-';
 					channel[3].raw = (0xFFFFFF + 1) - channel[3].raw;
+					channel[3].signed_raw = -channel[3].raw;
 				}
 			}
 			//evaluate_calibrated_values( 3 );
