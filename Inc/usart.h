@@ -41,7 +41,7 @@ void MX_USART2_Init(void);
 void MX_UART4_Init(void);
 
 uint32_t CyclicRedundancyCheck(uint8_t* data, uint8_t length );
-void UsartReceiveData_SearchCommand(void);
+void USART1_receive_operations(void);
 void PRESS_CONV_CommandOperating(void);
 void PRESS_GAIN_CommandOperating(void);
 void PRESS_TARE_CommandOperating(void);
@@ -57,5 +57,7 @@ void slope_calculation(uint8_t no);
 unsigned int stepper_abs_pos;
 uint8_t active_cal_channel;
 u8 usart_debugger;
+u8 usart1_received;
+u8 usart1_transmit;
 
 #endif /*__ usart_H */

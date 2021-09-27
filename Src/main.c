@@ -7,9 +7,6 @@
 #include "gpio.h"
 #include "max11254.h"
 
-ControlState ControlUsart1_ReceiveData 	= ControlState_CHECKED,
-			 ControlUsart1_TransmitData = ControlState_CHECKED;
-
 void SystemClock_Config(void);
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
@@ -18,7 +15,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 		usart1.clear_buffer = 1;
 		usart1.rx[usart1.rx_indeks] = usart1.instant_data;
 		if (usart1.rx[usart1.rx_indeks] == 0x0A && usart1.rx[usart1.rx_indeks - 1] == 0x0D) {
-			ControlUsart1_ReceiveData = ControlState_CHECKIT;
+			usart1_received = 1;
 		}
 		usart1.rx_indeks++;
 		if (usart1.rx_indeks > USART_RX_ARRAY_SIZE) {
@@ -110,6 +107,31 @@ void channel_operation(u8 no){
 	}
 	cal[no].calibrated = evaluate_calibrated_values(no);
 }
+void usart_buffer_clearance(void){
+	if (usart2.data_received == 1) {
+		usart2.data_received = 0;
+		usart2_handle();
+	}
+	if (usart2.clear_buffer == 1) {
+		if (usart2.buffer_clear_timer == 0) {
+			usart2.clear_buffer = 0;
+			usart2.rx_indeks = 0;
+			for (uint8_t i = 0; i < USART_RX_ARRAY_SIZE ; i++) {
+				usart2.rx[i] = 0;
+			}
+		}
+	}
+
+	if (usart1.clear_buffer == 1) {
+		if (usart1.buffer_clear_timer == 0) {
+			usart1.clear_buffer = 0;
+			usart1.rx_indeks = 0;
+			for (uint8_t i = 0; i < USART_RX_ARRAY_SIZE ; i++) {
+				usart1.rx[i] = 0;
+			}
+		}
+	}
+}
 int main(void) {
 	HAL_Init();
 	SystemClock_Config();
@@ -137,29 +159,7 @@ int main(void) {
 	usart_debugger = 0;
 
 	while (1) {
-		if (usart2.data_received == 1) {
-			usart2.data_received = 0;
-			usart2_handle();
-		}
-		if (usart2.clear_buffer == 1) {
-			if (usart2.buffer_clear_timer == 0) {
-				usart2.clear_buffer = 0;
-				usart2.rx_indeks = 0;
-				for (uint8_t i = 0; i < USART_RX_ARRAY_SIZE ; i++) {
-					usart2.rx[i] = 0;
-				}
-			}
-		}
-
-		if (usart1.clear_buffer == 1) {
-			if (usart1.buffer_clear_timer == 0) {
-				usart1.clear_buffer = 0;
-				usart1.rx_indeks = 0;
-				for (uint8_t i = 0; i < USART_RX_ARRAY_SIZE ; i++) {
-					usart1.rx[i] = 0;
-				}
-			}
-		}
+		usart_buffer_clearance();
 
 		if(send_RS485 == 1){
 			send_RS485 = 0;
@@ -186,13 +186,13 @@ int main(void) {
 			channel_operation(3);
 		}
 
-		if (ControlUsart1_ReceiveData == ControlState_CHECKIT) {
-			UsartReceiveData_SearchCommand();
-			ControlUsart1_ReceiveData = ControlState_CHECKED;
+		if (usart1_received == 1) {
+			usart1_received = 0;
+			USART1_receive_operations();
 		}
-		if (ControlUsart1_TransmitData == ControlState_CHECKIT) {
+		if (usart1_transmit == 1) {
+			usart1_transmit = 0;
 			HAL_UART_Transmit_DMA(&huart1, &usart1.tx[0], usart1.tx_amount);
-			ControlUsart1_TransmitData = ControlState_CHECKED;
 		}
 	}
 }

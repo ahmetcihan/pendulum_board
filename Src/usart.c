@@ -206,7 +206,7 @@ uint32_t CyclicRedundancyCheck(uint8_t* data, uint8_t length) {
 	}
 	return reg_crc;
 }
-void 	 UsartReceiveData_SearchCommand ( void ) {
+void 	 USART1_receive_operations ( void ) {
 	//float *channel_floats[8];
 	if 		( usart1.rx[0]=='C' && usart1.rx[1]=='O' && usart1.rx[2]=='N' && usart1.rx[3]=='V' ) {
 			PRESS_CONV_CommandOperating( );
@@ -425,7 +425,7 @@ void 	 PRESS_ANS_Command 				( void ) {
 		usart1.tx[51] = fcrc%256;
 		usart1.tx[52] = fcrc/256;
 		usart1.tx_amount = 53;
-		ControlUsart1_TransmitData = ControlState_CHECKIT;
+		usart1_transmit = 1;
 
 		HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
 }

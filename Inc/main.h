@@ -89,13 +89,6 @@ typedef signed int s32;
 #define Electromechanic_ServoReverse        	HAL_GPIO_WritePin( MotorDir_GPIO_Port	 , MotorDir_Pin 	 , GPIO_PIN_RESET )
 #define Electromechanic_ServoForward        	HAL_GPIO_WritePin( MotorDir_GPIO_Port 	 , MotorDir_Pin    , GPIO_PIN_SET   )
 
-
-typedef enum {
-  ControlState_CHECKED = 0,
-  ControlState_CHECKIT
-}ControlState; 
-extern ControlState ControlUsart1_TransmitData;
-
 void _Error_Handler(char *, int);
 
 unsigned char step_motor_command;
