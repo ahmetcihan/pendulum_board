@@ -126,6 +126,7 @@ int main(void) {
 	timer_1_msec = 0;
 	timer_100_msec = 0;
 	send_RS485 = 0;
+	usart_debugger = 0;
 
 	while (1) {
 		if (usart2.data_received == 1) {
@@ -158,26 +159,7 @@ int main(void) {
 			read_inputs();
 		}
 		if (ControlTIM4_10msec == ControlState_CHECKIT) {
-			if (calculate_slopes == 1) {
-				calculate_slopes = 0;
-				//slope_calculation(active_cal_channel);
-			}
 			ControlTIM4_10msec = ControlState_CHECKED;
-//			for (uint8_t i = 0; i < 4; i++) {
-//				channel[i].raw = DeviceChannel[i];
-//				channel[i].raw_sign = '+';			//	Unipolar Rate
-////				if (channel[i].raw > 0x7FFFFF) {
-////					channel[i].raw_sign = '-';
-////					channel[i].raw = (0xFFFFFF + 1) - channel[i].raw;
-////				} else {
-////					channel[i].raw_sign = '+';
-////				}
-//			}
-//			ControlTIM4_10msec = ControlState_CHECKED;
-//			if (calculate_slopes == 1) {
-//				calculate_slopes = 0;
-//				slope_calculation(active_cal_channel);
-//			}
 		}
 		if (ControlExti_Max_1_RdbyPin == ControlState_CHECKIT) {
 			OperatingMaxExtiRdbyControl( MAX_1 );
@@ -193,7 +175,7 @@ int main(void) {
 				}
 			}
 			//HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
-			//evaluate_calibrated_values( 0 );
+			channel[0].calibrated = evaluate_calibrated_values(0);
 			ControlExti_Max_1_RdbyPin = ControlState_CHECKED;
 		}
 		if (ControlExti_Max_2_RdbyPin == ControlState_CHECKIT) {
@@ -208,7 +190,7 @@ int main(void) {
 					channel[1].signed_raw = -channel[1].raw;
 				}
 			}
-			//evaluate_calibrated_values( 1 );
+			channel[1].calibrated = evaluate_calibrated_values(1);
 			ControlExti_Max_2_RdbyPin = ControlState_CHECKED;
 		}
 		if (ControlExti_Max_3_RdbyPin == ControlState_CHECKIT) {
@@ -223,7 +205,7 @@ int main(void) {
 					channel[2].signed_raw = -channel[2].raw;
 				}
 			}
-			//evaluate_calibrated_values( 2 );
+			channel[2].calibrated = evaluate_calibrated_values(2);
 			ControlExti_Max_3_RdbyPin = ControlState_CHECKED;
 		}
 		if (ControlExti_Max_4_RdbyPin == ControlState_CHECKIT) {
@@ -238,7 +220,7 @@ int main(void) {
 					channel[3].signed_raw = -channel[3].raw;
 				}
 			}
-			//evaluate_calibrated_values( 3 );
+			channel[3].calibrated = evaluate_calibrated_values(3);
 			ControlExti_Max_4_RdbyPin = ControlState_CHECKED;
 		}
 

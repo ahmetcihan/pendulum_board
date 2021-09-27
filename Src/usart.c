@@ -71,7 +71,6 @@ void MX_USART1_UART_Init 	( void ) {
 		_Error_Handler(__FILE__, __LINE__);
 
 	HAL_UART_Receive_DMA ( &huart1 , &usart1.instant_data , 1 );
-	calculate_slopes = 0;
 	usart1.clear_buffer = 1;
 	usart1.rx_indeks = 0;
 }
@@ -196,13 +195,13 @@ void usart2_handle(void){
 		}
 	}
 }
-uint32_t CyclicRedundancyCheck 				( uint8_t* data, uint8_t length ) {
+uint32_t CyclicRedundancyCheck(uint8_t* data, uint8_t length) {
 	int j;
 	uint32_t reg_crc=0xFFFF;
 
 	while( length-- ) {
 		reg_crc^= *data++;
-		for (j=0; j<8; j++ ) {
+		for (j = 0; j < 8; j++){
 			reg_crc = (reg_crc & 0x01) ? ((reg_crc >> 1)^0xA001) : (reg_crc>>1);
 		}
 	}
@@ -359,31 +358,27 @@ void 	 PRESS_PRINT_CommandOperating	( void ) {
 			HAL_UART_Transmit( &huart4 , &usart1.rx[5] , 32 , 10 );
 }
 void	 PRESS_CALSEND_CommandOperating ( void ) {
-	uint16_t fcrc;								//	unsigned int fcrc,i;
-	uint8_t  crc_high , crc_low;	//	unsigned char crc_high,crc_low;  
-	fcrc = CyclicRedundancyCheck((uint8_t*)usart1.rx,74);
-	crc_high = (fcrc)%256;
-	crc_low = (fcrc)/256;
-	if(((uint8_t)usart1.rx[74] == crc_high)&&((uint8_t)usart1.rx[75] == crc_low)){
-			active_cal_channel = usart1.rx[7];
-			channel[active_cal_channel].point_number = usart1.rx[8];
-			channel[active_cal_channel].cal_zero_sign = usart1.rx[9];
-			if(active_cal_channel > 7) active_cal_channel = 7;
-			for( uint8_t i = 0 ; i < 8 ; i++ ) {
-				char_to_f.u8_val[0] = usart1.rx[42+4*i];
-				char_to_f.u8_val[1] = usart1.rx[43+4*i];
-				char_to_f.u8_val[2] = usart1.rx[44+4*i];
-				char_to_f.u8_val[3] = usart1.rx[45+4*i];
-				channel[active_cal_channel].cal_point_value[i] = char_to_f.float_val;
-			}
-			for( uint8_t i = 0 ; i < 8 ; i++ ) {
-					channel[active_cal_channel].cal_raw_value[i] =(uint8_t)usart1.rx[10+4*i] *256*256*256 +
-									(uint8_t)usart1.rx[11+4*i] *256*256 +
-									(uint8_t)usart1.rx[12+4*i] *256 +
-									(uint8_t)usart1.rx[13+4*i] ;
-			}
-			calculate_slopes = 1;
+	u8 ch_no = 0;
+	usart_debugger = (uint8_t)usart1.rx[7];
+
+	ch_no = usart1.rx[7];
+	cal[ch_no].point_no = usart1.rx[8];
+
+	for( uint8_t i = 0 ; i < 8 ; i++ ) {
+		char_to_f.u8_val[0] = usart1.rx[9 + 4*i];
+		char_to_f.u8_val[1] = usart1.rx[10 + 4*i];
+		char_to_f.u8_val[2] = usart1.rx[11 + 4*i];
+		char_to_f.u8_val[3] = usart1.rx[12 + 4*i];
+		cal[ch_no].real_val[i] = char_to_f.int_val;
 	}
+	for( uint8_t i = 0 ; i < 8 ; i++ ) {
+		char_to_f.u8_val[0] = usart1.rx[41 + 4*i];
+		char_to_f.u8_val[1] = usart1.rx[42 + 4*i];
+		char_to_f.u8_val[2] = usart1.rx[43 + 4*i];
+		char_to_f.u8_val[3] = usart1.rx[44 + 4*i];
+		cal[ch_no].assigned_val[i] = char_to_f.float_val;
+	}
+	slope_calculation(ch_no);
 }
 void 	 PRESS_ANS_Command 				( void ) {
 	//	unsigned char *calibrated;
@@ -417,11 +412,21 @@ void 	 PRESS_ANS_Command 				( void ) {
 		usart1.tx[32] = (uint8_t)(stepper_abs_pos >> 8);
 		usart1.tx[33] = (uint8_t)(stepper_abs_pos);
 
+		for (uint8_t i = 0 ; i < 4 ; i++ ) {
+			char_to_f.float_val = channel[i].calibrated;
+			usart1.tx[4*i+34]= char_to_f.s8_val[0];
+			usart1.tx[4*i+35]= char_to_f.s8_val[1];
+			usart1.tx[4*i+36]= char_to_f.s8_val[2];
+			usart1.tx[4*i+37]= char_to_f.s8_val[3];
+		}
+		//last index is 49
+		usart1.tx[50] = usart_debugger;
+
 		uint16_t fcrc;
-		fcrc = CyclicRedundancyCheck( &usart1.tx[0] , 34 );
-		usart1.tx[34] = fcrc%256;
-		usart1.tx[35] = fcrc/256;
-		usart1.tx_amount = 36;
+		fcrc = CyclicRedundancyCheck( &usart1.tx[0] , 51);
+		usart1.tx[51] = fcrc%256;
+		usart1.tx[52] = fcrc/256;
+		usart1.tx_amount = 53;
 		ControlUsart1_TransmitData = ControlState_CHECKIT;
 
 		HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
@@ -460,393 +465,145 @@ void slope_calculation(uint8_t no){
         }
     }
 
-    for(u8 i= 0; i < (cal[no].point_no - 1); i++){
+    for(u8 i = 0; i < (cal[no].point_no - 1); i++){
         cal[no].slope[i] = ((1.0*(double)(cal[no].assigned_val[i+1]-cal[no].assigned_val[i]))/
-                (1.0*(double)(cal[no].real_val[i+1]-cal[no].real_val[i])));
+                (1.0*(double)(cal[no].real_val[i+1] - cal[no].real_val[i])));
     }
     cal[no].tare_val = 0;
 
 }
-void evaluate_calibrated_values	( uint8_t no ) {
-    float aux;
-    float tared;
-    int8_t tared_sign;
-    //	*****	*****	*****	*****	*****		TARE	*****	*****	*****	*****	*****		//
-    if  ( channel[no].zero_raw_sign == '+' ) {
-        if(channel[no].tare_sign == '+'){
-            if(channel[no].tare >= channel[no].zero_raw){
-                if(channel[no].raw_sign == '+'){
-                    if(channel[no].raw >= (channel[no].tare - channel[no].zero_raw)){
-                        tared = channel[no].raw - (channel[no].tare - channel[no].zero_raw);
-                        tared_sign = '+';
-                    }
-                    else{
-                        tared = (channel[no].tare - channel[no].zero_raw) - channel[no].raw;
-                        tared_sign = '-';
-                    }
-                }
-                else{
-                    tared = (channel[no].tare - channel[no].zero_raw) + channel[no].raw;
-                    tared_sign = '-';
-                }
-            }
-            else{
-                if(channel[no].raw_sign == '+'){
-                    tared = (channel[no].zero_raw - channel[no].tare) + channel[no].raw;
-                    tared_sign = '+';
-                }
-                else{
-                    if(channel[no].raw >= (channel[no].zero_raw - channel[no].tare)){
-                        tared = channel[no].raw - (channel[no].zero_raw - channel[no].tare);
-                        tared_sign = '-';
-                    }
-                    else{
-                        tared = (channel[no].zero_raw - channel[no].tare) - channel[no].raw;
-                        tared_sign = '+';
-                    }
-                }
-            }
+double evaluate_calibrated_values(uint8_t no){
+    double value = 0;
+    double aux = 0;
+    s32 tared = channel[no].signed_raw;
+
+    switch (cal[no].point_no) {
+    case 8:
+        if (tared <= cal[no].real_val[1]){
+            aux  = (tared - cal[no].real_val[0]);
+            value  = cal[no].slope[0]*(aux) + cal[no].assigned_val[0];
         }
-        else{
-            if(channel[no].raw_sign == '+'){
-                tared = (channel[no].tare + channel[no].zero_raw) + channel[no].raw;
-                tared_sign = '+';
-            }
-            else{
-                if(channel[no].raw >= (channel[no].zero_raw + channel[no].tare)){
-                    tared = channel[no].raw - (channel[no].zero_raw + channel[no].tare);
-                    tared_sign = '-';
-                }
-                else{
-                    tared = (channel[no].zero_raw + channel[no].tare) - channel[no].raw;
-                    tared_sign = '+';
-                }
-            }
+        else if ((tared <= cal[no].real_val[2])){
+            aux  = (tared - cal[no].real_val[1]);
+            value  = cal[no].slope[1]*(aux) + cal[no].assigned_val[1];
         }
+        else if ((tared <= cal[no].real_val[3])){
+            aux  = (tared - cal[no].real_val[2]);
+            value  = cal[no].slope[2]*(aux) + cal[no].assigned_val[2];
+        }
+        else if ((tared <= cal[no].real_val[4])){
+            aux  = (tared - cal[no].real_val[3]);
+            value  = cal[no].slope[3]*(aux) + cal[no].assigned_val[3];
+        }
+        else if ((tared <= cal[no].real_val[5])){
+            aux  = (tared - cal[no].real_val[4]);
+            value  = cal[no].slope[4]*(aux) + cal[no].assigned_val[4];
+        }
+        else if ((tared <= cal[no].real_val[6])){
+            aux  = (tared - cal[no].real_val[5]);
+            value  = cal[no].slope[5]*(aux) + cal[no].assigned_val[5];
+        }
+        else if ((tared > cal[no].real_val[6])){
+            aux  = (tared - cal[no].real_val[6]);
+            value  = cal[no].slope[6]*(aux) + cal[no].assigned_val[6];
+        }
+        break;
+    case 7:
+        if (tared <= cal[no].real_val[1]){
+            aux  = (tared - cal[no].real_val[0]);
+            value  = cal[no].slope[0]*(aux) + cal[no].assigned_val[0];
+        }
+        else if ((tared <= cal[no].real_val[2])){
+            aux  = (tared - cal[no].real_val[1]);
+            value  = cal[no].slope[1]*(aux) + cal[no].assigned_val[1];
+        }
+        else if ((tared <= cal[no].real_val[3])){
+            aux  = (tared - cal[no].real_val[2]);
+            value  = cal[no].slope[2]*(aux) + cal[no].assigned_val[2];
+        }
+        else if ((tared <= cal[no].real_val[4])){
+            aux  = (tared - cal[no].real_val[3]);
+            value  = cal[no].slope[3]*(aux) + cal[no].assigned_val[3];
+        }
+        else if ((tared <= cal[no].real_val[5])){
+            aux  = (tared - cal[no].real_val[4]);
+            value  = cal[no].slope[4]*(aux) + cal[no].assigned_val[4];
+        }
+        else if (tared > cal[no].real_val[5]){
+            aux  = (tared - cal[no].real_val[5]);
+            value  = cal[no].slope[5]*(aux) + cal[no].assigned_val[5];
+        }
+        break;
+    case 6:
+        if (tared <= cal[no].real_val[1]){
+            aux  = (tared - cal[no].real_val[0]);
+            value  = cal[no].slope[0]*(aux) + cal[no].assigned_val[0];
+        }
+        else if ((tared <= cal[no].real_val[2])){
+            aux  = (tared - cal[no].real_val[1]);
+            value  = cal[no].slope[1]*(aux) + cal[no].assigned_val[1];
+        }
+        else if ((tared <= cal[no].real_val[3])){
+            aux  = (tared - cal[no].real_val[2]);
+            value  = cal[no].slope[2]*(aux) + cal[no].assigned_val[2];
+        }
+        else if ((tared <= cal[no].real_val[4])){
+            aux  = (tared - cal[no].real_val[3]);
+            value  = cal[no].slope[3]*(aux) + cal[no].assigned_val[3];
+        }
+        else if (tared > cal[no].real_val[4]){
+            aux  = (tared - cal[no].real_val[4]);
+            value  = cal[no].slope[4]*(aux) + cal[no].assigned_val[4];
+        }
+        break;
+    case 5:
+        if (tared <= cal[no].real_val[1]){
+            aux  = (tared - cal[no].real_val[0]);
+            value  = cal[no].slope[0]*(aux) + cal[no].assigned_val[0];
+        }
+        else if ((tared <= cal[no].real_val[2])){
+            aux  = (tared - cal[no].real_val[1]);
+            value  = cal[no].slope[1]*(aux) + cal[no].assigned_val[1];
+        }
+        else if ((tared <= cal[no].real_val[3])){
+            aux  = (tared - cal[no].real_val[2]);
+            value  = cal[no].slope[2]*(aux) + cal[no].assigned_val[2];
+        }
+        else if (tared > cal[no].real_val[3]){
+            aux  = (tared - cal[no].real_val[3]);
+            value  = cal[no].slope[3]*(aux) + cal[no].assigned_val[3];
+        }
+        break;
+    case 4:
+        if (tared <= cal[no].real_val[1]){
+            aux  = (tared - cal[no].real_val[0]);
+            value  = cal[no].slope[0]*(aux) + cal[no].assigned_val[0];
+        }
+        else if ((tared <= cal[no].real_val[2])){
+            aux  = (tared - cal[no].real_val[1]);
+            value  = cal[no].slope[1]*(aux) + cal[no].assigned_val[1];
+        }
+        else if (tared > cal[no].real_val[2]){
+            aux  = (tared - cal[no].real_val[2]);
+            value  = cal[no].slope[2]*(aux) + cal[no].assigned_val[2];
+        }
+        break;
+    case 3:
+        if (tared <= cal[no].real_val[1]){
+            aux  = (tared - cal[no].real_val[0]);
+            value  = cal[no].slope[0]*(aux) + cal[no].assigned_val[0];
+        }
+        else if (tared > cal[no].real_val[1]){
+            aux  = (tared - cal[no].real_val[1]);
+            value  = cal[no].slope[1]*(aux) + cal[no].assigned_val[1];
+        }
+        break;
+    case 2:
+        aux  = (tared - cal[no].real_val[0]);
+        value  = cal[no].slope[0]*(aux) + cal[no].assigned_val[0];
+        break;
     }
-    else{
-        if(channel[no].tare_sign == '+'){
-            if(channel[no].raw_sign == '+'){
-                if(channel[no].raw >= (channel[no].zero_raw + channel[no].tare)){
-                    tared = channel[no].raw - (channel[no].zero_raw + channel[no].tare);
-                    tared_sign = '+';
-                }
-                else{
-                    tared = (channel[no].zero_raw + channel[no].tare) - channel[no].raw;
-                    tared_sign = '-';
-                }
-            }
-            else{
-                tared = channel[no].raw + (channel[no].zero_raw + channel[no].tare);
-                tared_sign = '-';
-            }
-        }
-        else{
-            if(channel[no].tare >= channel[no].zero_raw){
-                if(channel[no].raw_sign == '+'){
-                    tared = (channel[no].tare - channel[no].zero_raw) + channel[no].raw;
-                    tared_sign = '+';
-                }
-                else{
-                    if(channel[no].raw >= (channel[no].tare - channel[no].zero_raw)){
-                        tared = channel[no].raw - (channel[no].tare - channel[no].zero_raw);
-                        tared_sign = '-';
-                    }
-                    else{
-                        tared = (channel[no].tare - channel[no].zero_raw) - channel[no].raw;
-                        tared_sign = '+';
-                    }
-                }
-            }
-            else{
-                if(channel[no].raw_sign == '+'){
-                    if(channel[no].raw >= (channel[no].zero_raw - channel[no].tare)){
-                        tared = channel[no].raw - (channel[no].zero_raw - channel[no].tare);
-                        tared_sign = '+';
-                    }
-                    else{
-                        tared = (channel[no].zero_raw - channel[no].tare) - channel[no].raw;
-                        tared_sign = '-';
-                    }
-                }
-                else{
-                    tared = (channel[no].zero_raw - channel[no].tare) + channel[no].raw;
-                    tared_sign = '-';
-                }
-            }
-        }
-    }
-    //	*****	*****	*****	*****	*****		*****	*****	*****	*****	*****	*****		//
-    if	( channel[no].zero_raw_sign == '+' ) {
-        if(tared_sign == '+'){         // if raw data is postive
-            switch (channel[no].point_number) {
-                case 8:
-                    if (tared <= channel[no].cal_raw_value[1]){
-                        aux  = (tared - channel[no].zero_raw);
-                        channel[no].calibrated  = channel[no].slope[0]*(aux);
-                    }
-                    else if ((tared > channel[no].cal_raw_value[1])&&(tared <= channel[no].cal_raw_value[2])){
-                        aux  = (tared - channel[no].cal_raw_value[1]);
-                        channel[no].calibrated  = channel[no].slope[1]*(aux) + channel[no].cal_point_value[1];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[2])&&(tared <= channel[no].cal_raw_value[3])){
-                        aux  = (tared - channel[no].cal_raw_value[2]);
-                        channel[no].calibrated  = channel[no].slope[2]*(aux) + channel[no].cal_point_value[2];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[3])&&(tared <= channel[no].cal_raw_value[4])){
-                        aux  = (tared - channel[no].cal_raw_value[3]);
-                        channel[no].calibrated  = channel[no].slope[3]*(aux) + channel[no].cal_point_value[3];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[4])&&(tared <= channel[no].cal_raw_value[5])){
-                        aux  = (tared - channel[no].cal_raw_value[4]);
-                        channel[no].calibrated  = channel[no].slope[4]*(aux) + channel[no].cal_point_value[4];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[5])&&(tared <= channel[no].cal_raw_value[6])){
-                        aux  = (tared - channel[no].cal_raw_value[5]);
-                        channel[no].calibrated  = channel[no].slope[5]*(aux) + channel[no].cal_point_value[5];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[6])){
-                        aux  = (tared - channel[no].cal_raw_value[6]);
-                        channel[no].calibrated  = channel[no].slope[6]*(aux) + channel[no].cal_point_value[6];
-                    }
-                    break;
-                case 7:
-                    if (tared <= channel[no].cal_raw_value[1]){
-                        aux  = (tared - channel[no].zero_raw);
-                        channel[no].calibrated  = channel[no].slope[0]*(aux);
-                    }
-                    else if ((tared > channel[no].cal_raw_value[1])&&(tared <= channel[no].cal_raw_value[2])){
-                        aux  = (tared - channel[no].cal_raw_value[1]);
-                        channel[no].calibrated  = channel[no].slope[1]*(aux) + channel[no].cal_point_value[1];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[2])&&(tared <= channel[no].cal_raw_value[3])){
-                        aux  = (tared - channel[no].cal_raw_value[2]);
-                        channel[no].calibrated  = channel[no].slope[2]*(aux) + channel[no].cal_point_value[2];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[3])&&(tared <= channel[no].cal_raw_value[4])){
-                        aux  = (tared - channel[no].cal_raw_value[3]);
-                        channel[no].calibrated  = channel[no].slope[3]*(aux) + channel[no].cal_point_value[3];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[4])&&(tared <= channel[no].cal_raw_value[5])){
-                        aux  = (tared - channel[no].cal_raw_value[4]);
-                        channel[no].calibrated  = channel[no].slope[4]*(aux) + channel[no].cal_point_value[4];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[5])){
-                        aux  = (tared - channel[no].cal_raw_value[5]);
-                        channel[no].calibrated  = channel[no].slope[5]*(aux) + channel[no].cal_point_value[5];
-                    }
-                    break;
-                case 6:
-                    if (tared <= channel[no].cal_raw_value[1]){
-                        aux  = (tared - channel[no].zero_raw);
-                        channel[no].calibrated  = channel[no].slope[0]*(aux);
-                    }
-                    else if ((tared > channel[no].cal_raw_value[1])&&(tared <= channel[no].cal_raw_value[2])){
-                        aux  = (tared - channel[no].cal_raw_value[1]);
-                        channel[no].calibrated  = channel[no].slope[1]*(aux) + channel[no].cal_point_value[1];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[2])&&(tared <= channel[no].cal_raw_value[3])){
-                        aux  = (tared - channel[no].cal_raw_value[2]);
-                        channel[no].calibrated  = channel[no].slope[2]*(aux) + channel[no].cal_point_value[2];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[3])&&(tared <= channel[no].cal_raw_value[4])){
-                        aux  = (tared - channel[no].cal_raw_value[3]);
-                        channel[no].calibrated  = channel[no].slope[3]*(aux) + channel[no].cal_point_value[3];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[4])){
-                        aux  = (tared - channel[no].cal_raw_value[4]);
-                        channel[no].calibrated  = channel[no].slope[4]*(aux) + channel[no].cal_point_value[4];
-                    }
-                    break;
-                case 5:
-                    if (tared <= channel[no].cal_raw_value[1]){
-                        aux  = (tared - channel[no].zero_raw);
-                        channel[no].calibrated  = channel[no].slope[0]*(aux);
-                    }
-                    else if ((tared > channel[no].cal_raw_value[1])&&(tared <= channel[no].cal_raw_value[2])){
-                        aux  = (tared - channel[no].cal_raw_value[1]);
-                        channel[no].calibrated  = channel[no].slope[1]*(aux) + channel[no].cal_point_value[1];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[2])&&(tared <= channel[no].cal_raw_value[3])){
-                        aux  = (tared - channel[no].cal_raw_value[2]);
-                        channel[no].calibrated  = channel[no].slope[2]*(aux) + channel[no].cal_point_value[2];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[3])){
-                        aux  = (tared - channel[no].cal_raw_value[3]);
-                        channel[no].calibrated  = channel[no].slope[3]*(aux) + channel[no].cal_point_value[3];
-                    }
-                    break;
-                case 4:
-                    if (tared <= channel[no].cal_raw_value[1]){
-                        aux  = (tared - channel[no].zero_raw);
-                        channel[no].calibrated  = channel[no].slope[0]*(aux);
-                    }
-                    else if ((tared > channel[no].cal_raw_value[1])&&(tared <= channel[no].cal_raw_value[2])){
-                        aux  = (tared - channel[no].cal_raw_value[1]);
-                        channel[no].calibrated  = channel[no].slope[1]*(aux) + channel[no].cal_point_value[1];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[2])){
-                        aux  = (tared - channel[no].cal_raw_value[2]);
-                        channel[no].calibrated  = channel[no].slope[2]*(aux) + channel[no].cal_point_value[2];
-                    }
-                    break;
-                case 3:
-                    if (tared <= channel[no].cal_raw_value[1]){
-                        aux  = (tared - channel[no].zero_raw);
-                        channel[no].calibrated  = channel[no].slope[0]*(aux);
-                    }
-                    else {
-                        aux  = (tared - channel[no].cal_raw_value[1]);
-                        channel[no].calibrated  = channel[no].slope[1]*(aux) + channel[no].cal_point_value[1];
-                    }
-                    break;
-                case 2:
-                    aux  = (tared - channel[no].zero_raw);
-                    channel[no].calibrated = channel[no].slope[0]*(aux);
-                    break;
-                default:
-                    break;
-            }
-        }
-        else{                                                // if raw data is negative
-            aux  = -(channel[no].zero_raw + tared);
-            channel[no].calibrated  = channel[no].slope[0]*(aux);
-        }
-    }
-    else{
-        if(tared_sign == '+'){         // if raw data is postive
-            switch (channel[no].point_number) {
-                case 8:
-                    if (tared <= channel[no].cal_raw_value[1]){
-                        aux  = (channel[no].zero_raw + tared);
-                        channel[no].calibrated = channel[no].slope[0]*(aux);
-                    }
-                    else if ((tared > channel[no].cal_raw_value[1])&&(tared <= channel[no].cal_raw_value[2])){
-                        aux  = (tared - channel[no].cal_raw_value[1]);
-                        channel[no].calibrated  = channel[no].slope[1]*(aux) + channel[no].cal_point_value[1];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[2])&&(tared <= channel[no].cal_raw_value[3])){
-                        aux  = (tared - channel[no].cal_raw_value[2]);
-                        channel[no].calibrated  = channel[no].slope[2]*(aux) + channel[no].cal_point_value[2];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[3])&&(tared <= channel[no].cal_raw_value[4])){
-                        aux  = (tared - channel[no].cal_raw_value[3]);
-                        channel[no].calibrated  = channel[no].slope[3]*(aux) + channel[no].cal_point_value[3];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[4])&&(tared <= channel[no].cal_raw_value[5])){
-                        aux  = (tared - channel[no].cal_raw_value[4]);
-                        channel[no].calibrated  = channel[no].slope[4]*(aux) + channel[no].cal_point_value[4];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[5])&&(tared <= channel[no].cal_raw_value[6])){
-                        aux  = (tared - channel[no].cal_raw_value[5]);
-                        channel[no].calibrated  = channel[no].slope[5]*(aux) + channel[no].cal_point_value[5];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[6])){
-                        aux  = (tared - channel[no].cal_raw_value[6]);
-                        channel[no].calibrated  = channel[no].slope[6]*(aux) + channel[no].cal_point_value[6];
-                    }
-                    break;
-                case 7:
-                    if (tared <= channel[no].cal_raw_value[1]){
-                        aux  = (channel[no].zero_raw + tared);
-                        channel[no].calibrated = channel[no].slope[0]*(aux);
-                    }
-                    else if ((tared > channel[no].cal_raw_value[1])&&(tared <= channel[no].cal_raw_value[2])){
-                        aux  = (tared - channel[no].cal_raw_value[1]);
-                        channel[no].calibrated  = channel[no].slope[1]*(aux) + channel[no].cal_point_value[1];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[2])&&(tared <= channel[no].cal_raw_value[3])){
-                        aux  = (tared - channel[no].cal_raw_value[2]);
-                        channel[no].calibrated  = channel[no].slope[2]*(aux) + channel[no].cal_point_value[2];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[3])&&(tared <= channel[no].cal_raw_value[4])){
-                        aux  = (tared - channel[no].cal_raw_value[3]);
-                        channel[no].calibrated  = channel[no].slope[3]*(aux) + channel[no].cal_point_value[3];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[4])&&(tared <= channel[no].cal_raw_value[5])){
-                        aux  = (tared - channel[no].cal_raw_value[4]);
-                        channel[no].calibrated  = channel[no].slope[4]*(aux) + channel[no].cal_point_value[4];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[5])){
-                        aux  = (tared - channel[no].cal_raw_value[5]);
-                        channel[no].calibrated  = channel[no].slope[5]*(aux) + channel[no].cal_point_value[5];
-                    }
-                    break;
-                case 6:
-                    if (tared <= channel[no].cal_raw_value[1]){
-                        aux  = (channel[no].zero_raw + tared);
-                        channel[no].calibrated = channel[no].slope[0]*(aux);
-                    }
-                    else if ((tared > channel[no].cal_raw_value[1])&&(tared <= channel[no].cal_raw_value[2])){
-                        aux  = (tared - channel[no].cal_raw_value[1]);
-                        channel[no].calibrated  = channel[no].slope[1]*(aux) + channel[no].cal_point_value[1];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[2])&&(tared <= channel[no].cal_raw_value[3])){
-                        aux  = (tared - channel[no].cal_raw_value[2]);
-                        channel[no].calibrated  = channel[no].slope[2]*(aux) + channel[no].cal_point_value[2];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[3])&&(tared <= channel[no].cal_raw_value[4])){
-                        aux  = (tared - channel[no].cal_raw_value[3]);
-                        channel[no].calibrated  = channel[no].slope[3]*(aux) + channel[no].cal_point_value[3];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[4])){
-                        aux  = (tared - channel[no].cal_raw_value[4]);
-                        channel[no].calibrated  = channel[no].slope[4]*(aux) + channel[no].cal_point_value[4];
-                    }
-                    break;
-                case 5:
-                    if (tared <= channel[no].cal_raw_value[1]){
-                        aux  = (channel[no].zero_raw + tared);
-                        channel[no].calibrated = channel[no].slope[0]*(aux);
-                    }
-                    else if ((tared > channel[no].cal_raw_value[1])&&(tared <= channel[no].cal_raw_value[2])){
-                        aux  = (tared - channel[no].cal_raw_value[1]);
-                        channel[no].calibrated  = channel[no].slope[1]*(aux) + channel[no].cal_point_value[1];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[2])&&(tared <= channel[no].cal_raw_value[3])){
-                        aux  = (tared - channel[no].cal_raw_value[2]);
-                        channel[no].calibrated  = channel[no].slope[2]*(aux) + channel[no].cal_point_value[2];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[3])){
-                        aux  = (tared - channel[no].cal_raw_value[3]);
-                        channel[no].calibrated  = channel[no].slope[3]*(aux) + channel[no].cal_point_value[3];
-                    }
-                    break;
-                case 4:
-                    if (tared <= channel[no].cal_raw_value[1]){
-                        aux  = (channel[no].zero_raw + tared);
-                        channel[no].calibrated = channel[no].slope[0]*(aux);
-                    }
-                    else if ((tared > channel[no].cal_raw_value[1])&&(tared <= channel[no].cal_raw_value[2])){
-                        aux  = (tared - channel[no].cal_raw_value[1]);
-                        channel[no].calibrated  = channel[no].slope[1]*(aux) + channel[no].cal_point_value[1];
-                    }
-                    else if ((tared > channel[no].cal_raw_value[2])){
-                        aux  = (tared - channel[no].cal_raw_value[2]);
-                        channel[no].calibrated  = channel[no].slope[2]*(aux) + channel[no].cal_point_value[2];
-                    }
-                    break;
-                case 3:
-                    if (tared <= channel[no].cal_raw_value[1]){
-                        aux  = (channel[no].zero_raw + tared);
-                        channel[no].calibrated = channel[no].slope[0]*(aux);
-                    }
-                    else {
-                        aux  = (tared - channel[no].cal_raw_value[1]);
-                        channel[no].calibrated  = channel[no].slope[1]*(aux) + channel[no].cal_point_value[1];
-                    }
-                    break;
-                case 2:
-                    aux  = (channel[no].zero_raw + tared);
-                    channel[no].calibrated = channel[no].slope[0]*(aux);
-                    break;
-                default:
-                    break;
-            }
-        }
-        else{                                                // if raw data is negative
-            aux  = (channel[no].zero_raw - tared);
-            channel[no].calibrated = channel[no].slope[0]*(aux);
-        }
-    }
+
+    cal[no].absolute_calibrated = value;
+    return (cal[no].absolute_calibrated - cal[no].tare_val);
 }

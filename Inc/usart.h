@@ -9,7 +9,7 @@ typedef unsigned char u8;
 typedef unsigned int u32;
 typedef signed int s32;
 
-#define USART_TX_ARRAY_SIZE 			(uint8_t)90
+#define USART_TX_ARRAY_SIZE 			(uint8_t)120
 #define USART_RX_ARRAY_SIZE 			(uint8_t)120
 
 struct _usart{
@@ -76,10 +76,11 @@ struct chan {
 };
 extern struct chan channel[8];
 
-void evaluate_calibrated_values(uint8_t no);
+double evaluate_calibrated_values(uint8_t no);
 void slope_calculation(uint8_t no);
 
 unsigned int stepper_abs_pos;
-uint8_t active_cal_channel,calculate_slopes;
+uint8_t active_cal_channel;
+u8 usart_debugger;
 
 #endif /*__ usart_H */
