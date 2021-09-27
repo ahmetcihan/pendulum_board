@@ -91,6 +91,19 @@ typedef signed int s32;
 
 void _Error_Handler(char *, int);
 
+struct _cal{
+    double slope[7];
+    double assigned_val[8];
+    float tare_val;
+    float absolute_calibrated;
+    float calibrated;
+    s32 signed_raw;
+    u32 unsigned_raw;
+    int real_val[8];
+    u8 point_no;
+};
+extern struct _cal cal[4];
+
 unsigned char step_motor_command;
 unsigned char step_motor_speed[3];
 unsigned int step_motor_requested_pos;

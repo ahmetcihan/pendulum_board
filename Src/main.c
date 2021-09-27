@@ -7,6 +7,8 @@
 #include "gpio.h"
 #include "max11254.h"
 
+struct _cal cal[4];
+
 void SystemClock_Config(void);
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){

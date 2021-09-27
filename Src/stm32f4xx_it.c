@@ -2,19 +2,10 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_it.h"
 
-extern TIM_HandleTypeDef 	htim1;
-extern TIM_HandleTypeDef 	htim4;
-
+extern TIM_HandleTypeDef 	htim1,htim4;
 extern SPI_HandleTypeDef 	hspi2;
-
-extern UART_HandleTypeDef 	huart1;
-extern UART_HandleTypeDef 	huart2;
-
-extern DMA_HandleTypeDef 	hdma_usart1_rx;
-extern DMA_HandleTypeDef 	hdma_usart1_tx;
-
-extern UART_HandleTypeDef 	huart4;
-extern DMA_HandleTypeDef 	hdma_uart4_tx;
+extern UART_HandleTypeDef 	huart1,huart2,huart4;
+extern DMA_HandleTypeDef 	hdma_usart1_rx,hdma_usart1_tx,hdma_uart4_tx;
 
 /******************************************************************************/
 /*            Cortex-M4 Processor Interruption and Exception Handlers         */ 
