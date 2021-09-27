@@ -24,7 +24,6 @@ union 	_char_to_f {
 	s32 int_val;
 };
 union _char_to_f char_to_f;
-struct chan channel[8];
 struct _usart usart1,usart2;
 struct _cal cal[4];
 
@@ -389,7 +388,7 @@ void 	 PRESS_ANS_Command 				( void ) {
 			//uint8_t gain_force = (uint8_t)( MAX[i].Gain +  2 );
 			uint8_t gain_force =  MAX[resultBinding[i]/6].chGain[resultBinding[i]%6] + 2;	//(uint8_t)( MAX[i].Gain +  2 );
 
-			char_to_f.int_val = channel[i].signed_raw;
+			char_to_f.int_val = cal[i].signed_raw;
 			usart1.tx[5*i+3]= char_to_f.s8_val[0];
 			usart1.tx[5*i+4]= char_to_f.s8_val[1];
 			usart1.tx[5*i+5]= char_to_f.s8_val[2];
@@ -412,7 +411,7 @@ void 	 PRESS_ANS_Command 				( void ) {
 		usart1.tx[33] = (uint8_t)(stepper_abs_pos);
 
 		for (uint8_t i = 0 ; i < 4 ; i++ ) {
-			char_to_f.float_val = channel[i].calibrated;
+			char_to_f.float_val = cal[i].calibrated;
 			usart1.tx[4*i+34]= char_to_f.s8_val[0];
 			usart1.tx[4*i+35]= char_to_f.s8_val[1];
 			usart1.tx[4*i+36]= char_to_f.s8_val[2];
@@ -474,7 +473,7 @@ void slope_calculation(uint8_t no){
 double evaluate_calibrated_values(uint8_t no){
     double value = 0;
     double aux = 0;
-    s32 tared = channel[no].signed_raw;
+    s32 tared = cal[no].signed_raw;
 
     switch (cal[no].point_no) {
     case 8:

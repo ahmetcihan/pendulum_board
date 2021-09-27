@@ -29,6 +29,9 @@ struct _cal{
     double assigned_val[8];
     float tare_val;
     float absolute_calibrated;
+    float calibrated;
+    s32 signed_raw;
+    u32 unsigned_raw;
     int real_val[8];
     u8 point_no;
 };
@@ -52,29 +55,6 @@ void PRESS_CALSEND_CommandOperating(void);
 void PRESS_ANS_Command(void);
 void MASTER_send_RS485_data_to_motor(void);
 void usart2_handle(void);
-
-/*	A.C.AKINCA eklemeleri	*/
-struct chan {
-    uint32_t tare;
-    int8_t tare_sign;
-
-    uint32_t zero_raw;
-    int8_t zero_raw_sign;
-
-    uint32_t raw;
-    int8_t raw_sign;
-
-    uint8_t point_number;
-    int8_t cal_zero_sign;
-
-    float calibrated;
-    uint32_t cal_raw_value[8];
-    float cal_point_value[8];
-    double slope[7];
-
-    s32 signed_raw;
-};
-extern struct chan channel[8];
 
 double evaluate_calibrated_values(uint8_t no);
 void slope_calculation(uint8_t no);

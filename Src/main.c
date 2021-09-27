@@ -163,64 +163,55 @@ int main(void) {
 		}
 		if (ControlExti_Max_1_RdbyPin == ControlState_CHECKIT) {
 			OperatingMaxExtiRdbyControl( MAX_1 );
-			channel[0].raw = MAX[resultBinding[0]/6].chResult[resultBinding[0]%6];
-			channel[0].raw_sign = '+';
-			channel[0].signed_raw = channel[0].raw;
+			cal[0].unsigned_raw = MAX[resultBinding[0]/6].chResult[resultBinding[0]%6];
+			cal[0].signed_raw = cal[0].unsigned_raw;
 			if   ( MAX[0].polarity == POLARITY_BIPOLAR ) {
-				if (channel[0].raw > 0x7FFFFF) {
-					channel[0].raw_sign = '-';
-					channel[0].raw = (0xFFFFFF + 1) - channel[0].raw;
-					channel[0].signed_raw = channel[0].raw;
-					channel[0].signed_raw = -channel[0].signed_raw;
+				if (cal[0].unsigned_raw > 0x7FFFFF) {
+					cal[0].unsigned_raw = (0xFFFFFF + 1) - cal[0].unsigned_raw;
+					cal[0].signed_raw = -cal[0].unsigned_raw;
 				}
 			}
 			//HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
-			channel[0].calibrated = evaluate_calibrated_values(0);
+			cal[0].calibrated = evaluate_calibrated_values(0);
 			ControlExti_Max_1_RdbyPin = ControlState_CHECKED;
 		}
 		if (ControlExti_Max_2_RdbyPin == ControlState_CHECKIT) {
 			OperatingMaxExtiRdbyControl( MAX_2 );
-			channel[1].raw = MAX[resultBinding[1]/6].chResult[resultBinding[1]%6];
-			channel[1].raw_sign = '+';
-			channel[1].signed_raw = channel[1].raw;
+			cal[1].unsigned_raw = MAX[resultBinding[1]/6].chResult[resultBinding[1]%6];
+			cal[1].signed_raw = cal[1].unsigned_raw;
 			if   ( MAX[1].polarity == POLARITY_BIPOLAR ) {
-				if (channel[1].raw > 0x7FFFFF) {
-					channel[1].raw_sign = '-';
-					channel[1].raw = (0xFFFFFF + 1) - channel[1].raw;
-					channel[1].signed_raw = -channel[1].raw;
+				if (cal[1].unsigned_raw > 0x7FFFFF) {
+					cal[1].unsigned_raw = (0xFFFFFF + 1) - cal[1].unsigned_raw;
+					cal[1].signed_raw = -cal[1].unsigned_raw;
 				}
 			}
-			channel[1].calibrated = evaluate_calibrated_values(1);
+			cal[1].calibrated = evaluate_calibrated_values(1);
 			ControlExti_Max_2_RdbyPin = ControlState_CHECKED;
 		}
 		if (ControlExti_Max_3_RdbyPin == ControlState_CHECKIT) {
 			OperatingMaxExtiRdbyControl( MAX_3 );
-			channel[2].raw = MAX[resultBinding[2]/6].chResult[resultBinding[2]%6];
-			channel[2].raw_sign = '+';
-			channel[2].signed_raw = channel[2].raw;
+			cal[2].unsigned_raw = MAX[resultBinding[2]/6].chResult[resultBinding[2]%6];
+			cal[2].signed_raw = cal[2].unsigned_raw;
 			if   ( MAX[2].polarity == POLARITY_BIPOLAR ) {
-				if (channel[2].raw > 0x7FFFFF) {
-					channel[2].raw_sign = '-';
-					channel[2].raw = (0xFFFFFF + 1) - channel[2].raw;
-					channel[2].signed_raw = -channel[2].raw;
+				if (cal[2].unsigned_raw > 0x7FFFFF) {
+					cal[2].unsigned_raw = (0xFFFFFF + 1) - cal[2].unsigned_raw;
+					cal[2].signed_raw = -cal[2].unsigned_raw;
 				}
 			}
-			channel[2].calibrated = evaluate_calibrated_values(2);
+			cal[2].calibrated = evaluate_calibrated_values(2);
 			ControlExti_Max_3_RdbyPin = ControlState_CHECKED;
 		}
 		if (ControlExti_Max_4_RdbyPin == ControlState_CHECKIT) {
 			OperatingMaxExtiRdbyControl( MAX_4 );
-			channel[3].raw = MAX[resultBinding[3]/6].chResult[resultBinding[3]%6];
-			channel[3].raw_sign = '+';
-			channel[3].signed_raw = channel[3].raw;
+			cal[3].unsigned_raw = MAX[resultBinding[3]/6].chResult[resultBinding[3]%6];
+			cal[3].signed_raw = cal[3].unsigned_raw;
 			if   ( MAX[3].polarity == POLARITY_BIPOLAR ) {
-				if (channel[3].raw > 0x7FFFFF) {
-					channel[3].raw_sign = '-';
-					channel[3].raw = (0xFFFFFF + 1) - channel[3].raw;
-					channel[3].signed_raw = -channel[3].raw;
+				if (cal[3].unsigned_raw > 0x7FFFFF) {
+					cal[3].unsigned_raw = (0xFFFFFF + 1) - cal[3].unsigned_raw;
+					cal[3].signed_raw = -cal[3].unsigned_raw;
 				}
 			}
-			channel[3].calibrated = evaluate_calibrated_values(3);
+			cal[3].calibrated = evaluate_calibrated_values(3);
 			ControlExti_Max_4_RdbyPin = ControlState_CHECKED;
 		}
 
