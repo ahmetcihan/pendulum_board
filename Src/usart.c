@@ -339,10 +339,9 @@ void	 PRESS_GAIN_CommandOperating	( void ) {
 
 } 
 void 	 PRESS_TARE_CommandOperating	( void ) {
-	if(usart1.rx[4] < 4){
-		channel[usart1.rx[4]].tare = channel[usart1.rx[4]].raw;
-		channel[usart1.rx[4]].tare_sign = channel[usart1.rx[4]].raw_sign;
-	}
+	u8 ch = usart1.rx[4];
+
+	cal[ch].tare_val = cal[ch].absolute_calibrated;
 }
 void 	 PRESS_PRINT_CommandOperating	( void ) {
 		static uint8_t print_count;
