@@ -1,6 +1,11 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
+typedef char s8;
+typedef unsigned char u8;
+typedef unsigned int u32;
+typedef signed int s32;
+
 #define Tx2En 					GPIO_PIN_12
 
 #define Led_Pin 				GPIO_PIN_11
@@ -97,8 +102,13 @@ unsigned char step_motor_command;
 unsigned char step_motor_speed[3];
 unsigned int step_motor_requested_pos;
 unsigned char timer_1_msec;
+unsigned char timer_10_msec;
 unsigned char timer_100_msec;
 unsigned char input_status[4];
 unsigned char send_RS485;
+u8 max1_dataready;
+u8 max2_dataready;
+u8 max3_dataready;
+u8 max4_dataready;
 
 #endif /* __MAIN_H */

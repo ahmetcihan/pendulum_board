@@ -7,13 +7,9 @@
 #include "gpio.h"
 #include "max11254.h"
 
-ControlState ControlExti_Max_1_RdbyPin 	= ControlState_CHECKED,
-			 ControlExti_Max_2_RdbyPin 	= ControlState_CHECKED,
-			 ControlExti_Max_3_RdbyPin 	= ControlState_CHECKED,
-			 ControlExti_Max_4_RdbyPin 	= ControlState_CHECKED,
-			 ControlUsart1_ReceiveData 	= ControlState_CHECKED,
-			 ControlUsart1_TransmitData = ControlState_CHECKED,
-			 ControlTIM4_10msec 		= ControlState_CHECKED;
+ControlState ControlUsart1_ReceiveData 	= ControlState_CHECKED,
+			 ControlUsart1_TransmitData = ControlState_CHECKED;
+
 void SystemClock_Config(void);
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
@@ -65,7 +61,7 @@ void HAL_TIM_PeriodElapsedCallback	( TIM_HandleTypeDef *htim ) {		//	Timer Inter
 			timer_1_msec = 1;
 		}
 		if ((usn10 % 1000) == 0) {
-			ControlTIM4_10msec = ControlState_CHECKIT;
+			timer_10_msec = 1;
 		}
 		if ((usn10 % 10000) == 0) {
 			timer_100_msec = 1;
@@ -85,13 +81,13 @@ void HAL_SYSTICK_Callback			( void ) {
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) { 						//	EXTI Interrupt Fonksiyonu
 	if (GPIO_Pin == ADC_1_RDYB_Pin)
-		ControlExti_Max_1_RdbyPin = ControlState_CHECKIT;
+		max1_dataready = 1;
 	if (GPIO_Pin == ADC_2_RDYB_Pin)
-		ControlExti_Max_2_RdbyPin = ControlState_CHECKIT;
+		max2_dataready = 1;
 	if (GPIO_Pin == ADC_3_RDYB_Pin)
-		ControlExti_Max_3_RdbyPin = ControlState_CHECKIT;
+		max3_dataready = 1;
 	if (GPIO_Pin == ADC_4_RDYB_Pin)
-		ControlExti_Max_4_RdbyPin = ControlState_CHECKIT;
+		max4_dataready = 1;
 	if (GPIO_Pin == EncoderZF_Pin)
 		((TIM1->CR1 & TIM_CR1_DIR) == TIM_CR1_DR_CW ) ?
 				signal_z_count++ : signal_z_count--;
@@ -101,6 +97,18 @@ void read_inputs(void){
 	input_status[1] = HAL_GPIO_ReadPin(INPUT_Port,INPUT_2_Pin);
 	input_status[2] = HAL_GPIO_ReadPin(INPUT_Port,INPUT_3_Pin);
 	input_status[3] = HAL_GPIO_ReadPin(INPUT_Port,INPUT_4_Pin);
+}
+void channel_operation(u8 no){
+	OperatingMaxExtiRdbyControl(no+1);
+	cal[no].unsigned_raw = MAX[resultBinding[no]/6].chResult[resultBinding[no]%6];
+	cal[no].signed_raw = cal[no].unsigned_raw;
+	if   ( MAX[no].polarity == POLARITY_BIPOLAR ) {
+		if (cal[no].unsigned_raw > 0x7FFFFF) {
+			cal[no].unsigned_raw = (0xFFFFFF + 1) - cal[no].unsigned_raw;
+			cal[no].signed_raw = -cal[no].unsigned_raw;
+		}
+	}
+	cal[no].calibrated = evaluate_calibrated_values(no);
 }
 int main(void) {
 	HAL_Init();
@@ -117,13 +125,13 @@ int main(void) {
 	MX_USART2_Init();
 	MX_UART4_Init();
 	MX_TIM4_Init();
-	ControlTIM4_10msec = ControlState_CHECKIT;
 	Timer3_AutoConsolidation_SpecialFunc(0);
 
 	step_motor_command = 0;
 	step_motor_requested_pos = 0;
 	stepper_abs_pos = 0;
 	timer_1_msec = 0;
+	timer_10_msec = 0;
 	timer_100_msec = 0;
 	send_RS485 = 0;
 	usart_debugger = 0;
@@ -158,61 +166,24 @@ int main(void) {
 			MASTER_send_RS485_data_to_motor();
 			read_inputs();
 		}
-		if (ControlTIM4_10msec == ControlState_CHECKIT) {
-			ControlTIM4_10msec = ControlState_CHECKED;
+		if (timer_10_msec == 0) {
+			timer_10_msec = 0;
 		}
-		if (ControlExti_Max_1_RdbyPin == ControlState_CHECKIT) {
-			OperatingMaxExtiRdbyControl( MAX_1 );
-			cal[0].unsigned_raw = MAX[resultBinding[0]/6].chResult[resultBinding[0]%6];
-			cal[0].signed_raw = cal[0].unsigned_raw;
-			if   ( MAX[0].polarity == POLARITY_BIPOLAR ) {
-				if (cal[0].unsigned_raw > 0x7FFFFF) {
-					cal[0].unsigned_raw = (0xFFFFFF + 1) - cal[0].unsigned_raw;
-					cal[0].signed_raw = -cal[0].unsigned_raw;
-				}
-			}
-			//HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
-			cal[0].calibrated = evaluate_calibrated_values(0);
-			ControlExti_Max_1_RdbyPin = ControlState_CHECKED;
+		if (max1_dataready == 1) {
+			max1_dataready = 0;
+			channel_operation(0);
 		}
-		if (ControlExti_Max_2_RdbyPin == ControlState_CHECKIT) {
-			OperatingMaxExtiRdbyControl( MAX_2 );
-			cal[1].unsigned_raw = MAX[resultBinding[1]/6].chResult[resultBinding[1]%6];
-			cal[1].signed_raw = cal[1].unsigned_raw;
-			if   ( MAX[1].polarity == POLARITY_BIPOLAR ) {
-				if (cal[1].unsigned_raw > 0x7FFFFF) {
-					cal[1].unsigned_raw = (0xFFFFFF + 1) - cal[1].unsigned_raw;
-					cal[1].signed_raw = -cal[1].unsigned_raw;
-				}
-			}
-			cal[1].calibrated = evaluate_calibrated_values(1);
-			ControlExti_Max_2_RdbyPin = ControlState_CHECKED;
+		if (max2_dataready == 1) {
+			max2_dataready = 0;
+			channel_operation(1);
 		}
-		if (ControlExti_Max_3_RdbyPin == ControlState_CHECKIT) {
-			OperatingMaxExtiRdbyControl( MAX_3 );
-			cal[2].unsigned_raw = MAX[resultBinding[2]/6].chResult[resultBinding[2]%6];
-			cal[2].signed_raw = cal[2].unsigned_raw;
-			if   ( MAX[2].polarity == POLARITY_BIPOLAR ) {
-				if (cal[2].unsigned_raw > 0x7FFFFF) {
-					cal[2].unsigned_raw = (0xFFFFFF + 1) - cal[2].unsigned_raw;
-					cal[2].signed_raw = -cal[2].unsigned_raw;
-				}
-			}
-			cal[2].calibrated = evaluate_calibrated_values(2);
-			ControlExti_Max_3_RdbyPin = ControlState_CHECKED;
+		if (max3_dataready == 1) {
+			max3_dataready = 0;
+			channel_operation(2);
 		}
-		if (ControlExti_Max_4_RdbyPin == ControlState_CHECKIT) {
-			OperatingMaxExtiRdbyControl( MAX_4 );
-			cal[3].unsigned_raw = MAX[resultBinding[3]/6].chResult[resultBinding[3]%6];
-			cal[3].signed_raw = cal[3].unsigned_raw;
-			if   ( MAX[3].polarity == POLARITY_BIPOLAR ) {
-				if (cal[3].unsigned_raw > 0x7FFFFF) {
-					cal[3].unsigned_raw = (0xFFFFFF + 1) - cal[3].unsigned_raw;
-					cal[3].signed_raw = -cal[3].unsigned_raw;
-				}
-			}
-			cal[3].calibrated = evaluate_calibrated_values(3);
-			ControlExti_Max_4_RdbyPin = ControlState_CHECKED;
+		if (max4_dataready == 1) {
+			max4_dataready = 0;
+			channel_operation(3);
 		}
 
 		if (ControlUsart1_ReceiveData == ControlState_CHECKIT) {

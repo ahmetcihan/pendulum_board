@@ -4,11 +4,6 @@
 #include "stm32f4xx_hal.h"
 #include "main.h" 
 
-typedef char s8;
-typedef unsigned char u8;
-typedef unsigned int u32;
-typedef signed int s32;
-
 #define USART_TX_ARRAY_SIZE 			(uint8_t)120
 #define USART_RX_ARRAY_SIZE 			(uint8_t)120
 
