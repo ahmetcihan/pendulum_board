@@ -11,22 +11,23 @@ UART_HandleTypeDef huart1,huart2,huart4;
 union _char_to_f char_to_f;
 struct _usart usart1,usart2;
 
-void MX_UART4_Init			( void ) {
-	huart4.Instance 			= UART4;
-	huart4.Init.BaudRate 		= 115200;
-	huart4.Init.WordLength 		= UART_WORDLENGTH_8B;
-	huart4.Init.StopBits 		= UART_STOPBITS_1;
-	huart4.Init.Parity 			= UART_PARITY_NONE;
-	huart4.Init.Mode 			= UART_MODE_TX;
-	huart4.Init.HwFlowCtl		= UART_HWCONTROL_NONE;
-	huart4.Init.OverSampling 	= UART_OVERSAMPLING_16;
-	if (HAL_HalfDuplex_Init(&huart4) != HAL_OK)
+void MX_USART1_UART_Init(void){
+	huart1.Instance 			= USART1;
+	huart1.Init.BaudRate 		= 115200;
+	huart1.Init.WordLength 		= UART_WORDLENGTH_8B;
+	huart1.Init.StopBits 		= UART_STOPBITS_1;
+	huart1.Init.Parity 			= UART_PARITY_NONE;
+	huart1.Init.Mode 			= UART_MODE_TX_RX;
+	huart1.Init.HwFlowCtl 		= UART_HWCONTROL_NONE;
+	huart1.Init.OverSampling 	= UART_OVERSAMPLING_16;
+	if (HAL_UART_Init(&huart1) != HAL_OK)
 		_Error_Handler(__FILE__, __LINE__);
 
-	usart1.rx[ 0 ] = 10;
-	HAL_UART_Transmit( &huart4 , &usart1.rx[0] , 1 , 10 );
+	HAL_UART_Receive_DMA(&huart1 ,&usart1.instant_data , 1);
+	usart1.clear_buffer = 1;
+	usart1.rx_indeks = 0;
 }
-void MX_USART2_Init			( void ) {
+void MX_USART2_Init(void){
 	huart2.Instance 			= USART2;
 	huart2.Init.BaudRate 		= 115200;
 	huart2.Init.WordLength 		= UART_WORDLENGTH_8B;
@@ -41,26 +42,25 @@ void MX_USART2_Init			( void ) {
 	usart2.rx_indeks = 0;
     HAL_UART_Receive_IT(&huart2, &usart2.instant_data,1);
 }
-void MX_USART1_UART_Init 	( void ) {
-	huart1.Instance 			= USART1;
-	huart1.Init.BaudRate 		= 115200;
-	huart1.Init.WordLength 	= UART_WORDLENGTH_8B;
-	huart1.Init.StopBits 		= UART_STOPBITS_1;
-	huart1.Init.Parity 		= UART_PARITY_NONE;
-	huart1.Init.Mode 			= UART_MODE_TX_RX;
-	huart1.Init.HwFlowCtl 	= UART_HWCONTROL_NONE;
-	huart1.Init.OverSampling 	= UART_OVERSAMPLING_16;
-	if (HAL_UART_Init(&huart1) != HAL_OK)
+void MX_UART4_Init(void){
+	huart4.Instance 			= UART4;
+	huart4.Init.BaudRate 		= 115200;
+	huart4.Init.WordLength 		= UART_WORDLENGTH_8B;
+	huart4.Init.StopBits 		= UART_STOPBITS_1;
+	huart4.Init.Parity 			= UART_PARITY_NONE;
+	huart4.Init.Mode 			= UART_MODE_TX;
+	huart4.Init.HwFlowCtl		= UART_HWCONTROL_NONE;
+	huart4.Init.OverSampling 	= UART_OVERSAMPLING_16;
+	if (HAL_HalfDuplex_Init(&huart4) != HAL_OK)
 		_Error_Handler(__FILE__, __LINE__);
 
-	HAL_UART_Receive_DMA ( &huart1 , &usart1.instant_data , 1 );
-	usart1.clear_buffer = 1;
-	usart1.rx_indeks = 0;
+	usart1.rx[ 0 ] = 10;
+	HAL_UART_Transmit( &huart4 , &usart1.rx[0] , 1 , 10 );
 }
-void HAL_UART_MspInit		( UART_HandleTypeDef* uartHandle ) {
+void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle){
 	GPIO_InitTypeDef GPIO_InitStruct;
 
-	if			( uartHandle->Instance == UART4  ) {
+	if(uartHandle->Instance == UART4){
 		__HAL_RCC_UART4_CLK_ENABLE();
 
 		GPIO_InitStruct.Pin 		= GPIO_PIN_0;
@@ -113,7 +113,7 @@ void HAL_UART_MspInit		( UART_HandleTypeDef* uartHandle ) {
     HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(USART1_IRQn);
 	}
-	else if ( uartHandle->Instance == USART2 ) {
+	else if(uartHandle->Instance == USART2){
 		__HAL_RCC_USART2_CLK_ENABLE();
 
 		GPIO_InitStruct.Pin  = GPIO_PIN_2|GPIO_PIN_3;
@@ -127,26 +127,38 @@ void HAL_UART_MspInit		( UART_HandleTypeDef* uartHandle ) {
 		HAL_NVIC_EnableIRQ(USART2_IRQn);
 	}
 }
-void HAL_UART_MspDeInit  	( UART_HandleTypeDef* uartHandle ) {
+void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle){
 
-	if(uartHandle -> Instance == UART4  ) {
+	if(uartHandle -> Instance == UART4){
 		__HAL_RCC_UART4_CLK_DISABLE();
 		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0);
 		HAL_DMA_DeInit(uartHandle->hdmatx);
 		HAL_NVIC_DisableIRQ(UART4_IRQn);
 	}
-	else if ( uartHandle -> Instance == USART1 ) {
+	else if(uartHandle -> Instance == USART1){
 		__HAL_RCC_USART1_CLK_DISABLE();
 		HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6|GPIO_PIN_7);
 		HAL_DMA_DeInit(uartHandle->hdmarx);
 		HAL_DMA_DeInit(uartHandle->hdmatx);
 		HAL_NVIC_DisableIRQ(USART1_IRQn);
 	}
-  else if ( uartHandle -> Instance == USART2 ) {
+  else if(uartHandle -> Instance == USART2){
 		__HAL_RCC_USART2_CLK_DISABLE();
 		HAL_GPIO_DeInit(GPIOA, GPIO_PIN_2|GPIO_PIN_3);
 		HAL_NVIC_DisableIRQ(USART2_IRQn);
 	}
+}
+uint32_t CyclicRedundancyCheck(uint8_t* data, uint8_t length) {
+	int j;
+	uint32_t reg_crc=0xFFFF;
+
+	while( length-- ) {
+		reg_crc^= *data++;
+		for (j = 0; j < 8; j++){
+			reg_crc = (reg_crc & 0x01) ? ((reg_crc >> 1)^0xA001) : (reg_crc>>1);
+		}
+	}
+	return reg_crc;
 }
 void MASTER_send_RS485_data_to_motor(void){
 	HAL_GPIO_WritePin( GPIOA , Tx2En , GPIO_PIN_SET );
@@ -178,36 +190,23 @@ void usart2_handle(void){
 		}
 	}
 }
-uint32_t CyclicRedundancyCheck(uint8_t* data, uint8_t length) {
-	int j;
-	uint32_t reg_crc=0xFFFF;
-
-	while( length-- ) {
-		reg_crc^= *data++;
-		for (j = 0; j < 8; j++){
-			reg_crc = (reg_crc & 0x01) ? ((reg_crc >> 1)^0xA001) : (reg_crc>>1);
-		}
-	}
-	return reg_crc;
-}
-void 	 USART1_receive_operations ( void ) {
-	//float *channel_floats[8];
-	if 		( usart1.rx[0]=='C' && usart1.rx[1]=='O' && usart1.rx[2]=='N' && usart1.rx[3]=='V' ) {
+void USART1_receive_operations(void){
+	if(usart1.rx[0]=='C' && usart1.rx[1]=='O' && usart1.rx[2]=='N' && usart1.rx[3]=='V' ) {
 			PRESS_CONV_CommandOperating( );
 	}
-	else if ( usart1.rx[0]=='G' && usart1.rx[1]=='A' && usart1.rx[2]=='I' && usart1.rx[3]=='N' ) {
+	else if(usart1.rx[0]=='G' && usart1.rx[1]=='A' && usart1.rx[2]=='I' && usart1.rx[3]=='N' ) {
 			PRESS_GAIN_CommandOperating( );
 	}
-	else if ( usart1.rx[0]=='T' && usart1.rx[1]=='A' && usart1.rx[2]=='R' && usart1.rx[3]=='E' ) {
+	else if(usart1.rx[0]=='T' && usart1.rx[1]=='A' && usart1.rx[2]=='R' && usart1.rx[3]=='E' ) {
 			PRESS_TARE_CommandOperating();
 	}
-	else if ( usart1.rx[0]=='P' && usart1.rx[1]=='R' && usart1.rx[2]=='I' && usart1.rx[3]=='N' && usart1.rx[4]=='T' ) {
+	else if(usart1.rx[0]=='P' && usart1.rx[1]=='R' && usart1.rx[2]=='I' && usart1.rx[3]=='N' && usart1.rx[4]=='T' ) {
 			PRESS_PRINT_CommandOperating();			
 	}
-	else if ( usart1.rx[0]=='C' && usart1.rx[1]=='A' && usart1.rx[2]=='L' && usart1.rx[3]=='S' && usart1.rx[4]=='E' && usart1.rx[5]=='N' && usart1.rx[6]=='D' )  {
+	else if(usart1.rx[0]=='C' && usart1.rx[1]=='A' && usart1.rx[2]=='L' && usart1.rx[3]=='S' && usart1.rx[4]=='E' && usart1.rx[5]=='N' && usart1.rx[6]=='D' )  {
 		PRESS_CALSEND_CommandOperating();
 	}
-	else if	( usart1.rx[0]=='P' && usart1.rx[1]=='L' && usart1.rx[2]=='R' && usart1.rx[3]=='T' ) {
+	else if(usart1.rx[0]=='P' && usart1.rx[1]=='L' && usart1.rx[2]=='R' && usart1.rx[3]=='T' ) {
 		uint8_t chn  = usart1.rx[4] - 0x30;
 		uint8_t plrt = usart1.rx[5] - 0x30;
 
@@ -221,76 +220,13 @@ void 	 USART1_receive_operations ( void ) {
 		}
 		Max11254_PolaritySelect( (chn+1) , MAX[chn].polarity );
 		Max11254_ConversionCommand( (chn+1) , MAX[chn].RateNumber|COMMAND_MODE_SEQUENCER );
-
 	}
-	else if ( usart1.rx[0]=='M' && usart1.rx[1]=='A' && usart1.rx[2]=='X' && usart1.rx[3]=='A' && usart1.rx[4]=='D' && usart1.rx[5]=='C' ) {
-		if ( (usart1.rx[6]<=3) && (usart1.rx[7]<=1) && (usart1.rx[8]<=15) ) {
-			Max11254_SoftwareReset 			( usart1.rx[6] + 1 );
-			MAX[ usart1.rx[6] ].polarity 		= usart1.rx[ 7 ];
-			MAX[ usart1.rx[6] ].RateNumber 	= usart1.rx[ 8 ];
-
-			for ( uint8_t ch=0 ; ch<6 ; ch++ )	//	All channel cleer Read bit
-				MAX[usart1.rx[6]].chRead[ch] = CH_NotREAD;
-			for ( uint8_t ch=0 ; ch<6 ; ch++ ) {
-				if ( usart1.rx[ 9+ch*2 ] == 1 ) {
-					if ( usart1.rx[ 10+ch*2 ] <= 8 ) {
-						MAX[usart1.rx[6]].chRead[5-ch] = CH_READ;
-						MAX[usart1.rx[6]].chGain[5-ch] = (GAIN)usart1.rx[10+ch*2];
-					}
-					else {
-						MAX[usart1.rx[6]].chRead[5-ch] = CH_NotREAD;
-						MAX[usart1.rx[6]].chGain[5-ch] = GAIN_Disb;
-					}
-				}
-				else {
-					MAX[usart1.rx[6]].chRead[5-ch] = CH_NotREAD;
-					MAX[usart1.rx[6]].chGain[5-ch] = GAIN_Disb;
-			}
-
-			for ( uint8_t i=0 ; i<6 ; i++ ) {
-				if ( MAX[usart1.rx[6]].chRead[i] == CH_READ ) {
-					MAX[usart1.rx[6]].rank = i;
-				}
-			}
-			uint8_t chs = 	(uint8_t)( MAX[usart1.rx[6]].chRead[5] << 5 ) |
-							(uint8_t)( MAX[usart1.rx[6]].chRead[4] << 4 ) |
-							(uint8_t)( MAX[usart1.rx[6]].chRead[3] << 3 ) |
-							(uint8_t)( MAX[usart1.rx[6]].chRead[2] << 2 ) |
-							(uint8_t)( MAX[usart1.rx[6]].chRead[1] << 1 ) |
-							(uint8_t)( MAX[usart1.rx[6]].chRead[0] );
-
-			Max11254_SequencerMode2_EntryUart(  usart1.rx[6]+1,
-												(ChmapConvChannels)chs ,
-												MAX[usart1.rx[6]].chGain[MAX[usart1.rx[6]].rank] );
-
-			Max11254_ConversionCommand( usart1.rx[6]+1 , MAX[usart1.rx[6]].RateNumber|COMMAND_MODE_SEQUENCER );
-
-//			Max11254_ChannelMap_Set( chooseMax , (ChmapConvChannels)x );
-//			Max11254_ConversionCommand( chooseMax , MAX[usart1.rx[6]].RateNumber|COMMAND_MODE_SEQUENCER );
-//			OperatingMaxExtiRdbyControl( (MaxDevice)chooseMax );
-		}
-		u1_ctrl1 = Max11254_Read1byte( MAX_1 , MAX11254_REG_CTRL1 );
-		u2_ctrl1 = Max11254_Read1byte( MAX_2 , MAX11254_REG_CTRL1 );
-		u3_ctrl1 = Max11254_Read1byte( MAX_3 , MAX11254_REG_CTRL1 );
-		u4_ctrl1 = Max11254_Read1byte( MAX_4 , MAX11254_REG_CTRL1 );
-		}
-	}
-	else if	( usart1.rx[0]=='G' && usart1.rx[1]=='P' && usart1.rx[2]=='I' && usart1.rx[3]=='O' ) {
-		if ( usart1.rx[4] <= 3 )
+	else if(usart1.rx[0]=='G' && usart1.rx[1]=='P' && usart1.rx[2]=='I' && usart1.rx[3]=='O' ) {
+		if (usart1.rx[4] <= 3 )
 			Max11254_GPIOSetting( usart1.rx[4]+1 , usart1.rx[5] );
 	}
-	else if ( usart1.rx[0]=='R' && usart1.rx[1]=='E' && usart1.rx[2]=='S' && usart1.rx[3]=='U' && usart1.rx[4]=='L' && usart1.rx[5]=='T' ) {
-		if ( usart1.rx[6] <= 23 )
-						resultBinding[ 0 ] = usart1.rx[ 6 ];
-		if ( usart1.rx[7] <= 23 )
-						resultBinding[ 1 ] = usart1.rx[ 7 ];
-		if ( usart1.rx[8] <= 23 )
-						resultBinding[ 2 ] = usart1.rx[ 8 ];
-		if ( usart1.rx[9] <= 23 )
-						resultBinding[ 3 ] = usart1.rx[ 9 ];
-	}
 }
-void 	 PRESS_CONV_CommandOperating	( void ) {
+void PRESS_CONV_CommandOperating(void){
 	//	0x30[Hex] = 48[Dec]	,	0x31[Hex] = 49[Dec]
 	if (usart1.rx[4] == 0x30 )	Electromechanic_RELAY_OFF_AutoManual;
 	else if(usart1.rx[4] == 0x31 ) 	Electromechanic_RELAY_ON_AutoManual;
@@ -309,24 +245,23 @@ void 	 PRESS_CONV_CommandOperating	( void ) {
 
 	PRESS_ANS_Command();
 }
-void	 PRESS_GAIN_CommandOperating	( void ) {
+void PRESS_GAIN_CommandOperating(void){
 	uint8_t usart_gain = usart1.rx[4] - 50;		//	48;
 	uint8_t usart_adc  = usart1.rx[5] - 48;
-	if ( usart_gain <= 8 ){
+	if(usart_gain <= 8 ){
 		MAX[usart_adc].Gain = (GAIN)( usart_gain );
 		MAX[usart_adc].chGain[4] = (GAIN)( usart_gain );
 	}
 	Max11254_PGAGain_Set( (MaxDevice)(usart_adc+1) , MAX[usart_adc].Gain );
 	Max11254_ConversionCommand( (MaxDevice)(usart_adc+1) , MAX[usart_adc].RateNumber|COMMAND_MODE_SEQUENCER );
 	//Max11254_SequencerMode2_Entry( MAX_1 , (ChmapConvChannels)(CHMAP_CH4_ENABLE|CHMAP_CH5_ENABLE) , MAX[usart_adc].chGain[4] );
-
 } 
-void 	 PRESS_TARE_CommandOperating	( void ) {
+void PRESS_TARE_CommandOperating(void){
 	u8 ch = usart1.rx[4];
 
 	cal[ch].tare_val = cal[ch].absolute_calibrated;
 }
-void 	 PRESS_PRINT_CommandOperating	( void ) {
+void PRESS_PRINT_CommandOperating(void){
 		static uint8_t print_count;
 		print_count++;
 		if ( print_count == 22 ) {
@@ -339,7 +274,7 @@ void 	 PRESS_PRINT_CommandOperating	( void ) {
 		else
 			HAL_UART_Transmit( &huart4 , &usart1.rx[5] , 32 , 10 );
 }
-void	 PRESS_CALSEND_CommandOperating ( void ) {
+void PRESS_CALSEND_CommandOperating(void){
 	u8 ch_no = 0;
 	usart_debugger = (uint8_t)usart1.rx[7];
 
@@ -362,7 +297,7 @@ void	 PRESS_CALSEND_CommandOperating ( void ) {
 	}
 	slope_calculation(ch_no);
 }
-void 	 PRESS_ANS_Command 				( void ) {
+void PRESS_ANS_Command(void){
 	//	unsigned char *calibrated;
 		usart1.tx[0] = 'A';
 		usart1.tx[1] = 'N';
