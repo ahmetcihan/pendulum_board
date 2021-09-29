@@ -89,6 +89,7 @@ typedef signed int s32;
 #define Electromechanic_ServoReverse        	HAL_GPIO_WritePin( MotorDir_GPIO_Port	 , MotorDir_Pin 	 , GPIO_PIN_RESET )
 #define Electromechanic_ServoForward        	HAL_GPIO_WritePin( MotorDir_GPIO_Port 	 , MotorDir_Pin    , GPIO_PIN_SET   )
 
+void SystemClock_Config(void);
 void _Error_Handler(char *, int);
 
 struct _cal{
@@ -104,17 +105,29 @@ struct _cal{
 };
 extern struct _cal cal[4];
 
-unsigned char step_motor_command;
-unsigned char step_motor_speed[3];
-unsigned int step_motor_requested_pos;
-unsigned char timer_1_msec;
-unsigned char timer_10_msec;
-unsigned char timer_100_msec;
-unsigned char input_status[4];
-unsigned char send_RS485;
+struct _par{
+	float test_start_speed;
+	float failure_threshold;
+	float zero_suppression;
+	float pace_rate;
+	u8 break_percentage;
+};
+extern struct _par parameters;
+
+u32 step_motor_requested_pos;
+u32 _10_usec_counter;
+u8 step_motor_command;
+u8 step_motor_speed[3];
+u8 timer_1_msec;
+u8 timer_10_msec;
+u8 timer_100_msec;
+u8 input_status[4];
+u8 send_RS485;
 u8 max1_dataready;
 u8 max2_dataready;
 u8 max3_dataready;
 u8 max4_dataready;
+float old_load;
+float calculated_pace_rate;
 
 #endif /* __MAIN_H */

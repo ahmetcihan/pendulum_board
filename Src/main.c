@@ -8,8 +8,7 @@
 #include "max11254.h"
 
 struct _cal cal[4];
-
-void SystemClock_Config(void);
+struct _par parameters;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	if (huart->Instance == USART1) {
@@ -46,12 +45,10 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
 void HAL_TIM_PeriodElapsedCallback	( TIM_HandleTypeDef *htim ) {		//	Timer Interrupt Fonksiyonu
 	static uint32_t usn10;
 
-	if (htim->Instance == TIM1) {
-		((TIM1->CR1 & TIM_CR1_DIR) == TIM_CR1_DR_CW ) ?
-				enc_signal_msb++ : enc_signal_msb--;
-	}
 	if (htim->Instance == TIM4) {
 		usn10++;
+
+		_10_usec_counter++;
 
 		if(usart1.buffer_clear_timer > 0) usart1.buffer_clear_timer--;
 		if(usart2.buffer_clear_timer > 0) usart2.buffer_clear_timer--;
@@ -139,16 +136,16 @@ int main(void) {
 	SystemClock_Config();
 	MX_GPIO_Init();
 
-	//MX_TIM1_Init();		//	Encoder sinyalinin bagli oldugu timer modulu
-	MX_TIM8_Init(); 	// 	Duty Modilation 		-> 0 to 14Bit Duty output   ( Usart Control ) [DacPWM]	 [PC8]
-	MX_TIM3_Init();     //  Frequency Modilation 	-> 0.1Hz to 1MHz PWM output.( Usart Control ) [PulseOut][PB4]
+	//MX_TIM1_Init();		//	Encoder
+	//MX_TIM8_Init(); 	// 	Duty Modilation
+	//MX_TIM3_Init();   //  Frequency Modilation
+	MX_TIM4_Init();
 	MX_DMA_Init();
 	MX_SPI2_Init();
 	Max11254_Init();
 	MX_USART1_UART_Init();
 	MX_USART2_Init();
 	MX_UART4_Init();
-	MX_TIM4_Init();
 	Timer3_AutoConsolidation_SpecialFunc(0);
 
 	step_motor_command = 0;
@@ -157,6 +154,8 @@ int main(void) {
 	timer_1_msec = 0;
 	timer_10_msec = 0;
 	timer_100_msec = 0;
+	old_load = 0;
+	_10_usec_counter = 0;
 	send_RS485 = 0;
 	usart_debugger = 0;
 
@@ -174,6 +173,10 @@ int main(void) {
 		if (max1_dataready == 1) {
 			max1_dataready = 0;
 			channel_operation(0);
+			calculated_pace_rate = (cal[0].calibrated - old_load) * (float)100000;
+			calculated_pace_rate = calculated_pace_rate / (float)_10_usec_counter;
+			old_load = cal[0].calibrated;
+			_10_usec_counter = 0;
 		}
 		if (max2_dataready == 1) {
 			max2_dataready = 0;

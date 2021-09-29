@@ -118,7 +118,6 @@ void EXTI9_5_IRQHandler ( void ) {
 void TIM1_UP_TIM10_IRQHandler ( void ) {
   HAL_TIM_IRQHandler(&htim1);
 }
-
 /**
 * @brief This function handles TIM4 global interrupt.
 */

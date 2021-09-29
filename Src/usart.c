@@ -225,6 +225,33 @@ void USART1_receive_operations(void){
 		if (usart1.rx[4] <= 3 )
 			Max11254_GPIOSetting( usart1.rx[4]+1 , usart1.rx[5] );
 	}
+	else if(usart1.rx[0]=='P' && usart1.rx[1]=='R' && usart1.rx[2]=='M' && usart1.rx[3]=='T' ) {
+		char_to_f.u8_val[0] = usart1.rx[4];
+		char_to_f.u8_val[1] = usart1.rx[5];
+		char_to_f.u8_val[2] = usart1.rx[6];
+		char_to_f.u8_val[3] = usart1.rx[7];
+		parameters.test_start_speed = char_to_f.float_val;
+
+		char_to_f.u8_val[0] = usart1.rx[8];
+		char_to_f.u8_val[1] = usart1.rx[9];
+		char_to_f.u8_val[2] = usart1.rx[10];
+		char_to_f.u8_val[3] = usart1.rx[11];
+		parameters.failure_threshold = char_to_f.float_val;
+
+		char_to_f.u8_val[0] = usart1.rx[12];
+		char_to_f.u8_val[1] = usart1.rx[13];
+		char_to_f.u8_val[2] = usart1.rx[14];
+		char_to_f.u8_val[3] = usart1.rx[15];
+		parameters.zero_suppression = char_to_f.float_val;
+
+		char_to_f.u8_val[0] = usart1.rx[16];
+		char_to_f.u8_val[1] = usart1.rx[17];
+		char_to_f.u8_val[2] = usart1.rx[18];
+		char_to_f.u8_val[3] = usart1.rx[19];
+		parameters.pace_rate = char_to_f.float_val;
+
+		parameters.break_percentage = usart1.rx[20];
+	}
 }
 void PRESS_CONV_CommandOperating(void){
 	//	0x30[Hex] = 48[Dec]	,	0x31[Hex] = 49[Dec]
@@ -339,11 +366,17 @@ void PRESS_ANS_Command(void){
 		//last index is 49
 		usart1.tx[50] = usart_debugger;
 
+		char_to_f.float_val = calculated_pace_rate;
+		usart1.tx[51]= char_to_f.s8_val[0];
+		usart1.tx[52]= char_to_f.s8_val[1];
+		usart1.tx[53]= char_to_f.s8_val[2];
+		usart1.tx[54]= char_to_f.s8_val[3];
+
 		uint16_t fcrc;
-		fcrc = CyclicRedundancyCheck( &usart1.tx[0] , 51);
-		usart1.tx[51] = fcrc%256;
-		usart1.tx[52] = fcrc/256;
-		usart1.tx_amount = 53;
+		fcrc = CyclicRedundancyCheck( &usart1.tx[0] , 55);
+		usart1.tx[55] = fcrc%256;
+		usart1.tx[56] = fcrc/256;
+		usart1.tx_amount = 57;
 		usart1_transmit = 1;
 
 		HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );

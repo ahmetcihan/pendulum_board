@@ -33,8 +33,8 @@ void MX_TIM1_Init ( void ) {
 
 	if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
 		_Error_Handler(__FILE__, __LINE__);
-		
-	__HAL_TIM_ENABLE_IT	 ( &htim1 , TIM_IT_UPDATE ); 
+
+	__HAL_TIM_ENABLE_IT	 ( &htim1 , TIM_IT_UPDATE );
 	HAL_TIM_Encoder_Start( &htim1 , TIM_CHANNEL_ALL );
 
 	signal_z_count = 0;
