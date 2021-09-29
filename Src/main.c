@@ -47,7 +47,6 @@ void HAL_TIM_PeriodElapsedCallback	( TIM_HandleTypeDef *htim ) {		//	Timer Inter
 
 	if (htim->Instance == TIM4) {
 		usn10++;
-
 		_10_usec_counter++;
 
 		if(usart1.buffer_clear_timer > 0) usart1.buffer_clear_timer--;
@@ -131,7 +130,20 @@ void usart_buffer_clearance(void){
 		}
 	}
 }
+float EMA(float *raw_signal, u8 filter_coefficient){
+    float EMA = 0;
+    static float past_EMA = 0;
+    float alpha = (float)2/(filter_coefficient+1);
+
+    EMA = (*raw_signal)*alpha + past_EMA*(1-alpha);
+    past_EMA = EMA;
+
+    return EMA;
+}
 int main(void) {
+	float aux_float;
+	float filtered_load;
+
 	HAL_Init();
 	SystemClock_Config();
 	MX_GPIO_Init();
@@ -173,10 +185,14 @@ int main(void) {
 		if (max1_dataready == 1) {
 			max1_dataready = 0;
 			channel_operation(0);
-			calculated_pace_rate = (cal[0].calibrated - old_load) * (float)100000;
-			calculated_pace_rate = calculated_pace_rate / (float)_10_usec_counter;
-			old_load = cal[0].calibrated;
+
+			filtered_load = EMA(&cal[0].calibrated,8);
+			calculated_pace_rate = (filtered_load - old_load);
+			aux_float = (float)100000 / (float)_10_usec_counter;
+			calculated_pace_rate = calculated_pace_rate * aux_float;
+			old_load = filtered_load;
 			_10_usec_counter = 0;
+
 		}
 		if (max2_dataready == 1) {
 			max2_dataready = 0;
