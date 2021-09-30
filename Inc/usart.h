@@ -47,7 +47,9 @@ union 	_char_to_f {
 extern union _char_to_f char_to_f;
 
 u32 stepper_abs_pos;
-u8 usart_debugger;
+u8 usart_debugger_u8;
+u32 usart_debugger_u32;
+float usart_debugger_float;
 u8 usart1_received;
 u8 usart1_transmit;
 

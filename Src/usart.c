@@ -269,12 +269,11 @@ void PRESS_CONV_CommandOperating(void){
 		step_motor_speed[0] = usart1.rx[9];
 		step_motor_speed[1] = usart1.rx[10];
 		step_motor_speed[2] = usart1.rx[11];
+		send_RS485 = 1;
 	}
 	else{
 
 	}
-
-	send_RS485 = 1;
 
 	PRESS_ANS_Command();
 }
@@ -309,7 +308,6 @@ void PRESS_PRINT_CommandOperating(void){
 }
 void PRESS_CALSEND_CommandOperating(void){
 	u8 ch_no = 0;
-	usart_debugger = (uint8_t)usart1.rx[7];
 
 	ch_no = usart1.rx[7];
 	cal[ch_no].point_no = usart1.rx[8];
@@ -370,19 +368,31 @@ void PRESS_ANS_Command(void){
 			usart1.tx[4*i+37]= char_to_f.s8_val[3];
 		}
 		//last index is 49
-		usart1.tx[50] = usart_debugger;
+		usart1.tx[50] = usart_debugger_u8;
 
-		char_to_f.float_val = calculated_pace_rate;
+		char_to_f.float_val = filtered_pace_rate;
 		usart1.tx[51]= char_to_f.s8_val[0];
 		usart1.tx[52]= char_to_f.s8_val[1];
 		usart1.tx[53]= char_to_f.s8_val[2];
 		usart1.tx[54]= char_to_f.s8_val[3];
 
+		char_to_f.u32_val = usart_debugger_u32;
+		usart1.tx[55]= char_to_f.s8_val[0];
+		usart1.tx[56]= char_to_f.s8_val[1];
+		usart1.tx[57]= char_to_f.s8_val[2];
+		usart1.tx[58]= char_to_f.s8_val[3];
+
+		char_to_f.float_val = usart_debugger_float;
+		usart1.tx[59]= char_to_f.s8_val[0];
+		usart1.tx[60]= char_to_f.s8_val[1];
+		usart1.tx[61]= char_to_f.s8_val[2];
+		usart1.tx[62]= char_to_f.s8_val[3];
+
 		uint16_t fcrc;
-		fcrc = CyclicRedundancyCheck( &usart1.tx[0] , 55);
-		usart1.tx[55] = fcrc%256;
-		usart1.tx[56] = fcrc/256;
-		usart1.tx_amount = 57;
+		fcrc = CyclicRedundancyCheck( &usart1.tx[0] , 63);
+		usart1.tx[63] = fcrc%256;
+		usart1.tx[64] = fcrc/256;
+		usart1.tx_amount = 65;
 		usart1_transmit = 1;
 
 		HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );

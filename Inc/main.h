@@ -100,6 +100,9 @@ typedef signed int s32;
 
 void SystemClock_Config(void);
 void _Error_Handler(char *, int);
+float EMA(float *raw_signal, u8 filter_coefficient);
+void bessel_filter_coeffs(void);
+float bessel_filter(float input);
 
 struct _cal{
     double slope[7];
@@ -125,9 +128,15 @@ extern struct _par parameters;
 
 float old_load;
 float filtered_load;
-float calculated_pace_rate;
+float max_load_value;
+float unfiltered_pace_rate;
+float filtered_pace_rate;
+float ax[3], by[3];
+
+u32 PID_delta_t;
 u32 step_motor_requested_pos;
 u32 _10_usec_counter;
+u8 PID_first_in;
 u8 step_motor_command;
 u8 step_motor_speed[3];
 u8 timer_1_msec;

@@ -54,6 +54,7 @@ void HAL_TIM_PeriodElapsedCallback	( TIM_HandleTypeDef *htim ) {		//	Timer Inter
 
 		if ((usn10 % 100) == 0) {
 			timer_1_msec = 1;
+			PID_delta_t++;
 		}
 		if ((usn10 % 1000) == 0) {
 			timer_10_msec = 1;
@@ -130,17 +131,57 @@ void usart_buffer_clearance(void){
 		}
 	}
 }
-float EMA(float *raw_signal, u8 filter_coefficient){
-    float EMA = 0;
-    static float past_EMA = 0;
-    float alpha = (float)2/(filter_coefficient+1);
+float PID(void){
+    static float last_error[3] = {0};
+    static float output = 0;
+    static u8 first_move = 0;
 
-    EMA = (*raw_signal)*alpha + past_EMA*(1-alpha);
-    past_EMA = EMA;
+    float error = 0;
+    float a,b,c;
+    float Ts = (float)PID_delta_t;
+    static float kp,ki,kd;
 
-    return EMA;
+    if(PID_first_in){
+        PID_first_in = 0;
+        first_move = 7;
+        output = parameters.test_start_speed;
+        last_error[0] = 0;
+        last_error[1] = 0;
+        last_error[2] = 0;
+        kp = 1000;
+        ki = (float)5;
+        kd = 48250;
+    }
+    else{
+        error = parameters.pace_rate - filtered_pace_rate;
+
+        last_error[2] = last_error[1];
+        last_error[1] = last_error[0];
+        last_error[0] = error;
+
+        a = kp + kd/(float)Ts;
+        b = -kp + (ki*(float)Ts) - (2*kd)/(float)Ts;
+        c = kd/Ts;
+
+        output = output + (a*last_error[0] + b*last_error[1] + c*last_error[2]);
+        if(output > 200000) output = 200000;
+        if(output < 0) output = 0;
+
+		usart_debugger_u8 = PID_delta_t;
+		usart_debugger_u32 = output;
+		usart_debugger_float = error;
+
+    }
+    PID_delta_t = 0;
+    if(first_move > 0){
+        first_move--;
+        output = 50;
+    }
+    return output;
 }
+
 void control_process(void){
+	u32 PID_speed;
 
 	switch (control_process_tmp) {
 		case 0:
@@ -154,14 +195,28 @@ void control_process(void){
 			control_process_tmp++;
 			break;
 		case 2:
-			usart_debugger++;
-
 			if(filtered_load > parameters.failure_threshold){
-				step_motor_command = STEPPER_COMMAND_STOP;
+				//step_motor_command = STEPPER_COMMAND_STOP;
+				max_load_value = 0;
+				PID_first_in = 1;
+				PID_delta_t = 0;
 				control_process_tmp++;
 			}
 			break;
 		case 3:
+            if(filtered_load > max_load_value){
+                max_load_value = filtered_load;
+            }
+            if(filtered_load <= (max_load_value - (max_load_value * parameters.break_percentage)/100)){
+				control_process_tmp++;
+            }
+            PID_speed = PID();
+			step_motor_speed[0] = ((PID_speed / 65536) % 256);
+			step_motor_speed[1] = ((PID_speed / 256) % 256);
+			step_motor_speed[2] = ((PID_speed) % 256);
+			break;
+		case 4:
+			step_motor_command = STEPPER_COMMAND_STOP;
 			break;
 		default:
 			break;
@@ -185,7 +240,8 @@ int main(void) {
 	MX_USART1_UART_Init();
 	MX_USART2_Init();
 	MX_UART4_Init();
-	Timer3_AutoConsolidation_SpecialFunc(0);
+	//Timer3_AutoConsolidation_SpecialFunc(0);
+    bessel_filter_coeffs();
 
 	step_motor_command = STEPPER_COMMAND_STOP;
 	step_motor_requested_pos = 0;
@@ -196,7 +252,9 @@ int main(void) {
 	old_load = 0;
 	_10_usec_counter = 0;
 	send_RS485 = 0;
-	usart_debugger = 0;
+	usart_debugger_u8 = 0;
+	usart_debugger_u32 = 0;
+	usart_debugger_float = 0;
 	control_process_tmp = 0;
 	TMC_command = TMC_STOP;
 
@@ -216,14 +274,19 @@ int main(void) {
 			channel_operation(0);
 
 			filtered_load = EMA(&cal[0].calibrated,8);
-			calculated_pace_rate = (filtered_load - old_load);
-			aux_float = (float)100000 / (float)_10_usec_counter;
-			calculated_pace_rate = calculated_pace_rate * aux_float;
-			old_load = filtered_load;
-			_10_usec_counter = 0;
-			if(TMC_command == TMC_RUN){
 
+			unfiltered_pace_rate = (filtered_load - old_load);
+			aux_float = (float)100000 / (float)_10_usec_counter;
+			unfiltered_pace_rate = unfiltered_pace_rate * aux_float;
+			old_load = filtered_load;
+
+            filtered_pace_rate = bessel_filter(unfiltered_pace_rate);
+
+			_10_usec_counter = 0;
+
+			if(TMC_command == TMC_RUN){
 				control_process();
+				send_RS485 = 1;
 			}
 
 		}
