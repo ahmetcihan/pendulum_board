@@ -140,9 +140,36 @@ float EMA(float *raw_signal, u8 filter_coefficient){
 
     return EMA;
 }
+void control_process(void){
+
+	switch (control_process_tmp) {
+		case 0:
+			step_motor_speed[0] = ((parameters.test_start_speed / 65536) % 256);
+			step_motor_speed[1] = ((parameters.test_start_speed / 256) % 256);
+			step_motor_speed[2] = ((parameters.test_start_speed) % 256);
+			control_process_tmp++;
+			break;
+		case 1:
+			step_motor_command = STEPPER_COMMAND_RUN_UP;
+			control_process_tmp++;
+			break;
+		case 2:
+			usart_debugger++;
+
+			if(filtered_load > parameters.failure_threshold){
+				step_motor_command = STEPPER_COMMAND_STOP;
+				control_process_tmp++;
+			}
+			break;
+		case 3:
+			break;
+		default:
+			break;
+	}
+
+}
 int main(void) {
 	float aux_float;
-	float filtered_load;
 
 	HAL_Init();
 	SystemClock_Config();
@@ -160,7 +187,7 @@ int main(void) {
 	MX_UART4_Init();
 	Timer3_AutoConsolidation_SpecialFunc(0);
 
-	step_motor_command = 0;
+	step_motor_command = STEPPER_COMMAND_STOP;
 	step_motor_requested_pos = 0;
 	stepper_abs_pos = 0;
 	timer_1_msec = 0;
@@ -170,6 +197,8 @@ int main(void) {
 	_10_usec_counter = 0;
 	send_RS485 = 0;
 	usart_debugger = 0;
+	control_process_tmp = 0;
+	TMC_command = TMC_STOP;
 
 	while (1) {
 		usart_buffer_clearance();
@@ -192,6 +221,10 @@ int main(void) {
 			calculated_pace_rate = calculated_pace_rate * aux_float;
 			old_load = filtered_load;
 			_10_usec_counter = 0;
+			if(TMC_command == TMC_RUN){
+
+				control_process();
+			}
 
 		}
 		if (max2_dataready == 1) {

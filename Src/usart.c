@@ -230,7 +230,7 @@ void USART1_receive_operations(void){
 		char_to_f.u8_val[1] = usart1.rx[5];
 		char_to_f.u8_val[2] = usart1.rx[6];
 		char_to_f.u8_val[3] = usart1.rx[7];
-		parameters.test_start_speed = char_to_f.float_val;
+		parameters.test_start_speed = char_to_f.u32_val;
 
 		char_to_f.u8_val[0] = usart1.rx[8];
 		char_to_f.u8_val[1] = usart1.rx[9];
@@ -262,11 +262,17 @@ void PRESS_CONV_CommandOperating(void){
 	if (usart1.rx[5] == 0x30 ) 	Electromechanic_RELAY_OFF_StartStop;
 	else if (usart1.rx[5] == 0x31 ) 	Electromechanic_RELAY_ON_StartStop;
 
-	step_motor_command = usart1.rx[6];
-	step_motor_requested_pos = (uint32_t)((uint32_t)usart1.rx[7] * 256 + (uint32_t)usart1.rx[8]);
-	step_motor_speed[0] = usart1.rx[9];
-	step_motor_speed[1] = usart1.rx[10];
-	step_motor_speed[2] = usart1.rx[11];
+	TMC_command = usart1.rx[12];
+	if(TMC_command == TMC_STOP){
+		step_motor_command = usart1.rx[6];
+		step_motor_requested_pos = (uint32_t)((uint32_t)usart1.rx[7] * 256 + (uint32_t)usart1.rx[8]);
+		step_motor_speed[0] = usart1.rx[9];
+		step_motor_speed[1] = usart1.rx[10];
+		step_motor_speed[2] = usart1.rx[11];
+	}
+	else{
+
+	}
 
 	send_RS485 = 1;
 
@@ -313,7 +319,7 @@ void PRESS_CALSEND_CommandOperating(void){
 		char_to_f.u8_val[1] = usart1.rx[10 + 4*i];
 		char_to_f.u8_val[2] = usart1.rx[11 + 4*i];
 		char_to_f.u8_val[3] = usart1.rx[12 + 4*i];
-		cal[ch_no].real_val[i] = char_to_f.int_val;
+		cal[ch_no].real_val[i] = char_to_f.s32_val;
 	}
 	for( uint8_t i = 0 ; i < 8 ; i++ ) {
 		char_to_f.u8_val[0] = usart1.rx[41 + 4*i];
@@ -334,7 +340,7 @@ void PRESS_ANS_Command(void){
 			//uint8_t gain_force = (uint8_t)( MAX[i].Gain +  2 );
 			uint8_t gain_force =  MAX[resultBinding[i]/6].chGain[resultBinding[i]%6] + 2;	//(uint8_t)( MAX[i].Gain +  2 );
 
-			char_to_f.int_val = cal[i].signed_raw;
+			char_to_f.s32_val = cal[i].signed_raw;
 			usart1.tx[5*i+3]= char_to_f.s8_val[0];
 			usart1.tx[5*i+4]= char_to_f.s8_val[1];
 			usart1.tx[5*i+5]= char_to_f.s8_val[2];

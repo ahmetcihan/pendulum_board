@@ -89,6 +89,15 @@ typedef signed int s32;
 #define Electromechanic_ServoReverse        	HAL_GPIO_WritePin( MotorDir_GPIO_Port	 , MotorDir_Pin 	 , GPIO_PIN_RESET )
 #define Electromechanic_ServoForward        	HAL_GPIO_WritePin( MotorDir_GPIO_Port 	 , MotorDir_Pin    , GPIO_PIN_SET   )
 
+#define STEPPER_COMMAND_RUN_DOWN    1
+#define STEPPER_COMMAND_RUN_UP      2
+#define STEPPER_COMMAND_STOP        3
+#define STEPPER_COMMAND_POS_RESET   4
+#define STEPPER_COMMAND_GO_POS      5
+
+#define TMC_STOP    0
+#define TMC_RUN     1
+
 void SystemClock_Config(void);
 void _Error_Handler(char *, int);
 
@@ -106,7 +115,7 @@ struct _cal{
 extern struct _cal cal[4];
 
 struct _par{
-	float test_start_speed;
+	u32 test_start_speed;
 	float failure_threshold;
 	float zero_suppression;
 	float pace_rate;
@@ -114,6 +123,9 @@ struct _par{
 };
 extern struct _par parameters;
 
+float old_load;
+float filtered_load;
+float calculated_pace_rate;
 u32 step_motor_requested_pos;
 u32 _10_usec_counter;
 u8 step_motor_command;
@@ -127,7 +139,7 @@ u8 max1_dataready;
 u8 max2_dataready;
 u8 max3_dataready;
 u8 max4_dataready;
-float old_load;
-float calculated_pace_rate;
+u8 control_process_tmp;
+u8 TMC_command;
 
 #endif /* __MAIN_H */

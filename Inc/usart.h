@@ -41,7 +41,8 @@ union 	_char_to_f {
 	float float_val;
 	u8 u8_val[4];
 	char s8_val[4];
-	s32 int_val;
+	s32 s32_val;
+	u32 u32_val;
 };
 extern union _char_to_f char_to_f;
 
