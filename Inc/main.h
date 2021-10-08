@@ -95,8 +95,9 @@ typedef signed int s32;
 #define STEPPER_COMMAND_POS_RESET   4
 #define STEPPER_COMMAND_GO_POS      5
 
-#define TMC_STOP    0
-#define TMC_RUN     1
+#define TMC_STOP    		0
+#define TMC_RUN     		1
+#define TMC_AUTOTUNING     	2
 
 void SystemClock_Config(void);
 void _Error_Handler(char *, int);
@@ -119,6 +120,9 @@ extern struct _cal cal[4];
 
 struct _par{
 	u32 test_start_speed;
+	u32 step_first_speed;
+	u32 step_second_speed;
+	u32 step_transition_time;
 	float failure_threshold;
 	float zero_suppression;
 	float pace_rate;
@@ -132,10 +136,14 @@ float max_load_value;
 float unfiltered_pace_rate;
 float filtered_pace_rate;
 float ax[3], by[3];
+float calculated_kp;
+float calculated_ki;
+float calculated_kd;
 
 u32 PID_delta_t;
 u32 step_motor_requested_pos;
 u32 _10_usec_counter;
+u32 step_timer;
 u8 PID_first_in;
 u8 step_motor_command;
 u8 step_motor_speed[3];
@@ -150,5 +158,8 @@ u8 max3_dataready;
 u8 max4_dataready;
 u8 control_process_tmp;
 u8 TMC_command;
+u8 step_response_first_in;
+u8 autotuning_in_operation;
+u8 autotuning_is_finished;
 
 #endif /* __MAIN_H */

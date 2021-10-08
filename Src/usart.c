@@ -251,6 +251,20 @@ void USART1_receive_operations(void){
 		parameters.pace_rate = char_to_f.float_val;
 
 		parameters.break_percentage = usart1.rx[20];
+
+		char_to_f.u8_val[0] = usart1.rx[21];
+		char_to_f.u8_val[1] = usart1.rx[22];
+		char_to_f.u8_val[2] = usart1.rx[23];
+		char_to_f.u8_val[3] = usart1.rx[24];
+		parameters.step_first_speed = char_to_f.u32_val;
+
+		char_to_f.u8_val[0] = usart1.rx[25];
+		char_to_f.u8_val[1] = usart1.rx[26];
+		char_to_f.u8_val[2] = usart1.rx[27];
+		char_to_f.u8_val[3] = usart1.rx[28];
+		parameters.step_second_speed = char_to_f.u32_val;
+
+		parameters.step_transition_time = usart1.rx[29];
 	}
 }
 void PRESS_CONV_CommandOperating(void){
@@ -271,8 +285,12 @@ void PRESS_CONV_CommandOperating(void){
 		step_motor_speed[2] = usart1.rx[11];
 		send_RS485 = 1;
 	}
-	else{
-
+	else if(TMC_command == TMC_AUTOTUNING){
+		if(autotuning_is_finished == 0){
+			if(autotuning_in_operation == 0){
+				step_response_first_in = 1;
+			}
+		}
 	}
 
 	PRESS_ANS_Command();
@@ -382,17 +400,27 @@ void PRESS_ANS_Command(void){
 		usart1.tx[57]= char_to_f.s8_val[2];
 		usart1.tx[58]= char_to_f.s8_val[3];
 
-		char_to_f.float_val = usart_debugger_float;
+		char_to_f.float_val = usart_debugger_float[0];
 		usart1.tx[59]= char_to_f.s8_val[0];
 		usart1.tx[60]= char_to_f.s8_val[1];
 		usart1.tx[61]= char_to_f.s8_val[2];
 		usart1.tx[62]= char_to_f.s8_val[3];
+		char_to_f.float_val = usart_debugger_float[1];
+		usart1.tx[63]= char_to_f.s8_val[0];
+		usart1.tx[64]= char_to_f.s8_val[1];
+		usart1.tx[65]= char_to_f.s8_val[2];
+		usart1.tx[66]= char_to_f.s8_val[3];
+		char_to_f.float_val = usart_debugger_float[2];
+		usart1.tx[67]= char_to_f.s8_val[0];
+		usart1.tx[68]= char_to_f.s8_val[1];
+		usart1.tx[69]= char_to_f.s8_val[2];
+		usart1.tx[70]= char_to_f.s8_val[3];
 
 		uint16_t fcrc;
-		fcrc = CyclicRedundancyCheck( &usart1.tx[0] , 63);
-		usart1.tx[63] = fcrc%256;
-		usart1.tx[64] = fcrc/256;
-		usart1.tx_amount = 65;
+		fcrc = CyclicRedundancyCheck( &usart1.tx[0] , 71);
+		usart1.tx[71] = fcrc%256;
+		usart1.tx[72] = fcrc/256;
+		usart1.tx_amount = 73;
 		usart1_transmit = 1;
 
 		HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );

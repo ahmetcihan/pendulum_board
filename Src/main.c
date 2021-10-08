@@ -6,6 +6,7 @@
 #include "usart.h"
 #include "gpio.h"
 #include "max11254.h"
+#include "math.h"
 
 struct _cal cal[4];
 struct _par parameters;
@@ -55,6 +56,7 @@ void HAL_TIM_PeriodElapsedCallback	( TIM_HandleTypeDef *htim ) {		//	Timer Inter
 		if ((usn10 % 100) == 0) {
 			timer_1_msec = 1;
 			PID_delta_t++;
+			step_timer++;
 		}
 		if ((usn10 % 1000) == 0) {
 			timer_10_msec = 1;
@@ -134,7 +136,7 @@ void usart_buffer_clearance(void){
 float PID(void){
     static float last_error[3] = {0};
     static float output = 0;
-    static u8 first_move = 0;
+    //static u8 first_move = 0;
 
     float error = 0;
     float a,b,c;
@@ -143,14 +145,14 @@ float PID(void){
 
     if(PID_first_in){
         PID_first_in = 0;
-        first_move = 7;
+        //first_move = 7;
         output = parameters.test_start_speed;
         last_error[0] = 0;
         last_error[1] = 0;
         last_error[2] = 0;
-        kp = 1000;
-        ki = (float)5;
-        kd = 48250;
+        kp = (float)18358;
+        ki = (float)97;
+        kd = (float)464182;
     }
     else{
         error = parameters.pace_rate - filtered_pace_rate;
@@ -159,27 +161,168 @@ float PID(void){
         last_error[1] = last_error[0];
         last_error[0] = error;
 
-        a = kp + kd/(float)Ts;
-        b = -kp + (ki*(float)Ts) - (2*kd)/(float)Ts;
-        c = kd/Ts;
+        a = kp + kd / (float)Ts;
+        b = -kp + (ki * (float)Ts) - ((float)2 * kd)/(float)Ts;
+        c = kd / Ts;
 
-        output = output + (a*last_error[0] + b*last_error[1] + c*last_error[2]);
+        output = output + (a * last_error[0] + b * last_error[1] + c * last_error[2]);
         if(output > 200000) output = 200000;
-        if(output < 0) output = 0;
 
-		usart_debugger_u8 = PID_delta_t;
-		usart_debugger_u32 = output;
-		usart_debugger_float = error;
+        if(output >= 0){
+            step_motor_command = STEPPER_COMMAND_RUN_UP;
+        }
+        else{
+            step_motor_command = STEPPER_COMMAND_RUN_DOWN;
+        }
 
     }
+	usart_debugger_u8 = PID_delta_t;
+	//usart_debugger_u32 = step_timer;
+	usart_debugger_float[0] = output;
+	usart_debugger_float[1] = error;
+	usart_debugger_float[2] = 0;
     PID_delta_t = 0;
-    if(first_move > 0){
-        first_move--;
-        output = 50;
-    }
-    return output;
-}
+//    if(first_move > 0){
+//        first_move--;
+//        output = 50;
+//    }
 
+    return fabs(output);
+}
+void step_response(void){
+    static u8 step_tmp = 0;
+    static float first_step_values[5] = {0};
+    static float last_step_values[17] = {0};
+    static float average_first_step = 0;
+    static float average_last_step = 0;
+    static int meta_count = 0;
+    static float meta_val[400] = {0};
+    static int time_val[400] = {0};
+
+    float tmc_y1 = 0;
+    float tmc_y2 = 0;
+    int tmc_x1 = 0;
+    int tmc_x2 = 0;
+    float dead_time = 0;
+    float delta_p = 0;
+    float K_halt = 0;
+    float T_halt = 0;
+    u8 checker;
+
+    if(step_response_first_in == 1){
+        step_response_first_in = 0;
+        step_timer = 0;
+        autotuning_in_operation = 1;
+
+        step_tmp = 0;
+        average_first_step = 0;
+        average_last_step = 0;
+        meta_count = 0;
+        for(u8 j = 0; j < 5; j++){
+            first_step_values[j] = 0;
+        }
+        for(u8 j = 0; j < 17; j++){
+            last_step_values[j] = 0;
+        }
+        for(u32 j = 0; j < 400; j++){
+            meta_val[j] = 0;
+            time_val[j] = 0;
+        }
+    }
+
+    switch (step_tmp) {
+    case 0:
+        step_motor_command = STEPPER_COMMAND_RUN_UP;
+        step_tmp++;
+        break;
+    case 1:
+		step_motor_speed[0] = ((parameters.step_first_speed / 65536) % 256);
+		step_motor_speed[1] = ((parameters.step_first_speed / 256) % 256);
+		step_motor_speed[2] = ((parameters.step_first_speed) % 256);
+        step_timer = 0;
+        meta_count = 0;
+        step_tmp++;
+        break;
+    case 2:
+        for(u8 i = 0; i < 4 ; i++){
+            first_step_values[i] = first_step_values[i+1];
+        }
+        first_step_values[4] = filtered_pace_rate;
+
+        if(step_timer >= parameters.step_transition_time * 1000){
+    		step_motor_speed[0] = ((parameters.step_second_speed / 65536) % 256);
+    		step_motor_speed[1] = ((parameters.step_second_speed / 256) % 256);
+    		step_motor_speed[2] = ((parameters.step_second_speed) % 256);
+
+            step_tmp++;
+            average_first_step = (first_step_values[0] + first_step_values[1] +
+                    first_step_values[2] + first_step_values[3] + first_step_values[4]) / (float)5;
+            time_val[meta_count] = step_timer;
+            meta_val[meta_count++] = average_first_step;
+        }
+        break;
+    case 3:
+        average_last_step = filtered_pace_rate;
+        for(u8 i = 0; i < 16 ; i++){
+            last_step_values[i] = last_step_values[i+1];
+            average_last_step += last_step_values[i];
+        }
+        last_step_values[16] = filtered_pace_rate;
+
+        average_last_step = average_last_step / (float)17;
+
+        if(meta_count < 399){
+            time_val[meta_count] = step_timer;
+            meta_val[meta_count++] = filtered_pace_rate;
+        }
+        checker = 0;
+        for(u8 i = 0; i < 17 ; i++){
+            if((fabs(average_last_step - last_step_values[i])) <= (((float)0.1) * average_last_step)){
+                checker++;
+            }
+        }
+        if(checker == 17){
+            step_tmp++;
+            //qDebug() << "meta_count : " << meta_count;
+        }
+        break;
+    case 4:
+    	tmc_y1 = ((float)0.632) * (meta_val[meta_count-1] - meta_val[0]) + meta_val[0]; //y1 detected
+    	tmc_y2 = ((float)0.283) * (meta_val[meta_count-1] - meta_val[0]) + meta_val[0]; //y2 detected
+    	tmc_x1 = 0;
+    	tmc_x2 = 0;
+
+        for (int i = 0; i < meta_count; i++){
+            if(tmc_y1 >= meta_val[i]){
+            	tmc_x1 = i; //x1 detected, the point for y1
+            }
+            if(tmc_y2 >= meta_val[i]){
+            	tmc_x2 = i; //x2 detected, the point for y2
+            }
+        }
+        dead_time = (((float)time_val[tmc_x1] - (float)time_val[0]) - ((float)1.5) * ((float)time_val[tmc_x1] - (float)time_val[tmc_x2]));
+        delta_p = (float)parameters.step_second_speed - (float)parameters.step_first_speed;
+        K_halt = (meta_val[meta_count-1] - meta_val[0]) / delta_p;
+        T_halt = (float)time_val[tmc_x1] - (float)time_val[tmc_x2];
+
+        calculated_kp = (T_halt / (K_halt * dead_time)) * (dead_time / ((float)4 * T_halt) + (float)4 / (float)3);
+        calculated_ki = ((T_halt / (K_halt * dead_time)) * (dead_time / ((float)4*T_halt) + (float)4 / (float)3))
+        		/ (dead_time * (((float)32 * T_halt + (float)6 * dead_time)/((float)13 * T_halt + (float)8 * dead_time)));
+        calculated_kd = ((T_halt / (K_halt * dead_time)) * (dead_time/((float)4 * T_halt) + (float)4 / (float)3))
+        		* (dead_time * ((float)4 * T_halt / ((float)2 * dead_time + (float)11 * T_halt)));
+        step_tmp++;
+        break;
+    case 5:
+		step_motor_command = STEPPER_COMMAND_STOP;
+		autotuning_in_operation = 0;
+		autotuning_is_finished = 1;
+        step_tmp++;
+    	break;
+    default:
+        break;
+    }
+
+}
 void control_process(void){
 	u32 PID_speed;
 
@@ -195,7 +338,7 @@ void control_process(void){
 			control_process_tmp++;
 			break;
 		case 2:
-			if(filtered_load > parameters.failure_threshold){
+			if(filtered_load > parameters.zero_suppression){
 				//step_motor_command = STEPPER_COMMAND_STOP;
 				max_load_value = 0;
 				PID_first_in = 1;
@@ -254,9 +397,15 @@ int main(void) {
 	send_RS485 = 0;
 	usart_debugger_u8 = 0;
 	usart_debugger_u32 = 0;
-	usart_debugger_float = 0;
+	usart_debugger_float[0] = 0;
+	usart_debugger_float[1] = 0;
+	usart_debugger_float[2] = 0;
 	control_process_tmp = 0;
 	TMC_command = TMC_STOP;
+	step_timer = 0;
+	step_response_first_in = 1;
+	autotuning_in_operation = 0;
+	autotuning_is_finished = 0;
 
 	while (1) {
 		usart_buffer_clearance();
@@ -288,6 +437,11 @@ int main(void) {
 				control_process();
 				send_RS485 = 1;
 			}
+			else if(TMC_command == TMC_AUTOTUNING){
+				step_response();
+				send_RS485 = 1;
+			}
+
 
 		}
 		if (max2_dataready == 1) {
