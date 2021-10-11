@@ -101,7 +101,8 @@ typedef signed int s32;
 
 void SystemClock_Config(void);
 void _Error_Handler(char *, int);
-float EMA(float *raw_signal, u8 filter_coefficient);
+s32 EMA_raw(s32 *raw_signal, u8 filter_coefficient);
+float EMA_load(float *raw_signal, u8 filter_coefficient);
 void bessel_filter_coeffs(void);
 float bessel_filter(float input);
 
@@ -112,6 +113,7 @@ struct _cal{
     float absolute_calibrated;
     float calibrated;
     s32 signed_raw;
+    s32 signed_raw_filtered;
     u32 unsigned_raw;
     int real_val[8];
     u8 point_no;

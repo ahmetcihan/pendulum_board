@@ -1,7 +1,17 @@
 #include "main.h"
 #include "math.h"
 
-float EMA(float *raw_signal, u8 filter_coefficient){
+s32 EMA_raw(s32 *raw_signal, u8 filter_coefficient){
+    float EMA = 0;
+    static float past_EMA = 0;
+    float alpha = (float)2/(filter_coefficient+1);
+
+    EMA = (*raw_signal)*alpha + past_EMA*(1-alpha);
+    past_EMA = EMA;
+
+    return (s32)EMA;
+}
+float EMA_load(float *raw_signal, u8 filter_coefficient){
     float EMA = 0;
     static float past_EMA = 0;
     float alpha = (float)2/(filter_coefficient+1);
@@ -14,7 +24,7 @@ float EMA(float *raw_signal, u8 filter_coefficient){
 
 void bessel_filter_coeffs(void){
     float samplerate = 400;
-    float cutoff = 20;
+    float cutoff = 2;
 
     float QcRaw  = (2.0 * M_PI * cutoff) / (1.0*samplerate);
     float QcWarp = 1.0* tan(QcRaw); // Warp cutoff frequency

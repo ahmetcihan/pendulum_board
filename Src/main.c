@@ -106,6 +106,8 @@ void channel_operation(u8 no){
 			cal[no].signed_raw = -cal[no].unsigned_raw;
 		}
 	}
+	cal[0].signed_raw_filtered = EMA_raw(&cal[0].signed_raw,8);
+
 	cal[no].calibrated = evaluate_calibrated_values(no);
 }
 void usart_buffer_clearance(void){
@@ -150,9 +152,9 @@ float PID(void){
         last_error[0] = 0;
         last_error[1] = 0;
         last_error[2] = 0;
-        kp = (float)18358;
-        ki = (float)97;
-        kd = (float)464182;
+        kp = (float)3600;
+        ki = (float)27;
+        kd = (float)84000;
     }
     else{
         error = parameters.pace_rate - filtered_pace_rate;
@@ -176,16 +178,7 @@ float PID(void){
         }
 
     }
-	usart_debugger_u8 = PID_delta_t;
-	//usart_debugger_u32 = step_timer;
-	usart_debugger_float[0] = output;
-	usart_debugger_float[1] = error;
-	usart_debugger_float[2] = 0;
     PID_delta_t = 0;
-//    if(first_move > 0){
-//        first_move--;
-//        output = 50;
-//    }
 
     return fabs(output);
 }
@@ -321,6 +314,11 @@ void step_response(void){
     default:
         break;
     }
+	usart_debugger_u8 = 0;
+	usart_debugger_u32 = 0;
+	usart_debugger_float[0] = calculated_kp;
+	usart_debugger_float[1] = calculated_ki;
+	usart_debugger_float[2] = calculated_kd;
 
 }
 void control_process(void){
@@ -420,9 +418,11 @@ int main(void) {
 		}
 		if (max1_dataready == 1) {
 			max1_dataready = 0;
+			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
+
 			channel_operation(0);
 
-			filtered_load = EMA(&cal[0].calibrated,8);
+			filtered_load = EMA_load(&cal[0].calibrated,24);
 
 			unfiltered_pace_rate = (filtered_load - old_load);
 			aux_float = (float)100000 / (float)_10_usec_counter;

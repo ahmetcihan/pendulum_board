@@ -603,8 +603,8 @@ void 		Max11254_Init					( void ) {
 	channel_polarity[2] = 0;
 	channel_polarity[3] = 0;
 
-	for( uint8_t max=0 ; max<4 ; max++ ) {
-		for( uint8_t ch=0 ; ch<6 ; ch++ ) {
+	for(uint8_t max = 0 ; max < 4 ; max++ ) {
+		for(uint8_t ch = 0 ; ch < 6 ; ch++ ) {
 			MAX[max].chResult[ch]	= 0x00000000;
 			MAX[max].chRead[ch]		= CH_NotREAD;
 			MAX[max].chGain[ch]		= (GAIN)GAIN_Disb;
@@ -620,7 +620,7 @@ void 		Max11254_Init					( void ) {
 
 	/* MAX11254 - 1 Values Init */
 	MAX[0].Gain = GAIN_x128;
-	MAX[0].RateNumber = 0;
+	MAX[0].RateNumber = 2;
 	MAX[0].chRead[4] = CH_READ;
 	MAX[0].chGain[4] = (GAIN)GAIN_x128;
 	MAX[0].chRead[5] = CH_NotREAD;
