@@ -356,7 +356,7 @@ void PRESS_ANS_Command(void){
 			//uint8_t gain_force = (uint8_t)( MAX[i].Gain +  2 );
 			uint8_t gain_force =  MAX[resultBinding[i]/6].chGain[resultBinding[i]%6] + 2;	//(uint8_t)( MAX[i].Gain +  2 );
 
-			char_to_f.s32_val = cal[i].signed_raw;
+			char_to_f.s32_val = cal[i].signed_raw_filtered;
 			usart1.tx[5*i+3]= char_to_f.s8_val[0];
 			usart1.tx[5*i+4]= char_to_f.s8_val[1];
 			usart1.tx[5*i+5]= char_to_f.s8_val[2];

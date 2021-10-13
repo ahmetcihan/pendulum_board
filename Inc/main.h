@@ -101,10 +101,14 @@ typedef signed int s32;
 
 void SystemClock_Config(void);
 void _Error_Handler(char *, int);
-s32 EMA_raw(s32 *raw_signal, u8 filter_coefficient);
+s32 EMA_raw(s32 raw_signal, u8 filter_coefficient);
+s32 SMA_raw(s32 raw_signal, u8 filter_coefficient);
 float EMA_load(float *raw_signal, u8 filter_coefficient);
+float SMA_load(float load_signal,u8 filter_coefficient);
+
 void bessel_filter_coeffs(void);
 float bessel_filter(float input);
+void my_debugger(u8 u8_v, u32 u32_v, float f_0, float f_1, float f_2);
 
 struct _cal{
     double slope[7];

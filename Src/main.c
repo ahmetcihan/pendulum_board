@@ -103,13 +103,27 @@ void channel_operation(u8 no){
 	if   ( MAX[no].polarity == POLARITY_BIPOLAR ) {
 		if (cal[no].unsigned_raw > 0x7FFFFF) {
 			cal[no].unsigned_raw = (0xFFFFFF + 1) - cal[no].unsigned_raw;
-			cal[no].signed_raw = -cal[no].unsigned_raw;
+			cal[no].signed_raw = -1* (s32)cal[no].unsigned_raw;
 		}
 	}
-	cal[0].signed_raw_filtered = EMA_raw(&cal[0].signed_raw,8);
+	if(no == 0){
+		cal[0].signed_raw_filtered = SMA_raw(cal[0].signed_raw,8);
+	}
+	else{
+		cal[no].signed_raw_filtered = cal[no].signed_raw;
+	}
 
 	cal[no].calibrated = evaluate_calibrated_values(no);
 }
+void my_debugger(u8 u8_v, u32 u32_v, float f_0, float f_1, float f_2){
+	usart_debugger_u8 = u8_v;
+	usart_debugger_u32 = u32_v;
+	usart_debugger_float[0] = f_0;
+	usart_debugger_float[1] = f_1;
+	usart_debugger_float[2] = f_2;
+
+}
+
 void usart_buffer_clearance(void){
 	if (usart2.data_received == 1) {
 		usart2.data_received = 0;
@@ -314,12 +328,6 @@ void step_response(void){
     default:
         break;
     }
-	usart_debugger_u8 = 0;
-	usart_debugger_u32 = 0;
-	usart_debugger_float[0] = calculated_kp;
-	usart_debugger_float[1] = calculated_ki;
-	usart_debugger_float[2] = calculated_kd;
-
 }
 void control_process(void){
 	u32 PID_speed;
@@ -422,16 +430,21 @@ int main(void) {
 
 			channel_operation(0);
 
-			filtered_load = EMA_load(&cal[0].calibrated,24);
+			filtered_load = SMA_load(cal[0].calibrated,8);
+			//filtered_load = cal[0].calibrated;
 
 			unfiltered_pace_rate = (filtered_load - old_load);
 			aux_float = (float)100000 / (float)_10_usec_counter;
 			unfiltered_pace_rate = unfiltered_pace_rate * aux_float;
+
 			old_load = filtered_load;
+			_10_usec_counter = 0;
 
             filtered_pace_rate = bessel_filter(unfiltered_pace_rate);
 
-			_10_usec_counter = 0;
+            my_debugger(0,0,unfiltered_pace_rate,filtered_pace_rate,filtered_load);
+
+
 
 			if(TMC_command == TMC_RUN){
 				control_process();

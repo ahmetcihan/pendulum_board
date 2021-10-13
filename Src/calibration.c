@@ -45,7 +45,7 @@ void slope_calculation(uint8_t no){
 double evaluate_calibrated_values(uint8_t no){
     double value = 0;
     double aux = 0;
-    s32 tared = cal[no].signed_raw;
+    s32 tared = cal[no].signed_raw_filtered;
 
     switch (cal[no].point_no) {
     case 8:

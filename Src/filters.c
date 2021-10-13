@@ -1,12 +1,30 @@
 #include "main.h"
 #include "math.h"
 
-s32 EMA_raw(s32 *raw_signal, u8 filter_coefficient){
+s32 SMA_raw(s32 raw_signal,u8 filter_coefficient){
+    static s32 running_average[64];
+    float processed_value;
+    u8 j;
+
+    if(filter_coefficient > 63) filter_coefficient = 63;
+
+    running_average[filter_coefficient-1] = raw_signal;
+    processed_value = raw_signal;
+    for (j = 0; j < (filter_coefficient-1); j++){
+        processed_value += running_average[j];
+            running_average[j] = running_average[j+1];
+    }
+    processed_value = (processed_value)/((float)filter_coefficient);
+
+    return (s32)processed_value;
+}
+
+s32 EMA_raw(s32 raw_signal, u8 filter_coefficient){
     float EMA = 0;
     static float past_EMA = 0;
-    float alpha = (float)2/(filter_coefficient+1);
+    float alpha = (float)2/(filter_coefficient + (float)1);
 
-    EMA = (*raw_signal)*alpha + past_EMA*(1-alpha);
+    EMA = (float)raw_signal*alpha + past_EMA*((float)1-alpha);
     past_EMA = EMA;
 
     return (s32)EMA;
@@ -21,22 +39,39 @@ float EMA_load(float *raw_signal, u8 filter_coefficient){
 
     return EMA;
 }
+float SMA_load(float load_signal,u8 filter_coefficient){
+    static float running_average[64];
+    float processed_value;
+    u8 j;
+
+    if(filter_coefficient > 63) filter_coefficient = 63;
+
+    running_average[filter_coefficient-1] = load_signal;
+    processed_value = load_signal;
+    for (j = 0; j < (filter_coefficient-1); j++){
+        processed_value += running_average[j];
+            running_average[j] = running_average[j+1];
+    }
+    processed_value = (processed_value)/((float)filter_coefficient);
+
+    return processed_value;
+}
 
 void bessel_filter_coeffs(void){
     float samplerate = 400;
-    float cutoff = 2;
+    float cutoff = 10;
 
-    float QcRaw  = (2.0 * M_PI * cutoff) / (1.0*samplerate);
-    float QcWarp = 1.0* tan(QcRaw); // Warp cutoff frequency
+    float QcRaw  = ((float)2.0 * (float)M_PI * cutoff) / ((float)1.0 * samplerate);
+    float QcWarp = (float)1.0* tan(QcRaw); // Warp cutoff frequency
 
-    float gain = 1.0 / (1.0 + M_SQRT2/QcWarp + 2.0/(QcWarp*QcWarp));
+    float gain = (float)1.0 / ((float)1.0 + (float)M_SQRT2/QcWarp + (float)2.0/(QcWarp*QcWarp));
 
-    by[2] = (1.0 - M_SQRT2/QcWarp + 2.0/(QcWarp*QcWarp)) * gain;
-    by[1] = (2.0 - 4.0/(QcWarp*QcWarp)) * gain;
-    by[0] = 1.0;
-    ax[0] = 1.0 * gain;
-    ax[1] = 2.0 * gain;
-    ax[2] = 1.0 * gain;
+    by[2] = ((float)1.0 - M_SQRT2/QcWarp + 2.0/(QcWarp*QcWarp)) * gain;
+    by[1] = ((float)2.0 - (float)4.0/(QcWarp*QcWarp)) * gain;
+    by[0] = (float)1.0;
+    ax[0] = (float)1.0 * gain;
+    ax[1] = (float)2.0 * gain;
+    ax[2] = (float)1.0 * gain;
 }
 float bessel_filter(float input){
     static float xv[3] = {0};
