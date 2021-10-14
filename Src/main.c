@@ -166,9 +166,9 @@ float PID(void){
         last_error[0] = 0;
         last_error[1] = 0;
         last_error[2] = 0;
-        kp = (float)3600;
-        ki = (float)27;
-        kd = (float)84000;
+        kp = (float)85;
+        ki = (float)0.3;
+        kd = (float)4005;
     }
     else{
         error = parameters.pace_rate - filtered_pace_rate;
@@ -192,6 +192,8 @@ float PID(void){
         }
 
     }
+    //my_debugger(PID_delta_t,output,error,filtered_pace_rate,parameters.pace_rate);
+
     PID_delta_t = 0;
 
     return fabs(output);
@@ -264,6 +266,7 @@ void step_response(void){
             step_tmp++;
             average_first_step = (first_step_values[0] + first_step_values[1] +
                     first_step_values[2] + first_step_values[3] + first_step_values[4]) / (float)5;
+
             time_val[meta_count] = step_timer;
             meta_val[meta_count++] = average_first_step;
         }
@@ -328,6 +331,9 @@ void step_response(void){
     default:
         break;
     }
+    //my_debugger(step_tmp,step_timer,average_last_step,meta_count,filtered_pace_rate);
+    my_debugger(0,meta_count,calculated_kp,calculated_ki,calculated_kd);
+
 }
 void control_process(void){
 	u32 PID_speed;
@@ -431,7 +437,6 @@ int main(void) {
 			channel_operation(0);
 
 			filtered_load = SMA_load(cal[0].calibrated,8);
-			//filtered_load = cal[0].calibrated;
 
 			unfiltered_pace_rate = (filtered_load - old_load);
 			aux_float = (float)100000 / (float)_10_usec_counter;
@@ -442,11 +447,7 @@ int main(void) {
 
             filtered_pace_rate = bessel_filter(unfiltered_pace_rate);
 
-            my_debugger(0,0,unfiltered_pace_rate,filtered_pace_rate,filtered_load);
-
-
-
-			if(TMC_command == TMC_RUN){
+            if(TMC_command == TMC_RUN){
 				control_process();
 				send_RS485 = 1;
 			}
