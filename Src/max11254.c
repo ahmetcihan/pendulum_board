@@ -13,25 +13,33 @@ void 		Max11254_ConversionCommand 		( MaxDevice ChooseMax , uint8_t command ) {
 	switch ( ChooseMax ) {
 		case MAX_1 : {
 			HAL_GPIO_WritePin( MAX11254_1_CS_PORT , MAX11254_1_CS_PIN  , GPIO_PIN_RESET );
+			while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY){}
 			HAL_SPI_Transmit ( &hspi2 , &command  ,   1   , TIMEOUT_HAL_SPI_TRANSMIT 	);
+			while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY){}
 			HAL_GPIO_WritePin( MAX11254_1_CS_PORT , MAX11254_1_CS_PIN  , GPIO_PIN_SET 	);
 			break;
 		}
 		case MAX_2 : {
 			HAL_GPIO_WritePin( MAX11254_2_CS_PORT , MAX11254_2_CS_PIN  , GPIO_PIN_RESET );
+			while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY){}
 			HAL_SPI_Transmit ( &hspi2 , &command  ,   1   , TIMEOUT_HAL_SPI_TRANSMIT 	);
+			while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY){}
 			HAL_GPIO_WritePin( MAX11254_2_CS_PORT , MAX11254_2_CS_PIN  , GPIO_PIN_SET 	);
 			break;
 		}
 		case MAX_3 : {
 			HAL_GPIO_WritePin( MAX11254_3_CS_PORT , MAX11254_3_CS_PIN  , GPIO_PIN_RESET );
+			while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY){}
 			HAL_SPI_Transmit ( &hspi2 , &command  ,   1   , TIMEOUT_HAL_SPI_TRANSMIT 	);
+			while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY){}
 			HAL_GPIO_WritePin( MAX11254_3_CS_PORT , MAX11254_3_CS_PIN  , GPIO_PIN_SET 	);
 			break;
 		}
 		case MAX_4 : {
 			HAL_GPIO_WritePin( MAX11254_4_CS_PORT , MAX11254_4_CS_PIN  , GPIO_PIN_RESET );
+			while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY){}
 			HAL_SPI_Transmit ( &hspi2 , &command  ,   1   , TIMEOUT_HAL_SPI_TRANSMIT 	);
+			while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY){}
 			HAL_GPIO_WritePin( MAX11254_4_CS_PORT , MAX11254_4_CS_PIN  , GPIO_PIN_SET 	);
 			break;
 		}
