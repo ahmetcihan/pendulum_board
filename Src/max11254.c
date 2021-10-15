@@ -681,12 +681,12 @@ void 		Max11254_Init					( void ) {
 }
 void 		OperatingMaxExtiRdbyControl 	( MaxDevice ChooseMax ) {
 	uint8_t choose_max = (uint8_t)ChooseMax - 1 ;
-	for ( uint8_t ch=0 ; ch<6 ; ch++ ) {
-		if ( (MAX[choose_max].chRead[ch]==CH_READ) && (MAX[choose_max].rank==ch) ) {
-			MAX[choose_max].chResult[ch] =  Max11254_Read3byte( ChooseMax , MAX11254_REG_DATA0+ch );
+	for ( uint8_t ch = 0 ; ch < 6 ; ch++ ) {
+		if ( (MAX[choose_max].chRead[ch] == CH_READ) && (MAX[choose_max].rank == ch) ) {
+			MAX[choose_max].chResult[ch] =  Max11254_Read3byte( ChooseMax , MAX11254_REG_DATA0 + ch );
 		}
 	}
-	Max11254_NextChannelOperations( ChooseMax );
+	//Max11254_NextChannelOperations( ChooseMax );
 	Max11254_ConversionCommand( ChooseMax , MAX[choose_max].RateNumber|COMMAND_MODE_SEQUENCER );
 }
 
