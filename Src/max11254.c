@@ -628,7 +628,7 @@ void 		Max11254_Init					( void ) {
 
 	/* MAX11254 - 1 Values Init */
 	MAX[0].Gain = GAIN_x128;
-	MAX[0].RateNumber = 2;
+	MAX[0].RateNumber = 4;
 	MAX[0].chRead[4] = CH_READ;
 	MAX[0].chGain[4] = (GAIN)GAIN_x128;
 	MAX[0].chRead[5] = CH_NotREAD;

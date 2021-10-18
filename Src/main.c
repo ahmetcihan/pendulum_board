@@ -107,7 +107,7 @@ void channel_operation(u8 no){
 		}
 	}
 	if(no == 0){
-		cal[0].signed_raw_filtered = SMA_raw(cal[0].signed_raw,8);
+		cal[0].signed_raw_filtered = SMA_raw(cal[0].signed_raw,32);
 	}
 	else{
 		cal[no].signed_raw_filtered = cal[no].signed_raw;
@@ -166,9 +166,9 @@ float PID(void){
         last_error[0] = 0;
         last_error[1] = 0;
         last_error[2] = 0;
-        kp = (float)85;
-        ki = (float)0.3;
-        kd = (float)4005;
+        kp = (float)84;
+        ki = (float)0.32;
+        kd = (float)3920;
     }
     else{
         error = parameters.pace_rate - filtered_pace_rate;
@@ -287,7 +287,7 @@ void step_response(void){
         }
         checker = 0;
         for(u8 i = 0; i < 17 ; i++){
-            if((fabs(average_last_step - last_step_values[i])) <= (((float)0.1) * average_last_step)){
+            if((fabs(average_last_step - last_step_values[i])) <= (((float)0.01) * average_last_step)){
                 checker++;
             }
         }
@@ -366,6 +366,7 @@ void control_process(void){
 				control_process_tmp++;
             }
             PID_speed = PID();
+            //PID_speed = PID_with_fuzzy();
 			step_motor_speed[0] = ((PID_speed / 65536) % 256);
 			step_motor_speed[1] = ((PID_speed / 256) % 256);
 			step_motor_speed[2] = ((PID_speed) % 256);
@@ -437,6 +438,7 @@ int main(void) {
 			channel_operation(0);
 
 			filtered_load = SMA_load(cal[0].calibrated,8);
+			//filtered_load = cal[0].calibrated;
 
 			unfiltered_pace_rate = (filtered_load - old_load);
 			aux_float = (float)100000 / (float)_10_usec_counter;

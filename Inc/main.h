@@ -99,6 +99,14 @@ typedef signed int s32;
 #define TMC_RUN     		1
 #define TMC_AUTOTUNING     	2
 
+#define NB               0
+#define NM               1
+#define NS               2
+#define ZO               3
+#define PS               4
+#define PM               5
+#define PB               6
+
 void SystemClock_Config(void);
 void _Error_Handler(char *, int);
 s32 EMA_raw(s32 raw_signal, u8 filter_coefficient);
@@ -109,6 +117,16 @@ float SMA_load(float load_signal,u8 filter_coefficient);
 void bessel_filter_coeffs(void);
 float bessel_filter(float input);
 void my_debugger(u8 u8_v, u32 u32_v, float f_0, float f_1, float f_2);
+
+float uf(float x,float a,float  b,float c);
+float cuf(float x,float a,float b,float c);
+float ufl(float x,float a,float b);
+float cufl(float x,float a,float b);
+float ufr(float x,float a,float b);
+float cufr(float x,float a,float b);
+float fand(float a,float b);
+float forr(float a,float b);
+float PID_with_fuzzy(void);
 
 struct _cal{
     double slope[7];
