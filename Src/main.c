@@ -107,7 +107,7 @@ void channel_operation(u8 no){
 		}
 	}
 	if(no == 0){
-		cal[0].signed_raw_filtered = SMA_raw(cal[0].signed_raw,32);
+		cal[0].signed_raw_filtered = bessel_filter((float)cal[0].signed_raw);
 	}
 	else{
 		cal[no].signed_raw_filtered = cal[no].signed_raw;
@@ -115,13 +115,12 @@ void channel_operation(u8 no){
 
 	cal[no].calibrated = evaluate_calibrated_values(no);
 }
-void my_debugger(u8 u8_v, u32 u32_v, float f_0, float f_1, float f_2){
+void my_debugger(u8 u8_v, s32 s32_v, float f_0, float f_1, float f_2){
 	usart_debugger_u8 = u8_v;
-	usart_debugger_u32 = u32_v;
+	usart_debugger_s32 = s32_v;
 	usart_debugger_float[0] = f_0;
 	usart_debugger_float[1] = f_1;
 	usart_debugger_float[2] = f_2;
-
 }
 
 void usart_buffer_clearance(void){
@@ -166,9 +165,9 @@ float PID(void){
         last_error[0] = 0;
         last_error[1] = 0;
         last_error[2] = 0;
-        kp = (float)84;
-        ki = (float)0.32;
-        kd = (float)3920;
+        kp = (float)49;
+        ki = (float)0.21;
+        kd = (float)1915;
     }
     else{
         error = parameters.pace_rate - filtered_pace_rate;
@@ -192,7 +191,7 @@ float PID(void){
         }
 
     }
-    //my_debugger(PID_delta_t,output,error,filtered_pace_rate,parameters.pace_rate);
+    my_debugger(PID_delta_t,output,error,filtered_pace_rate,parameters.pace_rate);
 
     PID_delta_t = 0;
 
@@ -409,7 +408,7 @@ int main(void) {
 	_10_usec_counter = 0;
 	send_RS485 = 0;
 	usart_debugger_u8 = 0;
-	usart_debugger_u32 = 0;
+	usart_debugger_s32 = 0;
 	usart_debugger_float[0] = 0;
 	usart_debugger_float[1] = 0;
 	usart_debugger_float[2] = 0;
@@ -447,7 +446,7 @@ int main(void) {
 			old_load = filtered_load;
 			_10_usec_counter = 0;
 
-            filtered_pace_rate = bessel_filter(unfiltered_pace_rate);
+            filtered_pace_rate = SMA_pace(unfiltered_pace_rate,16);
 
             if(TMC_command == TMC_RUN){
 				control_process();

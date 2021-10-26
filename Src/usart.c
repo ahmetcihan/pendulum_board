@@ -394,7 +394,7 @@ void PRESS_ANS_Command(void){
 		usart1.tx[53]= char_to_f.s8_val[2];
 		usart1.tx[54]= char_to_f.s8_val[3];
 
-		char_to_f.u32_val = usart_debugger_u32;
+		char_to_f.s32_val = usart_debugger_s32;
 		usart1.tx[55]= char_to_f.s8_val[0];
 		usart1.tx[56]= char_to_f.s8_val[1];
 		usart1.tx[57]= char_to_f.s8_val[2];

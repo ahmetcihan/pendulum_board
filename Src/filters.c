@@ -56,6 +56,23 @@ float SMA_load(float load_signal,u8 filter_coefficient){
 
     return processed_value;
 }
+float SMA_pace(float pace_val,u8 filter_coefficient){
+    static float running_average[64];
+    float processed_value;
+    u8 j;
+
+    if(filter_coefficient > 63) filter_coefficient = 63;
+
+    running_average[filter_coefficient-1] = pace_val;
+    processed_value = pace_val;
+    for (j = 0; j < (filter_coefficient-1); j++){
+        processed_value += running_average[j];
+            running_average[j] = running_average[j+1];
+    }
+    processed_value = (processed_value)/((float)filter_coefficient);
+
+    return processed_value;
+}
 
 void bessel_filter_coeffs(void){
     float samplerate = 400;

@@ -113,10 +113,11 @@ s32 EMA_raw(s32 raw_signal, u8 filter_coefficient);
 s32 SMA_raw(s32 raw_signal, u8 filter_coefficient);
 float EMA_load(float *raw_signal, u8 filter_coefficient);
 float SMA_load(float load_signal,u8 filter_coefficient);
+float SMA_pace(float pace_val,u8 filter_coefficient);
 
 void bessel_filter_coeffs(void);
 float bessel_filter(float input);
-void my_debugger(u8 u8_v, u32 u32_v, float f_0, float f_1, float f_2);
+void my_debugger(u8 u8_v, s32 s32_v, float f_0, float f_1, float f_2);
 
 float uf(float x,float a,float  b,float c);
 float cuf(float x,float a,float b,float c);

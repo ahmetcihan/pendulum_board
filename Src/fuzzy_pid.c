@@ -242,14 +242,14 @@ float PID_with_fuzzy(void){
         last_error[0] = 0;
         last_error[1] = 0;
         last_error[2] = 0;
-        kp_fuzzy = (float)84;
-        ki_fuzzy = (float)0.32;
-        kd_fuzzy = (float)3920;
+        kp_fuzzy = (float)49;
+        ki_fuzzy = (float)0.21;
+        kd_fuzzy = (float)1915;
     }
     else{
-        kp_fuzzy = (float)84;
-        ki_fuzzy = (float)0.32;
-        kd_fuzzy = (float)3920;
+        kp_fuzzy = (float)49;
+        ki_fuzzy = (float)0.21;
+        kd_fuzzy = (float)1915;
 
         error = parameters.pace_rate - filtered_pace_rate;
 
@@ -285,7 +285,8 @@ float PID_with_fuzzy(void){
             {NB,NB,NB,PS,PS,PM,PB}};
 
         float es[7],ecs[7];
-        float fuzzyfication_e_factor = (parameters.pace_rate/(float)15);
+        //float fuzzyfication_e_factor = (parameters.pace_rate/(float)15);
+        float fuzzyfication_e_factor = (parameters.pace_rate)/(float)5;
         float fuzzyfication_ec_factor = (fuzzyfication_e_factor * (float)0.2);
 
         es[NB] = ufl(error,   (float)-3*fuzzyfication_e_factor,  (float)-1*fuzzyfication_e_factor);
@@ -385,9 +386,9 @@ float PID_with_fuzzy(void){
 		ki_fuzzy = f * ki_fuzzy;
 		kd_fuzzy = f * kd_fuzzy;
 
-		kp_fuzzy += ((float)3 * kp_fuzzy * detkp) / (float)10;    //%90 of Kp_fuzzy
-		ki_fuzzy += ((float)3 * ki_fuzzy * detki) / (float)10;
-		kd_fuzzy += ((float)3 * kd_fuzzy * detkd) / (float)10;
+		kp_fuzzy += ((float)3 * kp_fuzzy * detkp) / (float)100;    //%90 of Kp_fuzzy
+		ki_fuzzy += ((float)3 * ki_fuzzy * detki) / (float)100;
+		kd_fuzzy += ((float)3 * kd_fuzzy * detkd) / (float)100;
         //
 
         ak = kp_fuzzy + kd_fuzzy / (float)Ts;
