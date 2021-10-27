@@ -114,9 +114,15 @@ s32 SMA_raw(s32 raw_signal, u8 filter_coefficient);
 float EMA_load(float *raw_signal, u8 filter_coefficient);
 float SMA_load(float load_signal,u8 filter_coefficient);
 float SMA_pace(float pace_val,u8 filter_coefficient);
+float alpha_beta_filter(float input);
 
-void bessel_filter_coeffs(void);
-float bessel_filter(float input);
+void bessel_filter_coeffs_for_raw(void);
+float bessel_filter_for_raw(float input);
+void bessel_filter_coeffs_for_pace(void);
+float bessel_filter_for_pace(float input);
+void butterworth_lpf_coeffs(float *a, float *b);
+float butterworth_filter(float input, float *a, float *b, float *x, float *y);
+
 void my_debugger(u8 u8_v, s32 s32_v, float f_0, float f_1, float f_2);
 
 float uf(float x,float a,float  b,float c);
@@ -160,7 +166,13 @@ float filtered_load;
 float max_load_value;
 float unfiltered_pace_rate;
 float filtered_pace_rate;
-float ax[3], by[3];
+float filtered_SMA;
+float filtered_pace_bessel;
+float filtered_pace_butterworth;
+float bessel_raw_ax[3], bessel_raw_by[3];
+float bessel_pace_ax[3], bessel_pace_by[3];
+float butterworth_a[3],butterworth_b[3];
+float butterworth_x[2],butterworth_y[2];
 float calculated_kp;
 float calculated_ki;
 float calculated_kd;

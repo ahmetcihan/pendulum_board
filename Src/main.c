@@ -107,7 +107,7 @@ void channel_operation(u8 no){
 		}
 	}
 	if(no == 0){
-		cal[0].signed_raw_filtered = bessel_filter((float)cal[0].signed_raw);
+		cal[0].signed_raw_filtered = bessel_filter_for_raw((float)cal[0].signed_raw);
 	}
 	else{
 		cal[no].signed_raw_filtered = cal[no].signed_raw;
@@ -165,9 +165,9 @@ float PID(void){
         last_error[0] = 0;
         last_error[1] = 0;
         last_error[2] = 0;
-        kp = (float)49;
-        ki = (float)0.21;
-        kd = (float)1915;
+        kp = (float)113;
+        ki = (float)0.33;
+        kd = (float)6730;
     }
     else{
         error = parameters.pace_rate - filtered_pace_rate;
@@ -396,7 +396,9 @@ int main(void) {
 	MX_USART2_Init();
 	MX_UART4_Init();
 	//Timer3_AutoConsolidation_SpecialFunc(0);
-    bessel_filter_coeffs();
+    bessel_filter_coeffs_for_raw();
+    bessel_filter_coeffs_for_pace();
+    butterworth_lpf_coeffs(butterworth_a, butterworth_b);
 
 	step_motor_command = STEPPER_COMMAND_STOP;
 	step_motor_requested_pos = 0;
@@ -436,7 +438,7 @@ int main(void) {
 
 			channel_operation(0);
 
-			filtered_load = SMA_load(cal[0].calibrated,8);
+			filtered_load = SMA_load(cal[0].calibrated,16);
 			//filtered_load = cal[0].calibrated;
 
 			unfiltered_pace_rate = (filtered_load - old_load);
@@ -446,7 +448,12 @@ int main(void) {
 			old_load = filtered_load;
 			_10_usec_counter = 0;
 
-            filtered_pace_rate = SMA_pace(unfiltered_pace_rate,16);
+            //filtered_SMA = SMA_pace(unfiltered_pace_rate,16);
+            //filtered_pace_bessel = bessel_filter_for_pace(unfiltered_pace_rate);
+            //filtered_pace_butterworth = butterworth_filter(unfiltered_pace_rate,butterworth_a,butterworth_b,butterworth_x,butterworth_y);
+			//filtered_pace_rate = alpha_beta_filter(unfiltered_pace_rate);
+
+			filtered_pace_rate = butterworth_filter(unfiltered_pace_rate,butterworth_a,butterworth_b,butterworth_x,butterworth_y);
 
             if(TMC_command == TMC_RUN){
 				control_process();
@@ -457,6 +464,7 @@ int main(void) {
 				send_RS485 = 1;
 			}
 
+            //my_debugger(0,unfiltered_pace_rate,filtered_pace_bessel ,filtered_pace_butterworth, filtered_pace_rate);
 
 		}
 		if (max2_dataready == 1) {
