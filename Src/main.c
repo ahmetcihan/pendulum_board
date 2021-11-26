@@ -165,9 +165,9 @@ float PID(void){
         last_error[0] = 0;
         last_error[1] = 0;
         last_error[2] = 0;
-        kp = (float)113;
-        ki = (float)0.33;
-        kd = (float)6730;
+        kp = (float)3.7;
+        ki = (float)0.015;
+        kd = (float)152;
     }
     else{
         error = parameters.pace_rate - filtered_pace_rate;
@@ -286,7 +286,7 @@ void step_response(void){
         }
         checker = 0;
         for(u8 i = 0; i < 17 ; i++){
-            if((fabs(average_last_step - last_step_values[i])) <= (((float)0.01) * average_last_step)){
+            if((fabs(average_last_step - last_step_values[i])) <= (((float)0.001) * average_last_step)){
                 checker++;
             }
         }
