@@ -327,6 +327,8 @@ void step_response(void){
 		autotuning_is_finished = 1;
         step_tmp++;
     	break;
+    case 6:
+    	break;
     default:
         break;
     }
@@ -461,6 +463,9 @@ int main(void) {
 			}
 			else if(TMC_command == TMC_AUTOTUNING){
 				step_response();
+				send_RS485 = 1;
+			}
+			else if(TMC_command == TMC_STOP){
 				send_RS485 = 1;
 			}
 
