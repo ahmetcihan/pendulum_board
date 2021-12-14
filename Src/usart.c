@@ -416,11 +416,13 @@ void PRESS_ANS_Command(void){
 		usart1.tx[69]= char_to_f.s8_val[2];
 		usart1.tx[70]= char_to_f.s8_val[3];
 
+		usart1.tx[71]= autotuning_in_operation;
+
 		uint16_t fcrc;
-		fcrc = CyclicRedundancyCheck( &usart1.tx[0] , 71);
-		usart1.tx[71] = fcrc%256;
-		usart1.tx[72] = fcrc/256;
-		usart1.tx_amount = 73;
+		fcrc = CyclicRedundancyCheck( &usart1.tx[0] , 72);
+		usart1.tx[72] = fcrc%256;
+		usart1.tx[73] = fcrc/256;
+		usart1.tx_amount = 74;
 		usart1_transmit = 1;
 
 		HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );

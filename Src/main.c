@@ -191,7 +191,7 @@ float PID(void){
         }
 
     }
-    my_debugger(PID_delta_t,output,error,filtered_pace_rate,parameters.pace_rate);
+    //my_debugger(PID_delta_t,output,error,filtered_pace_rate,parameters.pace_rate);
 
     PID_delta_t = 0;
 
