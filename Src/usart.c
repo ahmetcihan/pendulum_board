@@ -283,7 +283,7 @@ void PRESS_CONV_CommandOperating(void){
 		step_motor_speed[0] = usart1.rx[9];
 		step_motor_speed[1] = usart1.rx[10];
 		step_motor_speed[2] = usart1.rx[11];
-		send_RS485 = 1;
+		//send_RS485 = 1;
 		autotuning_is_finished = 0;
 	}
 	else if(TMC_command == TMC_AUTOTUNING){

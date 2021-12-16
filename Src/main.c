@@ -459,15 +459,13 @@ int main(void) {
 
             if(TMC_command == TMC_RUN){
 				control_process();
-				send_RS485 = 1;
 			}
 			else if(TMC_command == TMC_AUTOTUNING){
 				step_response();
-				send_RS485 = 1;
 			}
 			else if(TMC_command == TMC_STOP){
-				send_RS485 = 1;
 			}
+			send_RS485 = 1;
 
             //my_debugger(0,unfiltered_pace_rate,filtered_pace_bessel ,filtered_pace_butterworth, filtered_pace_rate);
 
