@@ -226,46 +226,59 @@ void USART1_receive_operations(void){
 			Max11254_GPIOSetting( usart1.rx[4]+1 , usart1.rx[5] );
 	}
 	else if(usart1.rx[0]=='P' && usart1.rx[1]=='R' && usart1.rx[2]=='M' && usart1.rx[3]=='T' ) {
+		//MENU PARAMETERS
 		char_to_f.u8_val[0] = usart1.rx[4];
 		char_to_f.u8_val[1] = usart1.rx[5];
 		char_to_f.u8_val[2] = usart1.rx[6];
 		char_to_f.u8_val[3] = usart1.rx[7];
 		parameters.test_start_speed = char_to_f.u32_val;
-
 		char_to_f.u8_val[0] = usart1.rx[8];
 		char_to_f.u8_val[1] = usart1.rx[9];
 		char_to_f.u8_val[2] = usart1.rx[10];
 		char_to_f.u8_val[3] = usart1.rx[11];
 		parameters.failure_threshold = char_to_f.float_val;
-
 		char_to_f.u8_val[0] = usart1.rx[12];
 		char_to_f.u8_val[1] = usart1.rx[13];
 		char_to_f.u8_val[2] = usart1.rx[14];
 		char_to_f.u8_val[3] = usart1.rx[15];
 		parameters.zero_suppression = char_to_f.float_val;
-
 		char_to_f.u8_val[0] = usart1.rx[16];
 		char_to_f.u8_val[1] = usart1.rx[17];
 		char_to_f.u8_val[2] = usart1.rx[18];
 		char_to_f.u8_val[3] = usart1.rx[19];
 		parameters.pace_rate = char_to_f.float_val;
-
 		parameters.break_percentage = usart1.rx[20];
 
+		//AUTOTUNING
 		char_to_f.u8_val[0] = usart1.rx[21];
 		char_to_f.u8_val[1] = usart1.rx[22];
 		char_to_f.u8_val[2] = usart1.rx[23];
 		char_to_f.u8_val[3] = usart1.rx[24];
 		parameters.step_first_speed = char_to_f.u32_val;
-
 		char_to_f.u8_val[0] = usart1.rx[25];
 		char_to_f.u8_val[1] = usart1.rx[26];
 		char_to_f.u8_val[2] = usart1.rx[27];
 		char_to_f.u8_val[3] = usart1.rx[28];
 		parameters.step_second_speed = char_to_f.u32_val;
-
 		parameters.step_transition_time = usart1.rx[29];
-	}
+
+		//PID
+		char_to_f.u8_val[0] = usart1.rx[30];
+		char_to_f.u8_val[1] = usart1.rx[31];
+		char_to_f.u8_val[2] = usart1.rx[32];
+		char_to_f.u8_val[3] = usart1.rx[33];
+		parameters.kp = char_to_f.float_val;
+		char_to_f.u8_val[0] = usart1.rx[34];
+		char_to_f.u8_val[1] = usart1.rx[35];
+		char_to_f.u8_val[2] = usart1.rx[36];
+		char_to_f.u8_val[3] = usart1.rx[37];
+		parameters.ki = char_to_f.float_val;
+		char_to_f.u8_val[0] = usart1.rx[38];
+		char_to_f.u8_val[1] = usart1.rx[39];
+		char_to_f.u8_val[2] = usart1.rx[40];
+		char_to_f.u8_val[3] = usart1.rx[41];
+		parameters.kd = char_to_f.float_val;
+}
 }
 void PRESS_CONV_CommandOperating(void){
 	//	0x30[Hex] = 48[Dec]	,	0x31[Hex] = 49[Dec]

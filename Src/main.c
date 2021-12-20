@@ -165,9 +165,9 @@ float PID(void){
         last_error[0] = 0;
         last_error[1] = 0;
         last_error[2] = 0;
-        kp = (float)37;
-        ki = (float)0.15;
-        kd = (float)1621;
+        kp = parameters.kp;
+        ki = parameters.ki;
+        kd = parameters.kd;
     }
     else{
         error = parameters.pace_rate - filtered_pace_rate;

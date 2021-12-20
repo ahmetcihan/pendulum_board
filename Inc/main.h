@@ -158,6 +158,9 @@ struct _par{
 	float zero_suppression;
 	float pace_rate;
 	u8 break_percentage;
+	float kp;
+	float ki;
+	float kd;
 };
 extern struct _par parameters;
 
