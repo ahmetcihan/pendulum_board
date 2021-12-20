@@ -165,9 +165,9 @@ float PID(void){
         last_error[0] = 0;
         last_error[1] = 0;
         last_error[2] = 0;
-        kp = (float)3.7;
-        ki = (float)0.015;
-        kd = (float)152;
+        kp = (float)37;
+        ki = (float)0.15;
+        kd = (float)1621;
     }
     else{
         error = parameters.pace_rate - filtered_pace_rate;
@@ -341,6 +341,7 @@ void control_process(void){
 
 	switch (control_process_tmp) {
 		case 0:
+			PID_in_operation = 1;
 			step_motor_speed[0] = ((parameters.test_start_speed / 65536) % 256);
 			step_motor_speed[1] = ((parameters.test_start_speed / 256) % 256);
 			step_motor_speed[2] = ((parameters.test_start_speed) % 256);
@@ -422,6 +423,7 @@ int main(void) {
 	step_response_first_in = 1;
 	autotuning_in_operation = 0;
 	autotuning_is_finished = 0;
+	PID_in_operation = 0;
 
 	while (1) {
 		usart_buffer_clearance();

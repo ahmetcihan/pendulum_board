@@ -285,12 +285,19 @@ void PRESS_CONV_CommandOperating(void){
 		step_motor_speed[2] = usart1.rx[11];
 		//send_RS485 = 1;
 		autotuning_is_finished = 0;
+		PID_in_operation = 0;
 	}
 	else if(TMC_command == TMC_AUTOTUNING){
 		if(autotuning_is_finished == 0){
 			if(autotuning_in_operation == 0){
 				step_response_first_in = 1;
 			}
+		}
+		PID_in_operation = 0;
+	}
+	else if(TMC_command == TMC_RUN){
+		if(PID_in_operation == 0){
+			control_process_tmp = 0;
 		}
 	}
 

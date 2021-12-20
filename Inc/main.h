@@ -197,6 +197,7 @@ u8 control_process_tmp;
 u8 TMC_command;
 u8 step_response_first_in;
 u8 autotuning_in_operation;
+u8 PID_in_operation;
 u8 autotuning_is_finished;
 
 #endif /* __MAIN_H */
