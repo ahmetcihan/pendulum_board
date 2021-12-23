@@ -57,6 +57,7 @@ void HAL_TIM_PeriodElapsedCallback	( TIM_HandleTypeDef *htim ) {		//	Timer Inter
 			timer_1_msec = 1;
 			PID_delta_t++;
 			step_timer++;
+			plot_counter_1_msec++;
 		}
 		if ((usn10 % 1000) == 0) {
 			timer_10_msec = 1;
@@ -65,7 +66,6 @@ void HAL_TIM_PeriodElapsedCallback	( TIM_HandleTypeDef *htim ) {		//	Timer Inter
 			timer_100_msec = 1;
 		}
 		if (usn10 == 100000) {
-			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
 			usn10 = 0;
 		}
 	}
@@ -358,6 +358,7 @@ void control_process(void){
 				PID_first_in = 1;
 				PID_delta_t = 0;
 				control_process_tmp++;
+				plot_counter_1_msec = 0;
 			}
 			break;
 		case 3:
@@ -433,12 +434,15 @@ int main(void) {
 			MASTER_send_RS485_data_to_motor();
 			read_inputs();
 		}
-		if (timer_10_msec == 0) {
+		if (timer_1_msec == 1) {
+			timer_1_msec = 0;
+			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
+		}
+		if (timer_10_msec == 1) {
 			timer_10_msec = 0;
 		}
 		if (max1_dataready == 1) {
 			max1_dataready = 0;
-			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
 
 			channel_operation(0);
 
@@ -466,6 +470,7 @@ int main(void) {
 				step_response();
 			}
 			else if(TMC_command == TMC_STOP){
+				plot_counter_1_msec = 0;
 			}
 			send_RS485 = 1;
 

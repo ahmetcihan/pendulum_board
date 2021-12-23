@@ -184,6 +184,7 @@ u32 PID_delta_t;
 u32 step_motor_requested_pos;
 u32 _10_usec_counter;
 u32 step_timer;
+u32 plot_counter_1_msec;
 u8 PID_first_in;
 u8 step_motor_command;
 u8 step_motor_speed[3];
