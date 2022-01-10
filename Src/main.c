@@ -46,6 +46,10 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
 void HAL_TIM_PeriodElapsedCallback	( TIM_HandleTypeDef *htim ) {		//	Timer Interrupt Fonksiyonu
 	static uint32_t usn10;
 
+	if (htim->Instance == TIM1) {
+		((TIM1->CR1 & TIM_CR1_DIR) == TIM_CR1_DR_CW ) ?
+				enc_signal_msb++ : enc_signal_msb--;
+	}
 	if (htim->Instance == TIM4) {
 		usn10++;
 		_10_usec_counter++;
@@ -86,9 +90,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) { 						//	EXTI Interrupt Fonksiy
 		max3_dataready = 1;
 	if (GPIO_Pin == ADC_4_RDYB_Pin)
 		max4_dataready = 1;
-	if (GPIO_Pin == EncoderZF_Pin)
-		((TIM1->CR1 & TIM_CR1_DIR) == TIM_CR1_DR_CW ) ?
-				signal_z_count++ : signal_z_count--;
+	if (GPIO_Pin == EncoderZF_Pin){
+		HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
+
+		((TIM1->CR1 & TIM_CR1_DIR) == TIM_CR1_DR_CW ) ?	signal_z_count++ : signal_z_count--;
+	}
 }
 void read_inputs(void){
 	input_status[0] = HAL_GPIO_ReadPin(INPUT_Port,INPUT_1_Pin);
@@ -389,7 +395,7 @@ int main(void) {
 	SystemClock_Config();
 	MX_GPIO_Init();
 
-	//MX_TIM1_Init();		//	Encoder
+	MX_TIM1_Init();		//	Encoder
 	//MX_TIM8_Init(); 	// 	Duty Modilation
 	//MX_TIM3_Init();   //  Frequency Modilation
 	MX_TIM4_Init();
@@ -436,7 +442,7 @@ int main(void) {
 		}
 		if (timer_1_msec == 1) {
 			timer_1_msec = 0;
-			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
+			encoder_value = Timer1_CalculateEncoderValue();
 		}
 		if (timer_10_msec == 1) {
 			timer_10_msec = 0;

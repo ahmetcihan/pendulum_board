@@ -39,6 +39,7 @@ void MX_TIM1_Init ( void ) {
 
 	signal_z_count = 0;
 	enc_signal_msb = 0;
+	TIM1->CNT = 0;
 }
 void MX_TIM3_Init ( void ) {
 	TIM_ClockConfigTypeDef sClockSourceConfig;
@@ -284,7 +285,7 @@ void Timer3_AutoConsolidation_SpecialFunc( uint32_t value ) {
 	TIM3->CCR1= (TIM3->ARR)/2;
 }
 int32_t Timer1_CalculateEncoderValue ( void ) {
-	int32_t encoderval = enc_signal_msb * ( 65536 ) + TIM1->CNT;;
+	int32_t encoderval = enc_signal_msb * ( 65536 ) + TIM1->CNT;
 
 	return (int32_t)(encoderval);
 }

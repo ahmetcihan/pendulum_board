@@ -180,6 +180,7 @@ float calculated_kp;
 float calculated_ki;
 float calculated_kd;
 
+s32 encoder_value;
 u32 PID_delta_t;
 u32 step_motor_requested_pos;
 u32 _10_usec_counter;

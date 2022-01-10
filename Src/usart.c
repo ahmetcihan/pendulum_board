@@ -445,12 +445,23 @@ void PRESS_ANS_Command(void){
 		usart1.tx[74]= char_to_f.s8_val[2];
 		usart1.tx[75]= char_to_f.s8_val[3];
 
+		char_to_f.s32_val = signal_z_count;
+		usart1.tx[76]= char_to_f.s8_val[0];
+		usart1.tx[77]= char_to_f.s8_val[1];
+		usart1.tx[78]= char_to_f.s8_val[2];
+		usart1.tx[79]= char_to_f.s8_val[3];
+
+		char_to_f.s32_val = encoder_value;
+		usart1.tx[80]= char_to_f.s8_val[0];
+		usart1.tx[81]= char_to_f.s8_val[1];
+		usart1.tx[82]= char_to_f.s8_val[2];
+		usart1.tx[83]= char_to_f.s8_val[3];
 
 		uint16_t fcrc;
-		fcrc = CyclicRedundancyCheck( &usart1.tx[0] , 76);
-		usart1.tx[76] = fcrc%256;
-		usart1.tx[77] = fcrc/256;
-		usart1.tx_amount = 78;
+		fcrc = CyclicRedundancyCheck( &usart1.tx[0] , 84);
+		usart1.tx[84] = fcrc%256;
+		usart1.tx[85] = fcrc/256;
+		usart1.tx_amount = 86;
 		usart1_transmit = 1;
 }
 
