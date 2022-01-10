@@ -95,9 +95,10 @@ typedef signed int s32;
 #define STEPPER_COMMAND_POS_RESET   4
 #define STEPPER_COMMAND_GO_POS      5
 
-#define TMC_STOP    		0
-#define TMC_RUN     		1
-#define TMC_AUTOTUNING     	2
+#define TMC_STOP    				0
+#define TMC_RUN     				1
+#define TMC_AUTOTUNING     			2
+#define TMC_PENDULUM_HEADSHAKE     	3
 
 #define NB               0
 #define NM               1
@@ -204,5 +205,14 @@ u8 step_response_first_in;
 u8 autotuning_in_operation;
 u8 PID_in_operation;
 u8 autotuning_is_finished;
+
+
+struct _pend{
+	u32 head_change_timer;
+	u32 headshake_speed;
+	u8 headshake_tmp;
+};
+extern struct _pend pendulum;
+
 
 #endif /* __MAIN_H */

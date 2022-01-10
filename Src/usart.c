@@ -231,12 +231,13 @@ void USART1_receive_operations(void){
 		char_to_f.u8_val[1] = usart1.rx[5];
 		char_to_f.u8_val[2] = usart1.rx[6];
 		char_to_f.u8_val[3] = usart1.rx[7];
-		parameters.test_start_speed = char_to_f.u32_val;
+		pendulum.headshake_speed = char_to_f.u32_val;
 		char_to_f.u8_val[0] = usart1.rx[8];
 		char_to_f.u8_val[1] = usart1.rx[9];
 		char_to_f.u8_val[2] = usart1.rx[10];
 		char_to_f.u8_val[3] = usart1.rx[11];
-		parameters.failure_threshold = char_to_f.float_val;
+		pendulum.head_change_timer = char_to_f.float_val;
+
 		char_to_f.u8_val[0] = usart1.rx[12];
 		char_to_f.u8_val[1] = usart1.rx[13];
 		char_to_f.u8_val[2] = usart1.rx[14];

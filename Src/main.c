@@ -10,6 +10,7 @@
 
 struct _cal cal[4];
 struct _par parameters;
+struct _pend pendulum;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	if (huart->Instance == USART1) {
@@ -91,8 +92,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) { 						//	EXTI Interrupt Fonksiy
 	if (GPIO_Pin == ADC_4_RDYB_Pin)
 		max4_dataready = 1;
 	if (GPIO_Pin == EncoderZF_Pin){
-		HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
-
 		((TIM1->CR1 & TIM_CR1_DIR) == TIM_CR1_DR_CW ) ?	signal_z_count++ : signal_z_count--;
 	}
 }
@@ -204,7 +203,38 @@ float PID(void){
     return fabs(output);
 }
 void pendulum_head_shake(void){
+	//5 msec loop
+	static u32 local_timer = 0;
 
+	step_motor_speed[0] = ((pendulum.headshake_speed / 65536) % 256);
+	step_motor_speed[1] = ((pendulum.headshake_speed / 256) % 256);
+	step_motor_speed[2] = ((pendulum.headshake_speed) % 256);
+
+	if(local_timer > 0) local_timer = local_timer - 5;
+
+	switch (pendulum.headshake_tmp) {
+		case 0:
+            step_motor_command = STEPPER_COMMAND_RUN_UP;
+            local_timer = pendulum.head_change_timer;
+            pendulum.headshake_tmp++;
+			break;
+		case 1:
+			if(local_timer == 0){
+	            step_motor_command = STEPPER_COMMAND_RUN_DOWN;
+	            local_timer = pendulum.head_change_timer;
+	            pendulum.headshake_tmp++;
+			}
+			break;
+		case 2:
+			if(local_timer == 0){
+	            step_motor_command = STEPPER_COMMAND_RUN_UP;
+	            local_timer = pendulum.head_change_timer;
+	            pendulum.headshake_tmp = 1;
+			}
+			break;
+		default:
+			break;
+	}
 }
 void step_response(void){
     static u8 step_tmp = 0;
@@ -392,7 +422,7 @@ void control_process(void){
 
 }
 int main(void) {
-	float aux_float;
+	//float aux_float;
 
 	HAL_Init();
 	SystemClock_Config();
@@ -434,6 +464,7 @@ int main(void) {
 	autotuning_in_operation = 0;
 	autotuning_is_finished = 0;
 	PID_in_operation = 0;
+	pendulum.headshake_tmp = 0;
 
 	while (1) {
 		usart_buffer_clearance();
@@ -453,7 +484,9 @@ int main(void) {
 		if (max1_dataready == 1) {
 			max1_dataready = 0;
 
-//			channel_operation(0);
+			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
+
+			channel_operation(0);
 //
 //			filtered_load = SMA_load(cal[0].calibrated,16);
 //			//filtered_load = cal[0].calibrated;
@@ -472,14 +505,15 @@ int main(void) {
 //
 //			filtered_pace_rate = butterworth_filter(unfiltered_pace_rate,butterworth_a,butterworth_b,butterworth_x,butterworth_y);
 
-            if(TMC_command == TMC_RUN){
-				//control_process();
+            if(TMC_command == TMC_PENDULUM_HEADSHAKE){
+				pendulum_head_shake();
 			}
 			else if(TMC_command == TMC_AUTOTUNING){
 				//step_response();
 			}
 			else if(TMC_command == TMC_STOP){
-				plot_counter_1_msec = 0;
+				//plot_counter_1_msec = 0;
+				pendulum.headshake_tmp = 0;
 			}
 			send_RS485 = 1;
 
