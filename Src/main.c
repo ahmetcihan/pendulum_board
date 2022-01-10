@@ -203,6 +203,9 @@ float PID(void){
 
     return fabs(output);
 }
+void pendulum_head_shake(void){
+
+}
 void step_response(void){
     static u8 step_tmp = 0;
     static float first_step_values[5] = {0};
@@ -450,30 +453,30 @@ int main(void) {
 		if (max1_dataready == 1) {
 			max1_dataready = 0;
 
-			channel_operation(0);
-
-			filtered_load = SMA_load(cal[0].calibrated,16);
-			//filtered_load = cal[0].calibrated;
-
-			unfiltered_pace_rate = (filtered_load - old_load);
-			aux_float = (float)100000 / (float)_10_usec_counter;
-			unfiltered_pace_rate = unfiltered_pace_rate * aux_float;
-
-			old_load = filtered_load;
-			_10_usec_counter = 0;
-
-            //filtered_SMA = SMA_pace(unfiltered_pace_rate,16);
-            //filtered_pace_bessel = bessel_filter_for_pace(unfiltered_pace_rate);
-            //filtered_pace_butterworth = butterworth_filter(unfiltered_pace_rate,butterworth_a,butterworth_b,butterworth_x,butterworth_y);
-			//filtered_pace_rate = alpha_beta_filter(unfiltered_pace_rate);
-
-			filtered_pace_rate = butterworth_filter(unfiltered_pace_rate,butterworth_a,butterworth_b,butterworth_x,butterworth_y);
+//			channel_operation(0);
+//
+//			filtered_load = SMA_load(cal[0].calibrated,16);
+//			//filtered_load = cal[0].calibrated;
+//
+//			unfiltered_pace_rate = (filtered_load - old_load);
+//			aux_float = (float)100000 / (float)_10_usec_counter;
+//			unfiltered_pace_rate = unfiltered_pace_rate * aux_float;
+//
+//			old_load = filtered_load;
+//			_10_usec_counter = 0;
+//
+//            //filtered_SMA = SMA_pace(unfiltered_pace_rate,16);
+//            //filtered_pace_bessel = bessel_filter_for_pace(unfiltered_pace_rate);
+//            //filtered_pace_butterworth = butterworth_filter(unfiltered_pace_rate,butterworth_a,butterworth_b,butterworth_x,butterworth_y);
+//			//filtered_pace_rate = alpha_beta_filter(unfiltered_pace_rate);
+//
+//			filtered_pace_rate = butterworth_filter(unfiltered_pace_rate,butterworth_a,butterworth_b,butterworth_x,butterworth_y);
 
             if(TMC_command == TMC_RUN){
-				control_process();
+				//control_process();
 			}
 			else if(TMC_command == TMC_AUTOTUNING){
-				step_response();
+				//step_response();
 			}
 			else if(TMC_command == TMC_STOP){
 				plot_counter_1_msec = 0;
@@ -485,15 +488,15 @@ int main(void) {
 		}
 		if (max2_dataready == 1) {
 			max2_dataready = 0;
-			channel_operation(1);
+			//channel_operation(1);
 		}
 		if (max3_dataready == 1) {
 			max3_dataready = 0;
-			channel_operation(2);
+			//channel_operation(2);
 		}
 		if (max4_dataready == 1) {
 			max4_dataready = 0;
-			channel_operation(3);
+			//channel_operation(3);
 		}
 
 		if (usart1_received == 1) {
