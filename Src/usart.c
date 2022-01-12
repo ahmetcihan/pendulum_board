@@ -237,17 +237,17 @@ void USART1_receive_operations(void){
 		char_to_f.u8_val[2] = usart1.rx[10];
 		char_to_f.u8_val[3] = usart1.rx[11];
 		pendulum.head_change_timer = char_to_f.float_val;
-
 		char_to_f.u8_val[0] = usart1.rx[12];
 		char_to_f.u8_val[1] = usart1.rx[13];
 		char_to_f.u8_val[2] = usart1.rx[14];
 		char_to_f.u8_val[3] = usart1.rx[15];
-		parameters.zero_suppression = char_to_f.float_val;
+		pendulum.mid_point = char_to_f.float_val;
 		char_to_f.u8_val[0] = usart1.rx[16];
 		char_to_f.u8_val[1] = usart1.rx[17];
 		char_to_f.u8_val[2] = usart1.rx[18];
 		char_to_f.u8_val[3] = usart1.rx[19];
-		parameters.pace_rate = char_to_f.float_val;
+		pendulum.top_boundary = char_to_f.float_val;
+
 		parameters.break_percentage = usart1.rx[20];
 
 		//AUTOTUNING
@@ -255,7 +255,8 @@ void USART1_receive_operations(void){
 		char_to_f.u8_val[1] = usart1.rx[22];
 		char_to_f.u8_val[2] = usart1.rx[23];
 		char_to_f.u8_val[3] = usart1.rx[24];
-		parameters.step_first_speed = char_to_f.u32_val;
+		pendulum.speed_multiplier = char_to_f.float_val;
+
 		char_to_f.u8_val[0] = usart1.rx[25];
 		char_to_f.u8_val[1] = usart1.rx[26];
 		char_to_f.u8_val[2] = usart1.rx[27];
@@ -268,17 +269,17 @@ void USART1_receive_operations(void){
 		char_to_f.u8_val[1] = usart1.rx[31];
 		char_to_f.u8_val[2] = usart1.rx[32];
 		char_to_f.u8_val[3] = usart1.rx[33];
-		parameters.kp = char_to_f.float_val;
+		pendulum.kp = char_to_f.float_val;
 		char_to_f.u8_val[0] = usart1.rx[34];
 		char_to_f.u8_val[1] = usart1.rx[35];
 		char_to_f.u8_val[2] = usart1.rx[36];
 		char_to_f.u8_val[3] = usart1.rx[37];
-		parameters.ki = char_to_f.float_val;
+		pendulum.ki = char_to_f.float_val;
 		char_to_f.u8_val[0] = usart1.rx[38];
 		char_to_f.u8_val[1] = usart1.rx[39];
 		char_to_f.u8_val[2] = usart1.rx[40];
 		char_to_f.u8_val[3] = usart1.rx[41];
-		parameters.kd = char_to_f.float_val;
+		pendulum.kd = char_to_f.float_val;
 }
 }
 void PRESS_CONV_CommandOperating(void){
@@ -410,7 +411,7 @@ void PRESS_ANS_Command(void){
 		//last index is 49
 		usart1.tx[50] = usart_debugger_u8;
 
-		char_to_f.float_val = filtered_pace_rate;
+		char_to_f.s32_val = abs_encoder;
 		usart1.tx[51]= char_to_f.s8_val[0];
 		usart1.tx[52]= char_to_f.s8_val[1];
 		usart1.tx[53]= char_to_f.s8_val[2];

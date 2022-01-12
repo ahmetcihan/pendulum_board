@@ -99,6 +99,8 @@ typedef signed int s32;
 #define TMC_RUN     				1
 #define TMC_AUTOTUNING     			2
 #define TMC_PENDULUM_HEADSHAKE     	3
+#define TMC_PENDULUM_PLAIN_ALG  	4
+#define TMC_PENDULUM_PID        	5
 
 #define NB               0
 #define NM               1
@@ -182,6 +184,8 @@ float calculated_ki;
 float calculated_kd;
 
 s32 encoder_value;
+s32 abs_encoder;
+
 u32 PID_delta_t;
 u32 step_motor_requested_pos;
 u32 _10_usec_counter;
@@ -191,6 +195,7 @@ u8 PID_first_in;
 u8 step_motor_command;
 u8 step_motor_speed[3];
 u8 timer_1_msec;
+u8 timer_2_msec;
 u8 timer_10_msec;
 u8 timer_100_msec;
 u8 input_status[4];
@@ -211,6 +216,15 @@ struct _pend{
 	u32 head_change_timer;
 	u32 headshake_speed;
 	u8 headshake_tmp;
+
+	u32 mid_point;
+	u32 top_boundary;
+	float speed_multiplier;
+
+	float kp;
+	float ki;
+	float kd;
+	u8 pid_tmp;
 };
 extern struct _pend pendulum;
 

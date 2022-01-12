@@ -64,6 +64,9 @@ void HAL_TIM_PeriodElapsedCallback	( TIM_HandleTypeDef *htim ) {		//	Timer Inter
 			step_timer++;
 			plot_counter_1_msec++;
 		}
+		if ((usn10 % 200) == 0) {
+			timer_2_msec = 1;
+		}
 		if ((usn10 % 1000) == 0) {
 			timer_10_msec = 1;
 		}
@@ -201,6 +204,107 @@ float PID(void){
     PID_delta_t = 0;
 
     return fabs(output);
+}
+void pendulum_PID(void){
+    static float last_error[3] = {0};
+    static float output = 0;
+    float err = 0;
+    float a,b,c;
+    float Ts = (float)PID_delta_t;
+    static float kp,ki,kd;
+
+    u32 plain_speed;
+
+	switch(pendulum.pid_tmp){
+	case 0:
+        output = 0;
+        last_error[0] = 0;
+        last_error[1] = 0;
+        last_error[2] = 0;
+        kp = pendulum.kp;
+        ki = pendulum.ki;
+        kd = pendulum.kd;
+        pendulum.pid_tmp = 1;
+		step_motor_speed[0] = 0;
+		step_motor_speed[1] = 0;
+		step_motor_speed[2] = 0;
+		break;
+	case 1:
+		err = (s32)pendulum.mid_point - abs_encoder;
+
+		if(abs_encoder < (pendulum.mid_point - pendulum.top_boundary)){
+			plain_speed = 0;
+			output = 0;
+	        last_error[0] = 0;
+	        last_error[1] = 0;
+	        last_error[2] = 0;
+		}
+		else if(abs_encoder > (pendulum.mid_point + pendulum.top_boundary)){
+			plain_speed = 0;
+			output = 0;
+	        last_error[0] = 0;
+	        last_error[1] = 0;
+	        last_error[2] = 0;
+		}
+		else{
+	        last_error[2] = last_error[1];
+	        last_error[1] = last_error[0];
+	        last_error[0] = err;
+
+	        a = kp + kd / (float)Ts;
+	        b = -kp + (ki * (float)Ts) - ((float)2 * kd)/(float)Ts;
+	        c = kd / Ts;
+
+	        //output = output + (a * last_error[0] + b * last_error[1] + c * last_error[2]);
+	        output = (a * last_error[0] + b * last_error[1] + c * last_error[2]);
+
+	        if(output >= 0){
+	            step_motor_command = STEPPER_COMMAND_RUN_UP;
+	        }
+	        else{
+	            step_motor_command = STEPPER_COMMAND_RUN_DOWN;
+	        }
+	        plain_speed = fabs(output);
+		}
+		step_motor_speed[0] = ((plain_speed / 65536) % 256);
+		step_motor_speed[1] = ((plain_speed / 256) % 256);
+		step_motor_speed[2] = ((plain_speed) % 256);
+		break;
+	}
+
+    my_debugger(PID_delta_t,0,err,plain_speed,output);
+
+    PID_delta_t = 0;
+
+}
+
+void pendulum_plain_algorithm(void){
+	u32 plain_speed;
+	s32 enc_error;
+
+	enc_error = (s32)pendulum.mid_point - abs_encoder;
+
+	if(enc_error < 0){
+        step_motor_command = STEPPER_COMMAND_RUN_DOWN;
+	}
+	else{
+        step_motor_command = STEPPER_COMMAND_RUN_UP;
+	}
+
+	if(abs_encoder < (pendulum.mid_point - pendulum.top_boundary)){
+		plain_speed = 0;
+	}
+	else if(abs_encoder > (pendulum.mid_point + pendulum.top_boundary)){
+		plain_speed = 0;
+	}
+	else{
+		plain_speed = fabs(enc_error) * fabs(enc_error) * fabs(enc_error) * fabs(enc_error) * pendulum.speed_multiplier;
+	}
+
+	step_motor_speed[0] = ((plain_speed / 65536) % 256);
+	step_motor_speed[1] = ((plain_speed / 256) % 256);
+	step_motor_speed[2] = ((plain_speed) % 256);
+
 }
 void pendulum_head_shake(void){
 	//5 msec loop
@@ -447,6 +551,7 @@ int main(void) {
 	step_motor_requested_pos = 0;
 	stepper_abs_pos = 0;
 	timer_1_msec = 0;
+	timer_2_msec = 0;
 	timer_10_msec = 0;
 	timer_100_msec = 0;
 	old_load = 0;
@@ -465,6 +570,7 @@ int main(void) {
 	autotuning_is_finished = 0;
 	PID_in_operation = 0;
 	pendulum.headshake_tmp = 0;
+	pendulum.pid_tmp = 0;
 
 	while (1) {
 		usart_buffer_clearance();
@@ -472,11 +578,31 @@ int main(void) {
 		if(send_RS485 == 1){
 			send_RS485 = 0;
 			MASTER_send_RS485_data_to_motor();
-			read_inputs();
+			//read_inputs();
 		}
 		if (timer_1_msec == 1) {
 			timer_1_msec = 0;
+		}
+		if (timer_2_msec == 1) {
+			timer_2_msec = 0;
 			encoder_value = Timer1_CalculateEncoderValue();
+			abs_encoder = fabs(encoder_value % 4000);
+			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
+
+            if(TMC_command == TMC_PENDULUM_HEADSHAKE){
+				pendulum_head_shake();
+			}
+			else if(TMC_command == TMC_PENDULUM_PLAIN_ALG){
+				pendulum_plain_algorithm();
+			}
+			else if(TMC_command == TMC_PENDULUM_PID){
+				pendulum_PID();
+			}
+			else if(TMC_command == TMC_STOP){
+				pendulum.headshake_tmp = 0;
+				pendulum.pid_tmp = 0;
+			}
+			send_RS485 = 1;
 		}
 		if (timer_10_msec == 1) {
 			timer_10_msec = 0;
@@ -484,9 +610,8 @@ int main(void) {
 		if (max1_dataready == 1) {
 			max1_dataready = 0;
 
-			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
 
-			channel_operation(0);
+			//channel_operation(0);
 //
 //			filtered_load = SMA_load(cal[0].calibrated,16);
 //			//filtered_load = cal[0].calibrated;
@@ -505,17 +630,6 @@ int main(void) {
 //
 //			filtered_pace_rate = butterworth_filter(unfiltered_pace_rate,butterworth_a,butterworth_b,butterworth_x,butterworth_y);
 
-            if(TMC_command == TMC_PENDULUM_HEADSHAKE){
-				pendulum_head_shake();
-			}
-			else if(TMC_command == TMC_AUTOTUNING){
-				//step_response();
-			}
-			else if(TMC_command == TMC_STOP){
-				//plot_counter_1_msec = 0;
-				pendulum.headshake_tmp = 0;
-			}
-			send_RS485 = 1;
 
             //my_debugger(0,unfiltered_pace_rate,filtered_pace_bessel ,filtered_pace_butterworth, filtered_pace_rate);
 
