@@ -221,9 +221,9 @@ void pendulum_PID(void){
         last_error[0] = 0;
         last_error[1] = 0;
         last_error[2] = 0;
-        kp = pendulum.kp;
-        ki = pendulum.ki;
-        kd = pendulum.kd;
+        kp = pendulum.kp * 1000;
+        ki = pendulum.ki * 1000;
+        kd = pendulum.kd * 1000;
         pendulum.pid_tmp = 1;
 		step_motor_speed[0] = 0;
 		step_motor_speed[1] = 0;
@@ -265,6 +265,12 @@ void pendulum_PID(void){
 	            step_motor_command = STEPPER_COMMAND_RUN_DOWN;
 	        }
 	        plain_speed = fabs(output);
+
+	        if(fabs(err) < pendulum.tolerance){
+	        	if(fabs(output) < (2000 * pendulum.tolerance)){
+		        	plain_speed = 0;
+	        	}
+	        }
 		}
 		step_motor_speed[0] = ((plain_speed / 65536) % 256);
 		step_motor_speed[1] = ((plain_speed / 256) % 256);

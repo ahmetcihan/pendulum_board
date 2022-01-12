@@ -194,6 +194,12 @@ void USART1_receive_operations(void){
 	if(usart1.rx[0]=='C' && usart1.rx[1]=='O' && usart1.rx[2]=='N' && usart1.rx[3]=='V' ) {
 			PRESS_CONV_CommandOperating( );
 	}
+	else if(usart1.rx[0]=='C' && usart1.rx[1]=='L' && usart1.rx[2]=='R' && usart1.rx[3]=='E' && usart1.rx[4]=='N' && usart1.rx[5]=='C' ) {
+		signal_z_count = 0;
+		enc_signal_msb = 0;
+		TIM1->CNT = 0;
+		encoder_value = 0;
+	}
 	else if(usart1.rx[0]=='G' && usart1.rx[1]=='A' && usart1.rx[2]=='I' && usart1.rx[3]=='N' ) {
 			PRESS_GAIN_CommandOperating( );
 	}
@@ -248,7 +254,7 @@ void USART1_receive_operations(void){
 		char_to_f.u8_val[3] = usart1.rx[19];
 		pendulum.top_boundary = char_to_f.float_val;
 
-		parameters.break_percentage = usart1.rx[20];
+		pendulum.tolerance = usart1.rx[20];
 
 		//AUTOTUNING
 		char_to_f.u8_val[0] = usart1.rx[21];

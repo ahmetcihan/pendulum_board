@@ -220,6 +220,7 @@ struct _pend{
 	u32 mid_point;
 	u32 top_boundary;
 	float speed_multiplier;
+	u8 tolerance;
 
 	float kp;
 	float ki;
