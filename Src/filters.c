@@ -1,7 +1,7 @@
 #include "main.h"
 #include "math.h"
 
-s32 SMA_raw(s32 raw_signal,u8 filter_coefficient){
+s32 SMA_mid_point(s32 raw_signal,u8 filter_coefficient){
     static s32 running_average[64];
     float processed_value;
     u8 j;
@@ -19,6 +19,23 @@ s32 SMA_raw(s32 raw_signal,u8 filter_coefficient){
     return (s32)processed_value;
 }
 
+s32 SMA_raw(s32 raw_signal,u8 filter_coefficient){
+    static s32 running_average[64];
+    float processed_value;
+    u8 j;
+
+    if(filter_coefficient > 63) filter_coefficient = 63;
+
+    running_average[filter_coefficient-1] = raw_signal;
+    processed_value = raw_signal;
+    for (j = 0; j < (filter_coefficient-1); j++){
+        processed_value += running_average[j];
+            running_average[j] = running_average[j+1];
+    }
+    processed_value = (processed_value)/((float)filter_coefficient);
+
+    return (s32)processed_value;
+}
 s32 EMA_raw(s32 raw_signal, u8 filter_coefficient){
     float EMA = 0;
     static float past_EMA = 0;
@@ -138,7 +155,7 @@ float bessel_filter_for_pace(float input){
 }
 
 void butterworth_lpf_coeffs(float *a, float *b){
-	float OmegaC = (float)0.01;
+	float OmegaC = (float)0.001;
 	float A = (float)1, B = M_SQRT2, C = (float)1, D = (float)0, E = (float)0, F = (float)1, T, Arg;
 
     T = (float)2.0 * tan(OmegaC * M_PI_2);

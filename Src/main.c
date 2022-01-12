@@ -271,6 +271,20 @@ void pendulum_PID(void){
 		        	plain_speed = 0;
 	        	}
 	        }
+//	        if((abs_encoder < 2050)&&(abs_encoder > 1950)){
+//	        	//filter top point
+//	        	//pendulum.filtered_mid_point = SMA_mid_point(abs_encoder,63);
+//	        	pendulum.filtered_mid_point = butterworth_filter(abs_encoder,butterworth_a,butterworth_b,butterworth_x,butterworth_y);
+//
+//	        }
+//	        else{
+//	        	butterworth_x[0] = 0;
+//	        	butterworth_x[1] = 0;
+//	        	butterworth_x[2] = 0;
+//	        	butterworth_y[0] = 0;
+//	        	butterworth_y[1] = 0;
+//	        	butterworth_y[2] = 0;
+//	        }
 		}
 		step_motor_speed[0] = ((plain_speed / 65536) % 256);
 		step_motor_speed[1] = ((plain_speed / 256) % 256);
@@ -278,7 +292,7 @@ void pendulum_PID(void){
 		break;
 	}
 
-    my_debugger(PID_delta_t,0,err,plain_speed,output);
+    my_debugger(PID_delta_t,pendulum.filtered_mid_point,err,plain_speed,output);
 
     PID_delta_t = 0;
 
@@ -549,8 +563,8 @@ int main(void) {
 	MX_USART2_Init();
 	MX_UART4_Init();
 	//Timer3_AutoConsolidation_SpecialFunc(0);
-    bessel_filter_coeffs_for_raw();
-    bessel_filter_coeffs_for_pace();
+//    bessel_filter_coeffs_for_raw();
+//    bessel_filter_coeffs_for_pace();
     butterworth_lpf_coeffs(butterworth_a, butterworth_b);
 
 	step_motor_command = STEPPER_COMMAND_STOP;

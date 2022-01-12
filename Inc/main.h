@@ -118,6 +118,7 @@ float EMA_load(float *raw_signal, u8 filter_coefficient);
 float SMA_load(float load_signal,u8 filter_coefficient);
 float SMA_pace(float pace_val,u8 filter_coefficient);
 float alpha_beta_filter(float input);
+s32 SMA_mid_point(s32 raw_signal,u8 filter_coefficient);
 
 void bessel_filter_coeffs_for_raw(void);
 float bessel_filter_for_raw(float input);
@@ -221,6 +222,7 @@ struct _pend{
 	u32 top_boundary;
 	float speed_multiplier;
 	u8 tolerance;
+	u32 filtered_mid_point;
 
 	float kp;
 	float ki;
