@@ -259,10 +259,10 @@ void pendulum_PID(void){
 	        output = (a * last_error[0] + b * last_error[1] + c * last_error[2]);
 
 	        if(output >= 0){
-	            step_motor_command = STEPPER_COMMAND_RUN_UP;
+	            step_motor_command = STEPPER_COMMAND_RUN_DOWN;
 	        }
 	        else{
-	            step_motor_command = STEPPER_COMMAND_RUN_DOWN;
+	            step_motor_command = STEPPER_COMMAND_RUN_UP;
 	        }
 	        plain_speed = fabs(output);
 
@@ -297,7 +297,90 @@ void pendulum_PID(void){
     PID_delta_t = 0;
 
 }
+void pendulum_HeadUp(void){
+	static u32 local_timer = 0;
+	u32 speed = 0;
 
+	if(local_timer > 0) local_timer = local_timer - 2;	//2 msec loop
+
+	switch (pendulum.head_up_tmp) {
+		case 0:
+	        step_motor_command = STEPPER_COMMAND_RUN_DOWN;
+			speed = pendulum.headshake_speed;
+			step_motor_speed[0] = ((speed / 65536) % 256);
+			step_motor_speed[1] = ((speed / 256) % 256);
+			step_motor_speed[2] = ((speed) % 256);
+			pendulum.head_up_tmp++;
+			local_timer = pendulum.head_change_timer;
+			break;
+		case 1:
+			if(local_timer == 0){
+				speed = 0;
+				step_motor_speed[0] = ((speed / 65536) % 256);
+				step_motor_speed[1] = ((speed / 256) % 256);
+				step_motor_speed[2] = ((speed) % 256);
+				pendulum.head_up_tmp++;
+			}
+			break;
+		case 2:
+			if(abs_encoder < 2000){
+				if(abs_encoder > 250){
+			        step_motor_command = STEPPER_COMMAND_RUN_UP;
+					speed = pendulum.headshake_speed;
+					step_motor_speed[0] = ((speed / 65536) % 256);
+					step_motor_speed[1] = ((speed / 256) % 256);
+					step_motor_speed[2] = ((speed) % 256);
+					pendulum.head_up_tmp++;
+					local_timer = pendulum.head_change_timer;
+				}
+			}
+			break;
+		case 3:
+			if(local_timer == 0){
+				speed = 0;
+				step_motor_speed[0] = ((speed / 65536) % 256);
+				step_motor_speed[1] = ((speed / 256) % 256);
+				step_motor_speed[2] = ((speed) % 256);
+				pendulum.head_up_tmp++;
+			}
+			break;
+		case 4:
+			if(abs_encoder > 2000){
+				if(abs_encoder < 3100){
+			        step_motor_command = STEPPER_COMMAND_RUN_DOWN;
+					speed = pendulum.headshake_speed;
+					step_motor_speed[0] = ((speed / 65536) % 256);
+					step_motor_speed[1] = ((speed / 256) % 256);
+					step_motor_speed[2] = ((speed) % 256);
+					pendulum.head_up_tmp++;
+					local_timer = pendulum.head_change_timer;
+				}
+			}
+			break;
+		case 5:
+			if(local_timer == 0){
+				speed = 0;
+				step_motor_speed[0] = ((speed / 65536) % 256);
+				step_motor_speed[1] = ((speed / 256) % 256);
+				step_motor_speed[2] = ((speed) % 256);
+				pendulum.head_up_tmp++;
+			}
+			break;
+		case 6:
+			if(abs_encoder > 1800){
+				pendulum.head_up_tmp++;
+			}
+			break;
+		case 7:
+			pendulum_PID();
+			break;
+		default:
+			break;
+	}
+
+    my_debugger(0,0,0,0,0);
+
+}
 void pendulum_plain_algorithm(void){
 	u32 plain_speed;
 	s32 enc_error;
@@ -327,14 +410,14 @@ void pendulum_plain_algorithm(void){
 
 }
 void pendulum_head_shake(void){
-	//5 msec loop
+	//2 msec loop
 	static u32 local_timer = 0;
 
 	step_motor_speed[0] = ((pendulum.headshake_speed / 65536) % 256);
 	step_motor_speed[1] = ((pendulum.headshake_speed / 256) % 256);
 	step_motor_speed[2] = ((pendulum.headshake_speed) % 256);
 
-	if(local_timer > 0) local_timer = local_timer - 5;
+	if(local_timer > 0) local_timer = local_timer - 2;
 
 	switch (pendulum.headshake_tmp) {
 		case 0:
@@ -591,6 +674,7 @@ int main(void) {
 	PID_in_operation = 0;
 	pendulum.headshake_tmp = 0;
 	pendulum.pid_tmp = 0;
+	pendulum.head_up_tmp = 0;
 
 	while (1) {
 		usart_buffer_clearance();
@@ -606,7 +690,12 @@ int main(void) {
 		if (timer_2_msec == 1) {
 			timer_2_msec = 0;
 			encoder_value = Timer1_CalculateEncoderValue();
-			abs_encoder = fabs(encoder_value % 4000);
+			if(encoder_value >= 0){
+				abs_encoder = encoder_value % 4000;
+			}
+			else{
+				abs_encoder = 4000 - (((u32)fabs(encoder_value))%4000);
+			}
 			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
 
             if(TMC_command == TMC_PENDULUM_HEADSHAKE){
@@ -618,9 +707,13 @@ int main(void) {
 			else if(TMC_command == TMC_PENDULUM_PID){
 				pendulum_PID();
 			}
+			else if(TMC_command == TMC_PENDULUM_HEADUP){
+				pendulum_HeadUp();
+			}
 			else if(TMC_command == TMC_STOP){
 				pendulum.headshake_tmp = 0;
 				pendulum.pid_tmp = 0;
+				pendulum.head_up_tmp = 0;
 			}
 			send_RS485 = 1;
 		}

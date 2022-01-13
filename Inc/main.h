@@ -101,6 +101,7 @@ typedef signed int s32;
 #define TMC_PENDULUM_HEADSHAKE     	3
 #define TMC_PENDULUM_PLAIN_ALG  	4
 #define TMC_PENDULUM_PID        	5
+#define TMC_PENDULUM_HEADUP     	6
 
 #define NB               0
 #define NM               1
@@ -228,6 +229,9 @@ struct _pend{
 	float ki;
 	float kd;
 	u8 pid_tmp;
+
+	u8 head_up_tmp;
+
 };
 extern struct _pend pendulum;
 
