@@ -212,6 +212,11 @@ void pendulum_PID(void){
     float a,b,c;
     float Ts = (float)PID_delta_t;
     static float kp,ki,kd;
+    static u32 local_timer = 0;
+    static s32 sign_counter = 0;
+    static u32 calculated_mid_point;
+
+    if(local_timer > 0) local_timer--;
 
     u32 plain_speed;
 
@@ -228,9 +233,10 @@ void pendulum_PID(void){
 		step_motor_speed[0] = 0;
 		step_motor_speed[1] = 0;
 		step_motor_speed[2] = 0;
+		calculated_mid_point = pendulum.mid_point;
 		break;
 	case 1:
-		err = (s32)pendulum.mid_point - abs_encoder;
+		err = (s32)calculated_mid_point - abs_encoder;
 
 		if(abs_encoder < (pendulum.mid_point - pendulum.top_boundary)){
 			plain_speed = 0;
@@ -260,31 +266,26 @@ void pendulum_PID(void){
 
 	        if(output >= 0){
 	            step_motor_command = STEPPER_COMMAND_RUN_DOWN;
+	            if((abs_encoder < 2100)&&(abs_encoder > 1900)){
+		            sign_counter++;
+	            }
 	        }
 	        else{
 	            step_motor_command = STEPPER_COMMAND_RUN_UP;
+	            if((abs_encoder < 2100)&&(abs_encoder > 1900)){
+		            sign_counter--;
+	            }
 	        }
-	        plain_speed = fabs(output);
+	        if(sign_counter > 5){
+	        	calculated_mid_point = calculated_mid_point + 1;
+	        	sign_counter = 0;
+	        }
+	        if(sign_counter < (-5)){
+	        	calculated_mid_point = calculated_mid_point - 1;
+	        	sign_counter = 0;
+	        }
 
-	        if(fabs(err) < pendulum.tolerance){
-	        	if(fabs(output) < (2000 * pendulum.tolerance)){
-		        	plain_speed = 0;
-	        	}
-	        }
-//	        if((abs_encoder < 2050)&&(abs_encoder > 1950)){
-//	        	//filter top point
-//	        	//pendulum.filtered_mid_point = SMA_mid_point(abs_encoder,63);
-//	        	pendulum.filtered_mid_point = butterworth_filter(abs_encoder,butterworth_a,butterworth_b,butterworth_x,butterworth_y);
-//
-//	        }
-//	        else{
-//	        	butterworth_x[0] = 0;
-//	        	butterworth_x[1] = 0;
-//	        	butterworth_x[2] = 0;
-//	        	butterworth_y[0] = 0;
-//	        	butterworth_y[1] = 0;
-//	        	butterworth_y[2] = 0;
-//	        }
+	        plain_speed = fabs(output);
 		}
 		step_motor_speed[0] = ((plain_speed / 65536) % 256);
 		step_motor_speed[1] = ((plain_speed / 256) % 256);
@@ -292,7 +293,7 @@ void pendulum_PID(void){
 		break;
 	}
 
-    my_debugger(PID_delta_t,pendulum.filtered_mid_point,err,plain_speed,output);
+    my_debugger(PID_delta_t,calculated_mid_point,sign_counter,plain_speed,output);
 
     PID_delta_t = 0;
 
@@ -378,7 +379,7 @@ void pendulum_HeadUp(void){
 			break;
 	}
 
-    my_debugger(0,0,0,0,0);
+    //my_debugger(0,0,0,0,0);
 
 }
 void pendulum_plain_algorithm(void){
@@ -579,7 +580,7 @@ void step_response(void){
         break;
     }
     //my_debugger(step_tmp,step_timer,average_last_step,meta_count,filtered_pace_rate);
-    my_debugger(0,meta_count,calculated_kp,calculated_ki,calculated_kd);
+    //my_debugger(0,meta_count,calculated_kp,calculated_ki,calculated_kd);
 
 }
 void control_process(void){
