@@ -28,7 +28,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 		}
 	}
 	if (huart->Instance == USART2) {
-		usart2.buffer_clear_timer = 200;
+		usart2.buffer_clear_timer = 20;
 		usart2.clear_buffer = 1;
 		usart2.rx[usart2.rx_indeks] = usart2.instant_data;
 
@@ -697,7 +697,6 @@ int main(void) {
 			else{
 				abs_encoder = 4000 - (((u32)fabs(encoder_value))%4000);
 			}
-			HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
 
             if(TMC_command == TMC_PENDULUM_HEADSHAKE){
 				pendulum_head_shake();

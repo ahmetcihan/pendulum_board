@@ -182,12 +182,13 @@ void MASTER_send_RS485_data_to_motor(void){
 	HAL_UART_Transmit_IT(&huart2, &usart2.tx[0], usart2.tx_amount);
 }
 void usart2_handle(void){
-	if((usart2.rx[0] == 'A') && (usart2.rx[1] == 'H') && (usart2.rx[2] == 'A')){
+	if((usart2.rx[0] == 's') && (usart2.rx[1] == 't') && (usart2.rx[2] == 'p')){
 		stepper_abs_pos = 65536 * usart2.rx[3] + 256 * usart2.rx[4] + usart2.rx[5];
-		usart2.rx_indeks = 0;
-		for (uint8_t i = 0; i < USART_RX_ARRAY_SIZE ; i++) {
-			usart2.rx[i] = 0;
-		}
+		HAL_GPIO_TogglePin( Led_GPIO_Port, Led_Pin );
+//		usart2.rx_indeks = 0;
+//		for (uint8_t i = 0; i < USART_RX_ARRAY_SIZE ; i++) {
+//			usart2.rx[i] = 0;
+//		}
 	}
 }
 void USART1_receive_operations(void){
