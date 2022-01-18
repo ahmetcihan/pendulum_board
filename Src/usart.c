@@ -201,14 +201,14 @@ void USART1_receive_operations(void){
 		TIM1->CNT = 0;
 		encoder_value = 0;
 	}
-	else if(usart1.rx[0]=='G' && usart1.rx[1]=='A' && usart1.rx[2]=='I' && usart1.rx[3]=='N' ) {
-			PRESS_GAIN_CommandOperating( );
+	else if(usart1.rx[0]=='M' && usart1.rx[1]=='I' && usart1.rx[2]=='D' && usart1.rx[3]=='U' && usart1.rx[4]=='P' ) {
+		mid_point_up_cmd = 1;
 	}
-	else if(usart1.rx[0]=='T' && usart1.rx[1]=='A' && usart1.rx[2]=='R' && usart1.rx[3]=='E' ) {
-			PRESS_TARE_CommandOperating();
+	else if(usart1.rx[0]=='M' && usart1.rx[1]=='I' && usart1.rx[2]=='D' && usart1.rx[3]=='D' && usart1.rx[4]=='N' ) {
+		mid_point_down_cmd = 1;
 	}
 	else if(usart1.rx[0]=='P' && usart1.rx[1]=='R' && usart1.rx[2]=='I' && usart1.rx[3]=='N' && usart1.rx[4]=='T' ) {
-			PRESS_PRINT_CommandOperating();			
+		PRESS_PRINT_CommandOperating();
 	}
 	else if(usart1.rx[0]=='C' && usart1.rx[1]=='A' && usart1.rx[2]=='L' && usart1.rx[3]=='S' && usart1.rx[4]=='E' && usart1.rx[5]=='N' && usart1.rx[6]=='D' )  {
 		PRESS_CALSEND_CommandOperating();

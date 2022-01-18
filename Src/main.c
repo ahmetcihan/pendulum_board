@@ -213,10 +213,15 @@ void pendulum_PID(void){
     float Ts = (float)PID_delta_t;
     static float kp,ki,kd;
     static u32 local_timer = 0;
+    static u32 local_up_timer = 0;
     static s32 sign_counter = 0;
     static u32 calculated_mid_point;
+    static s32 local_stepper_current_pos;
+    static s32 local_stepper_old_pos;
+    static s32 pos_diff = 0;
 
     if(local_timer > 0) local_timer--;
+    local_up_timer++;
 
     u32 plain_speed;
 
@@ -234,9 +239,11 @@ void pendulum_PID(void){
 		step_motor_speed[1] = 0;
 		step_motor_speed[2] = 0;
 		calculated_mid_point = pendulum.mid_point;
+		local_stepper_old_pos = stepper_abs_pos;
 		break;
 	case 1:
 		err = (s32)calculated_mid_point - abs_encoder;
+
 
 		if(abs_encoder < (pendulum.mid_point - pendulum.top_boundary)){
 			plain_speed = 0;
@@ -266,25 +273,44 @@ void pendulum_PID(void){
 
 	        if(output >= 0){
 	            step_motor_command = STEPPER_COMMAND_RUN_DOWN;
-	            if((abs_encoder < 2100)&&(abs_encoder > 1900)){
-		            sign_counter++;
-	            }
+//	            if((abs_encoder < 2100)&&(abs_encoder > 1900)){
+//		            sign_counter++;
+//	            }
 	        }
 	        else{
 	            step_motor_command = STEPPER_COMMAND_RUN_UP;
-	            if((abs_encoder < 2100)&&(abs_encoder > 1900)){
-		            sign_counter--;
-	            }
+//	            if((abs_encoder < 2100)&&(abs_encoder > 1900)){
+//		            sign_counter--;
+//	            }
 	        }
-	        if(sign_counter > 5){
-	        	calculated_mid_point = calculated_mid_point + 1;
-	        	sign_counter = 0;
-	        }
-	        if(sign_counter < (-5)){
-	        	calculated_mid_point = calculated_mid_point - 1;
-	        	sign_counter = 0;
-	        }
+//	        if(sign_counter > 5){
+//	        	calculated_mid_point = calculated_mid_point + 1;
+//	        	sign_counter = 0;
+//	        }
+//	        if(sign_counter < (-5)){
+//	        	calculated_mid_point = calculated_mid_point - 1;
+//	        	sign_counter = 0;
+//	        }
+//	        if((local_up_timer % 25) == 0){	//500 msec
+//		        local_stepper_current_pos = stepper_abs_pos;
+//		        pos_diff = (local_stepper_current_pos - local_stepper_old_pos);
+//		        if(pos_diff > 6){
+//	            	calculated_mid_point = calculated_mid_point - 1;
+//	            }
+//	            else if(pos_diff < -6){
+//	            	calculated_mid_point = calculated_mid_point + 1;
+//	            }
+//		        local_stepper_old_pos = local_stepper_current_pos;
+//	        }
 
+	        if(mid_point_up_cmd == 1){
+	        	mid_point_up_cmd = 0;
+	        	calculated_mid_point = calculated_mid_point + 1;
+	        }
+	        if(mid_point_down_cmd == 1){
+	        	mid_point_down_cmd = 0;
+	        	calculated_mid_point = calculated_mid_point - 1;
+	        }
 	        plain_speed = fabs(output);
 		}
 		step_motor_speed[0] = ((plain_speed / 65536) % 256);
@@ -293,7 +319,7 @@ void pendulum_PID(void){
 		break;
 	}
 
-    my_debugger(PID_delta_t,calculated_mid_point,sign_counter,plain_speed,output);
+    my_debugger(PID_delta_t,calculated_mid_point,sign_counter,plain_speed,pos_diff);
 
     PID_delta_t = 0;
 
@@ -676,6 +702,8 @@ int main(void) {
 	pendulum.headshake_tmp = 0;
 	pendulum.pid_tmp = 0;
 	pendulum.head_up_tmp = 0;
+	mid_point_up_cmd = 0;
+	mid_point_down_cmd = 0;
 
 	while (1) {
 		usart_buffer_clearance();

@@ -212,7 +212,8 @@ u8 step_response_first_in;
 u8 autotuning_in_operation;
 u8 PID_in_operation;
 u8 autotuning_is_finished;
-
+u8 mid_point_up_cmd;
+u8 mid_point_down_cmd;
 
 struct _pend{
 	u32 head_change_timer;
