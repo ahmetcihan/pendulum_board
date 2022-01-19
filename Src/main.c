@@ -408,68 +408,6 @@ void pendulum_HeadUp(void){
     //my_debugger(0,0,0,0,0);
 
 }
-void pendulum_plain_algorithm(void){
-	u32 plain_speed;
-	s32 enc_error;
-
-	enc_error = (s32)pendulum.mid_point - abs_encoder;
-
-	if(enc_error < 0){
-        step_motor_command = STEPPER_COMMAND_RUN_DOWN;
-	}
-	else{
-        step_motor_command = STEPPER_COMMAND_RUN_UP;
-	}
-
-	if(abs_encoder < (pendulum.mid_point - pendulum.top_boundary)){
-		plain_speed = 0;
-	}
-	else if(abs_encoder > (pendulum.mid_point + pendulum.top_boundary)){
-		plain_speed = 0;
-	}
-	else{
-		plain_speed = fabs(enc_error) * fabs(enc_error) * fabs(enc_error) * fabs(enc_error) * pendulum.speed_multiplier;
-	}
-
-	step_motor_speed[0] = ((plain_speed / 65536) % 256);
-	step_motor_speed[1] = ((plain_speed / 256) % 256);
-	step_motor_speed[2] = ((plain_speed) % 256);
-
-}
-void pendulum_head_shake(void){
-	//2 msec loop
-	static u32 local_timer = 0;
-
-	step_motor_speed[0] = ((pendulum.headshake_speed / 65536) % 256);
-	step_motor_speed[1] = ((pendulum.headshake_speed / 256) % 256);
-	step_motor_speed[2] = ((pendulum.headshake_speed) % 256);
-
-	if(local_timer > 0) local_timer = local_timer - 2;
-
-	switch (pendulum.headshake_tmp) {
-		case 0:
-            step_motor_command = STEPPER_COMMAND_RUN_UP;
-            local_timer = pendulum.head_change_timer;
-            pendulum.headshake_tmp++;
-			break;
-		case 1:
-			if(local_timer == 0){
-	            step_motor_command = STEPPER_COMMAND_RUN_DOWN;
-	            local_timer = pendulum.head_change_timer;
-	            pendulum.headshake_tmp++;
-			}
-			break;
-		case 2:
-			if(local_timer == 0){
-	            step_motor_command = STEPPER_COMMAND_RUN_UP;
-	            local_timer = pendulum.head_change_timer;
-	            pendulum.headshake_tmp = 1;
-			}
-			break;
-		default:
-			break;
-	}
-}
 void step_response(void){
     static u8 step_tmp = 0;
     static float first_step_values[5] = {0};
@@ -726,13 +664,7 @@ int main(void) {
 				abs_encoder = 4000 - (((u32)fabs(encoder_value))%4000);
 			}
 
-            if(TMC_command == TMC_PENDULUM_HEADSHAKE){
-				pendulum_head_shake();
-			}
-			else if(TMC_command == TMC_PENDULUM_PLAIN_ALG){
-				pendulum_plain_algorithm();
-			}
-			else if(TMC_command == TMC_PENDULUM_PID){
+			if(TMC_command == TMC_PENDULUM_PID){
 				pendulum_PID();
 			}
 			else if(TMC_command == TMC_PENDULUM_HEADUP){
