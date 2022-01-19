@@ -216,12 +216,9 @@ u8 mid_point_down_cmd;
 struct _pend{
 	u32 head_change_timer;
 	u32 headshake_speed;
-	u8 headshake_tmp;
 
 	u32 mid_point;
 	u32 top_boundary;
-	float speed_multiplier;
-	u8 tolerance;
 	u32 filtered_mid_point;
 
 	float kp;

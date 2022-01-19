@@ -637,7 +637,6 @@ int main(void) {
 	autotuning_in_operation = 0;
 	autotuning_is_finished = 0;
 	PID_in_operation = 0;
-	pendulum.headshake_tmp = 0;
 	pendulum.pid_tmp = 0;
 	pendulum.head_up_tmp = 0;
 	mid_point_up_cmd = 0;
@@ -671,7 +670,6 @@ int main(void) {
 				pendulum_HeadUp();
 			}
 			else if(TMC_command == TMC_STOP){
-				pendulum.headshake_tmp = 0;
 				pendulum.pid_tmp = 0;
 				pendulum.head_up_tmp = 0;
 			}

@@ -255,14 +255,14 @@ void USART1_receive_operations(void){
 		char_to_f.u8_val[3] = usart1.rx[19];
 		pendulum.top_boundary = char_to_f.float_val;
 
-		pendulum.tolerance = usart1.rx[20];
+		//usart1.rx[20];
 
 		//AUTOTUNING
 		char_to_f.u8_val[0] = usart1.rx[21];
 		char_to_f.u8_val[1] = usart1.rx[22];
 		char_to_f.u8_val[2] = usart1.rx[23];
 		char_to_f.u8_val[3] = usart1.rx[24];
-		pendulum.speed_multiplier = char_to_f.float_val;
+		//char_to_f.float_val;
 
 		char_to_f.u8_val[0] = usart1.rx[25];
 		char_to_f.u8_val[1] = usart1.rx[26];
