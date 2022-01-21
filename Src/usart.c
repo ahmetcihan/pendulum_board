@@ -287,7 +287,24 @@ void USART1_receive_operations(void){
 		char_to_f.u8_val[2] = usart1.rx[40];
 		char_to_f.u8_val[3] = usart1.rx[41];
 		pendulum.kd = char_to_f.float_val;
-}
+
+		char_to_f.u8_val[0] = usart1.rx[42];
+		char_to_f.u8_val[1] = usart1.rx[43];
+		char_to_f.u8_val[2] = usart1.rx[44];
+		char_to_f.u8_val[3] = usart1.rx[45];
+		pendulum.kp_down = char_to_f.float_val;
+		char_to_f.u8_val[0] = usart1.rx[46];
+		char_to_f.u8_val[1] = usart1.rx[47];
+		char_to_f.u8_val[2] = usart1.rx[48];
+		char_to_f.u8_val[3] = usart1.rx[49];
+		pendulum.ki_down = char_to_f.float_val;
+		char_to_f.u8_val[0] = usart1.rx[50];
+		char_to_f.u8_val[1] = usart1.rx[51];
+		char_to_f.u8_val[2] = usart1.rx[52];
+		char_to_f.u8_val[3] = usart1.rx[53];
+		pendulum.kd_down = char_to_f.float_val;
+
+	}
 }
 void PRESS_CONV_CommandOperating(void){
 	//	0x30[Hex] = 48[Dec]	,	0x31[Hex] = 49[Dec]

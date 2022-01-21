@@ -98,6 +98,7 @@ typedef signed int s32;
 #define TMC_STOP    				0
 #define TMC_RUN     				1
 #define TMC_AUTOTUNING     			2
+#define TMC_PENDULUM_PID_DOWN   	4
 #define TMC_PENDULUM_PID        	5
 #define TMC_PENDULUM_HEADUP     	6
 
@@ -224,7 +225,11 @@ struct _pend{
 	float kp;
 	float ki;
 	float kd;
+	float kp_down;
+	float ki_down;
+	float kd_down;
 	u8 pid_tmp;
+	u8 pid_down_tmp;
 
 	u8 head_up_tmp;
 

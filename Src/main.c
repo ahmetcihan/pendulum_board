@@ -216,8 +216,8 @@ void pendulum_PID(void){
     static u32 local_up_timer = 0;
     static s32 sign_counter = 0;
     static u32 calculated_mid_point;
-    static s32 local_stepper_current_pos;
-    static s32 local_stepper_old_pos;
+    //static s32 local_stepper_current_pos;
+    //static s32 local_stepper_old_pos;
     static s32 pos_diff = 0;
 
     if(local_timer > 0) local_timer--;
@@ -239,7 +239,7 @@ void pendulum_PID(void){
 		step_motor_speed[1] = 0;
 		step_motor_speed[2] = 0;
 		calculated_mid_point = pendulum.mid_point;
-		local_stepper_old_pos = stepper_abs_pos;
+		//local_stepper_old_pos = stepper_abs_pos;
 		break;
 	case 1:
 		err = (s32)calculated_mid_point - abs_encoder;
@@ -324,6 +324,82 @@ void pendulum_PID(void){
     PID_delta_t = 0;
 
 }
+void pendulum_PID_DOWN(void){
+    static float last_error[3] = {0};
+    static float output = 0;
+    float err = 0;
+    float a,b,c;
+    float Ts = (float)PID_delta_t;
+    static float kp,ki,kd;
+    static u32 local_timer = 0;
+    static u32 local_up_timer = 0;
+    s32 abs_enc_down = 0;
+
+    if(local_timer > 0) local_timer--;
+    local_up_timer++;
+
+    u32 plain_speed;
+
+	switch(pendulum.pid_down_tmp){
+	case 0:
+        output = 0;
+        last_error[0] = 0;
+        last_error[1] = 0;
+        last_error[2] = 0;
+        kp = pendulum.kp_down * 1000;
+        ki = pendulum.ki_down * 1000;
+        kd = pendulum.kd_down * 1000;
+        pendulum.pid_down_tmp = 1;
+		step_motor_speed[0] = 0;
+		step_motor_speed[1] = 0;
+		step_motor_speed[2] = 0;
+		break;
+	case 1:
+		if(abs_encoder < pendulum.top_boundary){
+			abs_enc_down = abs_encoder;
+		}
+		else if(abs_encoder > (4000 - pendulum.top_boundary)){
+			abs_enc_down = abs_encoder - 4000;
+		}
+		else{
+			abs_enc_down = 0;
+	        last_error[0] = 0;
+	        last_error[1] = 0;
+	        last_error[2] = 0;
+		}
+
+		err = 0 - abs_enc_down;
+
+        last_error[2] = last_error[1];
+        last_error[1] = last_error[0];
+        last_error[0] = err;
+
+        a = kp + kd / (float)Ts;
+        b = -kp + (ki * (float)Ts) - ((float)2 * kd)/(float)Ts;
+        c = kd / Ts;
+
+        output = (a * last_error[0] + b * last_error[1] + c * last_error[2]);
+
+        if(output >= 0){
+            step_motor_command = STEPPER_COMMAND_RUN_UP;
+        }
+        else{
+            step_motor_command = STEPPER_COMMAND_RUN_DOWN;
+        }
+
+        plain_speed = fabs(output);
+		step_motor_speed[0] = ((plain_speed / 65536) % 256);
+		step_motor_speed[1] = ((plain_speed / 256) % 256);
+		step_motor_speed[2] = ((plain_speed) % 256);
+		break;
+	}
+
+    my_debugger(PID_delta_t,0,0,plain_speed,abs_enc_down);
+
+    PID_delta_t = 0;
+
+}
+
 void pendulum_HeadUp(void){
 	static u32 local_timer = 0;
 	u32 speed = 0;
@@ -638,6 +714,7 @@ int main(void) {
 	autotuning_is_finished = 0;
 	PID_in_operation = 0;
 	pendulum.pid_tmp = 0;
+	pendulum.pid_down_tmp = 0;
 	pendulum.head_up_tmp = 0;
 	mid_point_up_cmd = 0;
 	mid_point_down_cmd = 0;
@@ -666,11 +743,15 @@ int main(void) {
 			if(TMC_command == TMC_PENDULUM_PID){
 				pendulum_PID();
 			}
+			if(TMC_command == TMC_PENDULUM_PID_DOWN){
+				pendulum_PID_DOWN();
+			}
 			else if(TMC_command == TMC_PENDULUM_HEADUP){
 				pendulum_HeadUp();
 			}
 			else if(TMC_command == TMC_STOP){
 				pendulum.pid_tmp = 0;
+				pendulum.pid_down_tmp = 0;
 				pendulum.head_up_tmp = 0;
 			}
 			send_RS485 = 1;
