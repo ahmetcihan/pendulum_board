@@ -101,6 +101,7 @@ typedef signed int s32;
 #define TMC_PENDULUM_PID_DOWN   	4
 #define TMC_PENDULUM_PID        	5
 #define TMC_PENDULUM_HEADUP     	6
+#define TMC_PENDULUM_LQR_DOWN   	7
 
 #define NB               0
 #define NM               1
@@ -214,6 +215,8 @@ u8 autotuning_is_finished;
 u8 mid_point_up_cmd;
 u8 mid_point_down_cmd;
 
+u8 LQR_first_in;
+
 struct _pend{
 	u32 head_change_timer;
 	u32 headshake_speed;
@@ -232,6 +235,11 @@ struct _pend{
 	u8 pid_down_tmp;
 
 	u8 head_up_tmp;
+
+	float lqr_k1;
+	float lqr_k2;
+	float lqr_k3;
+	float lqr_k4;
 
 };
 extern struct _pend pendulum;

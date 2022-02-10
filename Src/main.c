@@ -399,7 +399,61 @@ void pendulum_PID_DOWN(void){
     PID_delta_t = 0;
 
 }
+void pendulum_LQR_DOWN(void){
+	static float teta = 0;
+	static float teta_dot = 0;
+	static float alpha = 0;
+	static float alpha_dot = 0;
 
+	static float teta_old = 0;
+	static float alpha_old = 0;
+
+	static u32 stepper_first_pos;
+
+	float output;
+	u32 plain_speed;
+
+	if(LQR_first_in == 1){
+		LQR_first_in = 0;
+		stepper_first_pos = stepper_abs_pos;
+	}
+
+	teta = ((s32)stepper_abs_pos - (s32)stepper_first_pos) % 100;
+	if(teta > 50){
+		teta = teta - 100;
+	}
+	teta_dot = teta - teta_old;
+	teta_old = teta;
+
+	if(abs_encoder > 2000){
+		alpha = abs_encoder - 4000;
+	}
+	else{
+		alpha = abs_encoder;
+	}
+	alpha_dot = alpha - alpha_old;
+	alpha_old = alpha;
+
+    output = pendulum.lqr_k1 * teta + pendulum.lqr_k2 * alpha + pendulum.lqr_k3 * teta_dot + pendulum.lqr_k4 * alpha_dot;
+
+    if(output >= 0){
+        step_motor_command = STEPPER_COMMAND_RUN_DOWN;
+    }
+    else{
+        step_motor_command = STEPPER_COMMAND_RUN_UP;
+    }
+
+    plain_speed = fabs(output);
+    if(plain_speed > 35000) plain_speed = 35000;
+
+	step_motor_speed[0] = ((plain_speed / 65536) % 256);
+	step_motor_speed[1] = ((plain_speed / 256) % 256);
+	step_motor_speed[2] = ((plain_speed) % 256);
+
+
+    my_debugger(PID_delta_t,teta,teta_dot,alpha,alpha_dot);
+    PID_delta_t = 0;
+}
 void pendulum_HeadUp(void){
 	static u32 local_timer = 0;
 	u32 speed = 0;
@@ -718,6 +772,7 @@ int main(void) {
 	pendulum.head_up_tmp = 0;
 	mid_point_up_cmd = 0;
 	mid_point_down_cmd = 0;
+	LQR_first_in = 1;
 
 	while (1) {
 		usart_buffer_clearance();
@@ -743,8 +798,11 @@ int main(void) {
 			if(TMC_command == TMC_PENDULUM_PID){
 				pendulum_PID();
 			}
-			if(TMC_command == TMC_PENDULUM_PID_DOWN){
+			else if(TMC_command == TMC_PENDULUM_PID_DOWN){
 				pendulum_PID_DOWN();
+			}
+			else if(TMC_command == TMC_PENDULUM_LQR_DOWN){
+				pendulum_LQR_DOWN();
 			}
 			else if(TMC_command == TMC_PENDULUM_HEADUP){
 				pendulum_HeadUp();
@@ -753,6 +811,7 @@ int main(void) {
 				pendulum.pid_tmp = 0;
 				pendulum.pid_down_tmp = 0;
 				pendulum.head_up_tmp = 0;
+				//LQR_first_in = 1;
 			}
 			send_RS485 = 1;
 		}

@@ -304,6 +304,27 @@ void USART1_receive_operations(void){
 		char_to_f.u8_val[3] = usart1.rx[53];
 		pendulum.kd_down = char_to_f.float_val;
 
+		char_to_f.u8_val[0] = usart1.rx[54];
+		char_to_f.u8_val[1] = usart1.rx[55];
+		char_to_f.u8_val[2] = usart1.rx[56];
+		char_to_f.u8_val[3] = usart1.rx[57];
+		pendulum.lqr_k1 = char_to_f.float_val;
+		char_to_f.u8_val[0] = usart1.rx[58];
+		char_to_f.u8_val[1] = usart1.rx[59];
+		char_to_f.u8_val[2] = usart1.rx[60];
+		char_to_f.u8_val[3] = usart1.rx[61];
+		pendulum.lqr_k2 = char_to_f.float_val;
+		char_to_f.u8_val[0] = usart1.rx[62];
+		char_to_f.u8_val[1] = usart1.rx[63];
+		char_to_f.u8_val[2] = usart1.rx[64];
+		char_to_f.u8_val[3] = usart1.rx[65];
+		pendulum.lqr_k3 = char_to_f.float_val;
+		char_to_f.u8_val[0] = usart1.rx[66];
+		char_to_f.u8_val[1] = usart1.rx[67];
+		char_to_f.u8_val[2] = usart1.rx[68];
+		char_to_f.u8_val[3] = usart1.rx[69];
+		pendulum.lqr_k4 = char_to_f.float_val;
+
 	}
 }
 void PRESS_CONV_CommandOperating(void){
