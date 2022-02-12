@@ -446,6 +446,8 @@ void pendulum_LQR_DOWN(void){
     plain_speed = fabs(output);
     if(plain_speed > 35000) plain_speed = 35000;
 
+    if(fabs(alpha) > 1000) plain_speed = 0;
+
 	step_motor_speed[0] = ((plain_speed / 65536) % 256);
 	step_motor_speed[1] = ((plain_speed / 256) % 256);
 	step_motor_speed[2] = ((plain_speed) % 256);
