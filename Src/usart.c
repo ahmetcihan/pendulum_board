@@ -308,22 +308,43 @@ void USART1_receive_operations(void){
 		char_to_f.u8_val[1] = usart1.rx[55];
 		char_to_f.u8_val[2] = usart1.rx[56];
 		char_to_f.u8_val[3] = usart1.rx[57];
-		pendulum.lqr_k1 = char_to_f.float_val;
+		pendulum.lqr_k1_down = char_to_f.float_val;
 		char_to_f.u8_val[0] = usart1.rx[58];
 		char_to_f.u8_val[1] = usart1.rx[59];
 		char_to_f.u8_val[2] = usart1.rx[60];
 		char_to_f.u8_val[3] = usart1.rx[61];
-		pendulum.lqr_k2 = char_to_f.float_val;
+		pendulum.lqr_k2_down = char_to_f.float_val;
 		char_to_f.u8_val[0] = usart1.rx[62];
 		char_to_f.u8_val[1] = usart1.rx[63];
 		char_to_f.u8_val[2] = usart1.rx[64];
 		char_to_f.u8_val[3] = usart1.rx[65];
-		pendulum.lqr_k3 = char_to_f.float_val;
+		pendulum.lqr_k3_down = char_to_f.float_val;
 		char_to_f.u8_val[0] = usart1.rx[66];
 		char_to_f.u8_val[1] = usart1.rx[67];
 		char_to_f.u8_val[2] = usart1.rx[68];
 		char_to_f.u8_val[3] = usart1.rx[69];
-		pendulum.lqr_k4 = char_to_f.float_val;
+		pendulum.lqr_k4_down = char_to_f.float_val;
+
+		char_to_f.u8_val[0] = usart1.rx[70];
+		char_to_f.u8_val[1] = usart1.rx[71];
+		char_to_f.u8_val[2] = usart1.rx[72];
+		char_to_f.u8_val[3] = usart1.rx[73];
+		pendulum.lqr_k1_up = char_to_f.float_val;
+		char_to_f.u8_val[0] = usart1.rx[74];
+		char_to_f.u8_val[1] = usart1.rx[75];
+		char_to_f.u8_val[2] = usart1.rx[76];
+		char_to_f.u8_val[3] = usart1.rx[77];
+		pendulum.lqr_k2_up = char_to_f.float_val;
+		char_to_f.u8_val[0] = usart1.rx[78];
+		char_to_f.u8_val[1] = usart1.rx[79];
+		char_to_f.u8_val[2] = usart1.rx[80];
+		char_to_f.u8_val[3] = usart1.rx[81];
+		pendulum.lqr_k3_up = char_to_f.float_val;
+		char_to_f.u8_val[0] = usart1.rx[82];
+		char_to_f.u8_val[1] = usart1.rx[83];
+		char_to_f.u8_val[2] = usart1.rx[84];
+		char_to_f.u8_val[3] = usart1.rx[85];
+		pendulum.lqr_k4_up = char_to_f.float_val;
 
 	}
 }

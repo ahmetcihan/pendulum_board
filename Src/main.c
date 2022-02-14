@@ -413,8 +413,8 @@ void pendulum_LQR_DOWN(void){
 	float output;
 	u32 plain_speed;
 
-	if(LQR_first_in == 1){
-		LQR_first_in = 0;
+	if(LQR_DOWN_first_in == 1){
+		LQR_DOWN_first_in = 0;
 		stepper_first_pos = stepper_abs_pos;
 	}
 
@@ -434,7 +434,7 @@ void pendulum_LQR_DOWN(void){
 	alpha_dot = alpha - alpha_old;
 	alpha_old = alpha;
 
-    output = pendulum.lqr_k1 * teta + pendulum.lqr_k2 * alpha + pendulum.lqr_k3 * teta_dot + pendulum.lqr_k4 * alpha_dot;
+    output = pendulum.lqr_k1_down * teta + pendulum.lqr_k2_down * alpha + pendulum.lqr_k3_down * teta_dot + pendulum.lqr_k4_down * alpha_dot;
 
     if(output >= 0){
         step_motor_command = STEPPER_COMMAND_RUN_DOWN;
@@ -455,6 +455,64 @@ void pendulum_LQR_DOWN(void){
 
     my_debugger(PID_delta_t,teta,teta_dot,alpha,alpha_dot);
     PID_delta_t = 0;
+}
+void pendulum_LQR_UP(void){
+	static float teta = 0;
+	static float teta_dot = 0;
+	static float alpha = 0;
+	static float alpha_dot = 0;
+
+	static float teta_old = 0;
+	static float alpha_old = 0;
+
+	static u32 stepper_first_pos;
+
+	float output;
+	u32 plain_speed;
+
+	if(LQR_UP_first_in == 1){
+		LQR_UP_first_in = 0;
+		stepper_first_pos = stepper_abs_pos;
+	}
+
+	teta = ((s32)stepper_abs_pos - (s32)stepper_first_pos) % 100;
+	if(teta > 50){
+		teta = teta - 100;
+	}
+	teta_dot = teta - teta_old;
+	teta_old = teta;
+
+	alpha = (s32)pendulum.mid_point - abs_encoder;
+	alpha_dot = alpha - alpha_old;
+	alpha_old = alpha;
+
+    output = pendulum.lqr_k1_up * teta + pendulum.lqr_k2_up * alpha + pendulum.lqr_k3_up * teta_dot + pendulum.lqr_k4_up * alpha_dot;
+
+    if(output >= 0){
+        step_motor_command = STEPPER_COMMAND_RUN_DOWN;
+    }
+    else{
+        step_motor_command = STEPPER_COMMAND_RUN_UP;
+    }
+
+    plain_speed = fabs(output);
+    if(plain_speed > 35000) plain_speed = 35000;
+
+    if(abs_encoder < 1000){
+    	plain_speed = 0;
+    }
+    else if(abs_encoder > 3000){
+    	plain_speed = 0;
+    }
+
+	step_motor_speed[0] = ((plain_speed / 65536) % 256);
+	step_motor_speed[1] = ((plain_speed / 256) % 256);
+	step_motor_speed[2] = ((plain_speed) % 256);
+
+
+    my_debugger(PID_delta_t,teta,teta_dot,alpha,alpha_dot);
+    PID_delta_t = 0;
+
 }
 void pendulum_HeadUp(void){
 	static u32 local_timer = 0;
@@ -774,7 +832,8 @@ int main(void) {
 	pendulum.head_up_tmp = 0;
 	mid_point_up_cmd = 0;
 	mid_point_down_cmd = 0;
-	LQR_first_in = 1;
+	LQR_DOWN_first_in = 1;
+	LQR_UP_first_in = 1;
 
 	while (1) {
 		usart_buffer_clearance();
@@ -806,6 +865,9 @@ int main(void) {
 			else if(TMC_command == TMC_PENDULUM_LQR_DOWN){
 				pendulum_LQR_DOWN();
 			}
+			else if(TMC_command == TMC_PENDULUM_LQR_UP){
+				pendulum_LQR_UP();
+			}
 			else if(TMC_command == TMC_PENDULUM_HEADUP){
 				pendulum_HeadUp();
 			}
@@ -813,7 +875,8 @@ int main(void) {
 				pendulum.pid_tmp = 0;
 				pendulum.pid_down_tmp = 0;
 				pendulum.head_up_tmp = 0;
-				//LQR_first_in = 1;
+				LQR_DOWN_first_in = 1;
+				LQR_UP_first_in = 1;
 			}
 			send_RS485 = 1;
 		}
