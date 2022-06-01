@@ -598,6 +598,91 @@ void pendulum_HeadUp(void){
     //my_debugger(0,0,0,0,0);
 
 }
+void pendulum_LQR_HeadUp(void){
+	static u32 local_timer = 0;
+	u32 speed = 0;
+
+	if(local_timer > 0) local_timer = local_timer - 2;	//2 msec loop
+
+	switch (pendulum.head_up_tmp) {
+		case 0:
+	        step_motor_command = STEPPER_COMMAND_RUN_DOWN;
+			speed = pendulum.headshake_speed;
+			step_motor_speed[0] = ((speed / 65536) % 256);
+			step_motor_speed[1] = ((speed / 256) % 256);
+			step_motor_speed[2] = ((speed) % 256);
+			pendulum.head_up_tmp++;
+			local_timer = pendulum.head_change_timer;
+			break;
+		case 1:
+			if(local_timer == 0){
+				speed = 0;
+				step_motor_speed[0] = ((speed / 65536) % 256);
+				step_motor_speed[1] = ((speed / 256) % 256);
+				step_motor_speed[2] = ((speed) % 256);
+				pendulum.head_up_tmp++;
+			}
+			break;
+		case 2:
+			if(abs_encoder < 2000){
+				if(abs_encoder > 250){
+			        step_motor_command = STEPPER_COMMAND_RUN_UP;
+					speed = pendulum.headshake_speed;
+					step_motor_speed[0] = ((speed / 65536) % 256);
+					step_motor_speed[1] = ((speed / 256) % 256);
+					step_motor_speed[2] = ((speed) % 256);
+					pendulum.head_up_tmp++;
+					local_timer = pendulum.head_change_timer;
+				}
+			}
+			break;
+		case 3:
+			if(local_timer == 0){
+				speed = 0;
+				step_motor_speed[0] = ((speed / 65536) % 256);
+				step_motor_speed[1] = ((speed / 256) % 256);
+				step_motor_speed[2] = ((speed) % 256);
+				pendulum.head_up_tmp++;
+			}
+			break;
+		case 4:
+			if(abs_encoder > 2000){
+				if(abs_encoder < 3100){
+			        step_motor_command = STEPPER_COMMAND_RUN_DOWN;
+					speed = pendulum.headshake_speed;
+					step_motor_speed[0] = ((speed / 65536) % 256);
+					step_motor_speed[1] = ((speed / 256) % 256);
+					step_motor_speed[2] = ((speed) % 256);
+					pendulum.head_up_tmp++;
+					local_timer = pendulum.head_change_timer;
+				}
+			}
+			break;
+		case 5:
+			if(local_timer == 0){
+				speed = 0;
+				step_motor_speed[0] = ((speed / 65536) % 256);
+				step_motor_speed[1] = ((speed / 256) % 256);
+				step_motor_speed[2] = ((speed) % 256);
+				pendulum.head_up_tmp++;
+			}
+			break;
+		case 6:
+			if(abs_encoder > 1700){
+				pendulum.head_up_tmp++;
+			}
+			break;
+		case 7:
+			pendulum_LQR_UP();
+			break;
+		default:
+			break;
+	}
+
+    //my_debugger(0,0,0,0,0);
+
+}
+
 void step_response(void){
     static u8 step_tmp = 0;
     static float first_step_values[5] = {0};
@@ -870,6 +955,9 @@ int main(void) {
 			}
 			else if(TMC_command == TMC_PENDULUM_HEADUP){
 				pendulum_HeadUp();
+			}
+			else if(TMC_command == TMC_PENDULUM_LQR_HEADUP){
+				pendulum_LQR_HeadUp();
 			}
 			else if(TMC_command == TMC_STOP){
 				pendulum.pid_tmp = 0;
